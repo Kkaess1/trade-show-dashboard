@@ -1,0 +1,939 @@
+<title>Trade Show Lead Generation Dashboard</title>
+<style>
+  .ts-root {
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --card-surface:   #ffffff;
+
+    --series-1: #2a78d6; /* blue */
+    --series-2: #1baf7a; /* aqua */
+    --series-3: #eda100; /* yellow */
+    --series-4: #008300; /* green */
+    --series-5: #4a3aa7; /* violet */
+    --series-6: #e34948; /* red */
+    --series-7: #e87ba4; /* magenta */
+    --series-8: #eb6834; /* orange */
+
+    --good:     #0ca30c;
+    --warning:  #b9790a;
+    --serious:  #ec835a;
+    --critical: #d03b3b;
+    --neutral-badge: #6b6a64;
+
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+    background: var(--page-plane);
+    line-height: 1.4;
+  }
+  @media (prefers-color-scheme: dark) {
+    .ts-root {
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --card-surface:   #17171a;
+
+      --series-1: #3987e5;
+      --series-2: #199e70;
+      --series-3: #c98500;
+      --series-4: #008300;
+      --series-5: #9085e9;
+      --series-6: #e66767;
+      --series-7: #d55181;
+      --series-8: #d95926;
+
+      --good:     #0ca30c;
+      --warning:  #fab219;
+      --serious:  #ec835a;
+      --critical: #d03b3b;
+      --neutral-badge: #9a988f;
+    }
+  }
+  :root[data-theme="dark"] .ts-root {
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --card-surface:   #17171a;
+      --series-1: #3987e5; --series-2: #199e70; --series-3: #c98500; --series-4: #008300;
+      --series-5: #9085e9; --series-6: #e66767; --series-7: #d55181; --series-8: #d95926;
+      --warning: #fab219; --neutral-badge: #9a988f;
+  }
+  :root[data-theme="light"] .ts-root {
+      --surface-1: #fcfcfb; --page-plane: #f9f9f7; --text-primary:#0b0b0b; --text-secondary:#52514e;
+      --card-surface:#ffffff; --border: rgba(11,11,11,0.10);
+      --series-1: #2a78d6; --series-2: #1baf7a; --series-3: #eda100; --series-4: #008300;
+      --series-5: #4a3aa7; --series-6: #e34948; --series-7: #e87ba4; --series-8: #eb6834;
+      --warning:#b9790a; --neutral-badge:#6b6a64;
+  }
+
+  .ts-root * { box-sizing: border-box; }
+  .ts-wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .ts-header { margin-bottom: 22px; }
+  .ts-title { font-size: 1.65rem; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .ts-subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0; max-width: 68ch; }
+  .ts-meta { color: var(--text-muted); font-size: 0.78rem; margin-top: 8px; }
+
+  /* KPI row */
+  .ts-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 22px 0 26px; }
+  @media (max-width: 760px) { .ts-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .ts-tile { background: var(--card-surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .ts-tile-label { font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 6px; }
+  .ts-tile-value { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.01em; }
+  .ts-tile-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
+
+  /* Filter row */
+  .ts-filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--gridline); }
+  .ts-filters label { font-size: 0.76rem; color: var(--text-secondary); margin-right: 4px; }
+  .ts-select { font: inherit; font-size: 0.82rem; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--border); background: var(--card-surface); color: var(--text-primary); }
+
+  .ts-section { margin: 34px 0; }
+  .ts-section-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; }
+  .ts-section-desc { font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 16px; max-width: 72ch; }
+
+  /* Neutral informational tags */
+  .ts-channel-tag { display: inline-block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; margin-left: 6px; font-weight: 600; vertical-align: 1px; }
+  .ts-tag { display: inline-block; font-size: 0.68rem; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+
+  /* Ranking bar chart */
+  .ts-rank-row { display: grid; grid-template-columns: 168px 1fr 64px 92px; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gridline); }
+  .ts-rank-row:last-child { border-bottom: none; }
+  .ts-rank-name { font-size: 0.83rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ts-rank-cat { font-size: 0.68rem; color: var(--text-muted); display: block; font-weight: 400; }
+  .ts-rank-bar-track { position: relative; height: 22px; background: var(--gridline); border-radius: 4px; overflow: hidden; }
+  .ts-rank-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--series-1); }
+  .ts-rank-value { font-size: 0.83rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .ts-rank-year { font-size: 0.68rem; color: var(--text-muted); text-align: right; }
+
+  /* Small multiples grid */
+  .ts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .ts-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .ts-grid { grid-template-columns: 1fr; } }
+  .ts-card { background: var(--card-surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 10px; }
+  .ts-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; gap: 8px; }
+  .ts-card-name { font-size: 0.9rem; font-weight: 700; }
+  .ts-card-cat { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 8px; }
+  .ts-card-chart { width: 100%; height: 64px; display: block; }
+  .ts-card-foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; font-size: 0.72rem; color: var(--text-secondary); }
+  .ts-card-latest { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+  .ts-card-note { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+  .ts-flag { color: var(--serious); font-weight: 700; }
+
+  /* Table */
+  .ts-table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table.ts-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 720px; }
+  table.ts-table th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); padding: 9px 12px; border-bottom: 1px solid var(--gridline); background: var(--card-surface); position: sticky; top: 0; }
+  table.ts-table td { padding: 7px 12px; border-bottom: 1px solid var(--gridline); font-variant-numeric: tabular-nums; }
+  table.ts-table tbody tr:hover { background: color-mix(in srgb, var(--series-1) 6%, transparent); }
+  table.ts-table td.ts-num { text-align: right; }
+  .ts-note-cell { font-variant-numeric: normal; color: var(--text-secondary); font-size: 0.75rem; max-width: 260px; }
+
+  /* Snapshot panel */
+  .ts-snapshot-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+
+  details.ts-details { margin-top: 8px; }
+  details.ts-details summary { cursor: pointer; font-size: 0.82rem; color: var(--text-secondary); padding: 6px 0; }
+  details.ts-details summary:hover { color: var(--text-primary); }
+
+  .ts-footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--gridline); font-size: 0.75rem; color: var(--text-muted); }
+  .ts-footer p { margin: 0 0 8px; max-width: 80ch; }
+  .ts-footer strong { color: var(--text-secondary); }
+
+  /* Clickable rows/cards */
+  .ts-rank-row.ts-clickable, .ts-card.ts-clickable { cursor: pointer; transition: background 0.12s ease, border-color 0.12s ease; }
+  .ts-rank-row.ts-clickable:hover, .ts-rank-row.ts-clickable:focus-visible { background: color-mix(in srgb, var(--series-1) 6%, transparent); }
+  .ts-card.ts-clickable:hover, .ts-card.ts-clickable:focus-visible { border-color: color-mix(in srgb, var(--series-1) 45%, var(--border)); }
+  .ts-rank-row.ts-clickable, .ts-card.ts-clickable { outline: none; }
+  .ts-rank-row.ts-clickable:focus-visible, .ts-card.ts-clickable:focus-visible { box-shadow: 0 0 0 2px var(--series-1); border-radius: 6px; }
+  .ts-hint { font-size: 0.68rem; color: var(--text-muted); margin: -10px 0 14px; }
+
+  /* Detail modal */
+  .ts-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: flex-start; justify-content: center; padding: 5vh 16px; z-index: 100; overflow-y: auto; }
+  .ts-modal-backdrop[hidden] { display: none; }
+  .ts-modal { background: var(--card-surface); color: var(--text-primary); border-radius: 14px; border: 1px solid var(--border); max-width: 780px; width: 100%; padding: 22px 24px 26px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+  .ts-modal-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 4px; }
+  .ts-modal-title { font-size: 1.25rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .ts-modal-cat { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+  .ts-modal-close { border: none; background: transparent; color: var(--text-secondary); font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 6px; border-radius: 6px; }
+  .ts-modal-close:hover { background: var(--gridline); color: var(--text-primary); }
+  .ts-modal-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 14px 0 18px; }
+  @media (max-width: 600px) { .ts-modal-stats { grid-template-columns: repeat(2, 1fr); } .ts-modal { padding: 18px 16px 20px; } }
+  .ts-modal-stat-label { font-size: 0.68rem; color: var(--text-muted); }
+  .ts-modal-stat-value { font-size: 1.15rem; font-weight: 700; }
+  .ts-modal-chart-scroll { overflow-x: auto; margin-bottom: 18px; }
+  .ts-chart-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; padding: 12px 6px 4px; background: var(--card-surface); }
+</style>
+
+<div class="ts-root">
+  <div class="ts-wrap">
+
+    <div class="ts-header">
+      <h1 class="ts-title">Trade Show Lead Generation Dashboard</h1>
+      <p class="ts-subtitle">Year-over-year lead counts and attendance history, mined from 24 years of trade show records (2004&ndash;2026). Informational only &mdash; it reports what's on file and doesn't score or recommend any show.</p>
+      <div class="ts-meta" id="ts-meta"></div>
+    </div>
+
+    <div class="ts-kpi-row" id="ts-kpi-row"></div>
+
+    <div class="ts-filters">
+      <div>
+        <label for="ts-cat-filter">Category</label>
+        <select class="ts-select" id="ts-cat-filter"></select>
+      </div>
+      <div>
+        <label for="ts-region-filter">Region</label>
+        <select class="ts-select" id="ts-region-filter"></select>
+      </div>
+      <div>
+        <label for="ts-channel-filter">Channel</label>
+        <select class="ts-select" id="ts-channel-filter"></select>
+      </div>
+    </div>
+
+    <div class="ts-section">
+      <h2 class="ts-section-title">Total leads across tracked shows, by year</h2>
+      <p class="ts-section-desc">Sum of leads across every show below with data for that year (respects the filters above). Shows come and go from the calendar over time, so this reflects program volume, not a fixed set of shows attending every year.</p>
+      <div class="ts-chart-scroll" id="ts-portfolio-chart"></div>
+    </div>
+
+    <div class="ts-section">
+      <h2 class="ts-section-title">Most recent lead count, ranked</h2>
+      <p class="ts-section-desc">Each show's latest year with data on file, sorted high to low.</p>
+      <p class="ts-hint">Click any show for its full history.</p>
+      <div id="ts-rank-list"></div>
+    </div>
+
+    <div class="ts-section">
+      <h2 class="ts-section-title">Year-over-year trend, per show</h2>
+      <p class="ts-section-desc">Full history where it exists. Gaps in the line are years with no lead data on file (or the show wasn't attended) &mdash; they're left open, not drawn as zero.</p>
+      <p class="ts-hint">Click a card for its full history.</p>
+      <div class="ts-grid" id="ts-card-grid"></div>
+    </div>
+
+    <div class="ts-section">
+      <h2 class="ts-section-title">Full data table</h2>
+      <p class="ts-section-desc">Every data point behind the charts above, with source notes. A "~" before a cost means it's a partial figure (see the Methodology note below) &mdash; those are shown but left out of Cost/Lead math.</p>
+      <div class="ts-table-scroll">
+        <table class="ts-table" id="ts-full-table">
+          <thead>
+            <tr><th>Show</th><th>Category</th><th>Channel</th><th>Region</th><th>Year</th><th style="text-align:right">Leads</th><th style="text-align:right">Cost</th><th style="text-align:right">Cost/Lead</th><th style="text-align:right">Opportunities</th><th style="text-align:right">Pipeline</th><th>Status</th><th>Notes</th></tr>
+          </thead>
+          <tbody id="ts-full-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ts-section">
+      <h2 class="ts-section-title">2014 snapshot: the company's own historical rating system</h2>
+      <p class="ts-section-desc">In H1 2014, the team formally rated each show 1&ndash;10 based on applications, cost, and staff recommendations &mdash; the earliest explicit show-rating record found in the archive. Reproduced here as a historical document, not a current assessment. GPS figures reflect only Jan&ndash;Jun 2014, not the full-year total shown above.</p>
+      <div class="ts-snapshot-scroll">
+        <table class="ts-table" id="ts-snapshot-table">
+          <thead><tr><th>Show</th><th>Region</th><th style="text-align:right">Applications</th><th style="text-align:right">Cost / App</th><th>Rating (2014, as recorded)</th><th>Staff comment</th></tr></thead>
+          <tbody id="ts-snapshot-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ts-footer">
+      <p><strong>Scope.</strong> The archive spans 2004&ndash;2026 and contains well over 150 distinct show instances across the Americas, EMEA and Asia Pacific. This dashboard tracks 20 shows: the recurring shows with the longest attendance history, plus every show currently on the company's active 2026 exhibit calendar (as of the 05/20/26 master schedule) &mdash; several of those, like SLAS, Space Tech Expo, AIMD Workshop, M-Tech Tokyo/Osaka and Compamed, are new to this dashboard and have thinner histories precisely because they're newer or more sporadic in the archive. Dozens more one-off, past, or distributor-only shows exist in the archive (regional Design&nbsp;2&nbsp;Part events, EP China, Eurosatory, DSEI, Offshore Europe/ONS, IEEE PES T&amp;D, Farnborough/Paris Air Show, and others) along with a running log of shows evaluated and declined &mdash; those aren't broken out individually here but remain in the source folders. Medtech Galway and Aeromart Toulouse are brand-new for 2026 and genuinely have no data yet since neither show has occurred as of this dashboard's refresh date.</p>
+      <p><strong>Methodology.</strong> Lead counts come from each show's consolidated lead-export file (not per-rep duplicates), read directly from the original spreadsheets; where no spreadsheet existed, a small number of counts come from trip-report PDFs instead (noted per data point). Where a year's file was blank-template boilerplate rather than real data (a known issue with several 2022&ndash;2023 "Eloqua ready" export templates), the count shown was corrected by counting rows with a populated company field instead of the raw sheet size &mdash; those are flagged in the notes. This dashboard doesn't score, rank by performance, or flag any show as underperforming &mdash; it reports the numbers on file and leaves interpretation to the reader.</p>
+      <p><strong>Cost figures &mdash; not invoice-audited.</strong> Cost numbers come from two different kinds of source and were not independently reconciled against invoices as part of building this dashboard. Most (mainly 2011&ndash;2014) are "Grand Total" lines from internal staff-completed expense-tracking spreadsheets, taken at face value. A smaller number (mostly 2022 onward) come from an agent reading an actual invoice or receipt PDF directly &mdash; but even those are usually <em>partial</em>: booth space plus maybe one line item, not travel, staffing, shipping, or lead-retrieval tech. Every cost sourced this way is marked with a "~" and excluded from Cost/Lead (shown in the table, but not divided into a ratio) so a partial figure can't masquerade as a full one. Cost/Lead elsewhere is simple division (cost &divide; leads) wherever both are on file and the cost isn't flagged partial; it's left blank, not estimated, when either figure is missing. One figure (Global Petroleum Show 2018) was recorded in CAD, not USD, and has been left out of the Cost column entirely rather than guess-converted &mdash; the raw figure is in that row's notes instead.</p>
+      <p><strong>Opportunities &amp; Pipeline.</strong> For 2010&ndash;2013 only, a separate CRM/campaign-tracking system recorded sales Opportunities and Pipeline value tied to each show's leads, shown in the full table where available. That system's own lead counts don't always match the consolidated lead-export counts used elsewhere on this dashboard (the CRM appears to track qualified/entered leads, not raw badge scans) &mdash; so Opportunities and Pipeline are shown as additional context alongside the lead count, not reconciled into it.</p>
+      <p><strong>Channel.</strong> M-Tech Tokyo and M-Tech Osaka run through a local distributor rather than a company-staffed booth, so lead capture depends on what the distributor reports back rather than BSE's own process &mdash; they're tagged "Distributor" throughout, since their numbers aren't directly comparable to direct-exhibit shows. Missing data on a distributor show more often reflects a reporting gap than anything about the show itself. The Channel filter defaults to "Direct only," so distributor-led shows are hidden across every view above unless you switch it to "All" or "Distributor only."</p>
+      <p><strong>Data quality flags.</strong> Three data points originally looked wrong on inspection (AAOS 2009 and Hannover Messe 2009 were far outside their neighboring years; Pittcon 2008 showed just 1 lead, implausible for that show). All three were checked against a second, independent source &mdash; a contemporaneous internal email for the first two, a separate raw badge-scanner export for the third &mdash; and corrected: AAOS 2009 is 82 (was 565), Hannover Messe 2009 is 180 (was 566), Pittcon 2008 is 61 (was 1). Each row's notes explain what was found. No other data points in this dashboard have been cross-checked against a second source this way; a number that looks right was generally taken as read from its one export file.</p>
+    </div>
+
+  </div>
+
+  <div class="ts-modal-backdrop" id="ts-modal-backdrop" hidden>
+    <div class="ts-modal" role="dialog" aria-modal="true" aria-labelledby="ts-modal-title-el" id="ts-modal">
+      <div class="ts-modal-top">
+        <div>
+          <h2 class="ts-modal-title" id="ts-modal-title-el"></h2>
+          <div class="ts-modal-cat" id="ts-modal-cat"></div>
+        </div>
+        <button class="ts-modal-close" id="ts-modal-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="ts-modal-stats" id="ts-modal-stats"></div>
+      <div class="ts-modal-chart-scroll" id="ts-modal-chart"></div>
+      <div class="ts-table-scroll">
+        <table class="ts-table" id="ts-modal-table">
+          <thead><tr><th>Year</th><th style="text-align:right">Leads</th><th style="text-align:right">Cost</th><th style="text-align:right">Cost/Lead</th><th style="text-align:right">Opportunities</th><th style="text-align:right">Pipeline</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody id="ts-modal-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  function Y(year, leads, extra) {
+    extra = extra || {};
+    return {
+      year: year,
+      leads: (leads === null || leads === undefined) ? null : leads,
+      status: extra.status || (leads == null ? 'no-data' : 'attended'),
+      cost: extra.cost || null,
+      costBasis: extra.costBasis || (extra.cost ? 'rollup' : null),
+      note: extra.note || null,
+      flag: !!extra.flag,
+      opportunities: (typeof extra.opportunities === 'number') ? extra.opportunities : null,
+      pipeline: (typeof extra.pipeline === 'number') ? extra.pipeline : null
+    };
+  }
+
+  var SHOWS = [
+    { id: 'mdm-west', name: 'MD&M West', category: 'Medical', region: 'Americas', data: [
+      Y(2004,82), Y(2005,75), Y(2006,74), Y(2007,132), Y(2008,50), Y(2009,267), Y(2010,26),
+      Y(2011,54,{cost:3300, opportunities:3, pipeline:240000}), Y(2012,null,{status:'walked', note:'Attended without exhibiting a booth.'}),
+      Y(2013,null), Y(2014,null), Y(2015,null),
+      Y(2016,76), Y(2017,50), Y(2018,47), Y(2019,40), Y(2020,16),
+      Y(2021,16,{note:'Virtual/hybrid event (IMEW2021).'}),
+      Y(2022,30,{note:'Virtual platform contacts.'}),
+      Y(2023,16,{note:'Corrected: raw export sheet showed 400 rows of blank template formatting; recounted by populated company field.', flag:true}),
+      Y(2024,null,{status:'cancelled', note:'Cancellation on file for 2024.'}),
+      Y(2025,null,{note:'Booth/photo records exist but no leads export was saved to the archive.'}),
+      Y(2026,35)
+    ]},
+    { id: 'mdm-minn', name: 'MD&M Minneapolis', category: 'Medical', region: 'Americas', data: [
+      Y(2004,27), Y(2005,70), Y(2006,61), Y(2007,23), Y(2008,33), Y(2009,30), Y(2010,26,{opportunities:1, pipeline:100000}),
+      Y(2011,31,{cost:1777}), Y(2012,29), Y(2013,18), Y(2014,17), Y(2015,14), Y(2016,27), Y(2017,47), Y(2018,124), Y(2019,21),
+      Y(2020,null,{status:'cancelled', note:'COVID-limited; not meaningfully held.'}),
+      Y(2021,null,{note:'Leads folder present but empty.'}),
+      Y(2022,15,{note:'Corrected: raw export sheet showed 417 rows of blank template formatting; recounted by populated company field.', flag:true}),
+      Y(2023,null,{note:'No leads export saved.'}), Y(2024,null,{note:'No leads export saved.'}), Y(2025,19),
+      Y(2026,null,{note:'Scheduled Oct 2026; hasn’t occurred yet.'})
+    ]},
+    { id: 'mdm-east', name: 'MD&M East', category: 'Medical', region: 'Americas', discontinued: true, data: [
+      Y(2004,53), Y(2005,356), Y(2006,41), Y(2007,null), Y(2008,null), Y(2009,null), Y(2010,null), Y(2011,null),
+      Y(2012,111), Y(2013,45),
+      Y(2014,null,{status:'walked', note:'Only feedback emails found; appears not exhibited. Not run again after 2014.'})
+    ]},
+    { id: 'pittcon', name: 'Pittcon', category: 'Analytical', region: 'Americas', data: [
+      Y(2004,99), Y(2005,53), Y(2006,157), Y(2007,87),
+      Y(2008,61,{note:'Corrected from an initial automated count of 1 (the "Import Ready Leads.xls" file for that year was genuinely broken/near-empty). A separate raw badge-scanner export (61 rows) for the same show was found and used instead.'}),
+      Y(2009,43), Y(2010,79,{opportunities:2, pipeline:971}),
+      Y(2011,107,{cost:3146, opportunities:5, pipeline:11600}), Y(2012,48,{cost:3075}), Y(2013,83,{cost:3356, opportunities:8, pipeline:5600}), Y(2014,125,{cost:3139}),
+      Y(2015,79), Y(2016,75), Y(2017,49), Y(2018,45), Y(2019,48), Y(2020,34),
+      Y(2021,null,{status:'declined', note:'Show went all-virtual; BSE did not participate.'}),
+      Y(2022,null,{status:'declined', note:'Declined for 2022 per internal correspondence.'}),
+      Y(2023,null), Y(2024,null), Y(2025,null), Y(2026,null)
+    ]},
+    { id: 'otc', name: 'OTC (Offshore Technology Conference)', category: 'Energy', region: 'Americas', data: [
+      Y(2004,131), Y(2005,104), Y(2006,62), Y(2007,108), Y(2008,88), Y(2009,128), Y(2010,177,{opportunities:2, pipeline:300}),
+      Y(2011,179,{cost:4064, opportunities:23, pipeline:167122}), Y(2012,140,{cost:2675, opportunities:8, pipeline:13909}), Y(2013,168,{opportunities:3, pipeline:0}), Y(2014,120), Y(2015,103), Y(2016,79), Y(2017,85), Y(2018,118), Y(2019,119),
+      Y(2020,null,{status:'cancelled', note:'COVID cancellation, lead-retrieval refunded.'}),
+      Y(2021,null,{note:'Booth confirmed/paid but no leads export was filed.'}),
+      Y(2022,119),
+      Y(2023,84,{note:'Corrected: raw export sheet showed 400 rows of blank template formatting; recounted by populated company field.', flag:true}),
+      Y(2024,49), Y(2025,33), Y(2026,67)
+    ]},
+    { id: 'aaos', name: 'AAOS', category: 'Medical', region: 'Americas', data: [
+      Y(2004,null), Y(2005,null), Y(2006,null), Y(2007,null),
+      Y(2008,72),
+      Y(2009,82,{note:'Corrected from an initial automated count of 565 (a spreadsheet row-count artifact). A contemporaneous internal email (Mar 3, 2009) states the true total: 64 inquiries + 18 applications = 82.'}),
+      Y(2010,102),
+      Y(2011,73,{cost:4188, opportunities:9, pipeline:13200}), Y(2012,73,{cost:2474, opportunities:1, pipeline:1168}), Y(2013,82,{cost:5079, opportunities:1, pipeline:0}), Y(2014,46), Y(2015,104), Y(2016,60), Y(2017,47), Y(2018,45), Y(2019,36),
+      Y(2020,null,{status:'cancelled', note:'COVID cancellation.'}),
+      Y(2021,null),
+      Y(2022,17,{note:'Corrected: raw export sheet showed 119 rows including blank template formatting; recounted by populated company field.', flag:true}),
+      Y(2023,null,{status:'declined', note:'Declined — folder explicitly marked "DECLINED".'}),
+      Y(2024,null), Y(2025,null), Y(2026,null)
+    ]},
+    { id: 'hannover', name: 'Hannover Messe', category: 'Industrial', region: 'EMEA', data: [
+      Y(2006,62), Y(2007,261), Y(2008,115),
+      Y(2009,180,{note:'Corrected from an initial automated count of 566 (a spreadsheet row-count artifact). A contemporaneous internal email (May 8, 2009) states the true total: 180 leads, including 20 applications.'}),
+      Y(2010,65), Y(2011,166,{opportunities:21, pipeline:132579}), Y(2012,172,{opportunities:4, pipeline:3000}), Y(2013,115), Y(2014,136), Y(2015,149), Y(2016,164), Y(2017,272), Y(2018,105),
+      Y(2019,null),
+      Y(2020,null,{status:'cancelled', note:'COVID cancellation.'}),
+      Y(2021,null,{status:'declined', note:'Declined due to COVID-era travel restrictions.'}),
+      Y(2022,57),
+      Y(2023,null), Y(2024,null,{note:'Booth cost (~€4,392) on file; no leads export found.'}), Y(2025,null)
+    ]},
+    { id: 'analytica', name: 'Analytica', category: 'Analytical', region: 'EMEA', data: [
+      Y(2008,60), Y(2009,null), Y(2010,63,{opportunities:2, pipeline:206337}), Y(2011,null), Y(2012,73,{opportunities:1, pipeline:0}), Y(2013,null),
+      Y(2014,7,{note:'Strict "qualified application" count per the company’s 2014 methodology, not raw badge scans.'}),
+      Y(2015,null), Y(2016,87), Y(2017,null), Y(2018,88), Y(2019,null),
+      Y(2020,null,{note:'Postponed to Oct 2020; not attended.'}),
+      Y(2021,null), Y(2022,51), Y(2023,null), Y(2024,null)
+    ]},
+    { id: 'biomed-sj', name: 'BIOMEDevice San Jose / Silicon Valley', category: 'Medical', region: 'Americas', data: [
+      Y(2009,69), Y(2010,53), Y(2011,51), Y(2012,45),
+      Y(2013,null,{status:'declined'}),
+      Y(2014,33), Y(2015,47), Y(2016,60), Y(2017,45), Y(2018,54), Y(2019,24),
+      Y(2020,null),
+      Y(2021,28,{note:'Virtual/hybrid event.'}),
+      Y(2022,32,{note:'Renamed to "Silicon Valley" this year. Corrected: raw export sheet showed 417 rows of blank template formatting; recounted by populated company field.', flag:true}),
+      Y(2023,21),
+      Y(2024,null,{note:'$650 lead-retrieval package purchased; no leads export found.'}),
+      Y(2025,25),
+      Y(2026,null,{status:'cancelled', note:'Cancellation on file for 2026.'})
+    ]},
+    { id: 'biomed-boston', name: 'BIOMEDevice Boston', category: 'Medical', region: 'Americas', discontinued: true, data: [
+      Y(2009,204), Y(2010,null), Y(2011,71), Y(2012,52), Y(2013,60), Y(2014,66), Y(2015,38), Y(2016,45), Y(2017,63), Y(2018,41), Y(2019,34),
+      Y(2020,null,{status:'cancelled', note:'Postponed to Sept 2020; ultimately did not occur.'}),
+      Y(2021,null),
+      Y(2022,21),
+      Y(2023,null),
+      Y(2024,24),
+      Y(2025,null), Y(2026,null)
+    ]},
+    { id: 'gps', name: 'Global Petroleum Show', category: 'Energy', region: 'Americas', discontinued: true, data: [
+      Y(2006,24), Y(2007,null), Y(2008,33,{cost:16156}), Y(2009,null), Y(2010,104,{cost:3885, costBasis:'partial', note:'Cost is booth space only (partial) — excludes travel, staffing, shipping.', opportunities:3, pipeline:1800}), Y(2011,null), Y(2012,129,{opportunities:1, pipeline:400}), Y(2013,null),
+      Y(2014,71), Y(2015,107), Y(2016,56), Y(2017,37), Y(2018,59,{note:'Cost on file: roughly $9,859 CAD (booth quote only, partial) — not converted to USD, so not included in the Cost column.'}), Y(2019,49),
+      Y(2020,null,{status:'declined', note:'Contract cancelled/refunded.'}),
+      Y(2021,null), Y(2022,null), Y(2023,null), Y(2024,null), Y(2025,null), Y(2026,null)
+    ]},
+    { id: 'robotics-summit', name: 'Robotics Summit & Expo', category: 'Robotics', region: 'Americas', data: [
+      Y(2022,33), Y(2023,27), Y(2024,46), Y(2025,33), Y(2026,39)
+    ]},
+    { id: 'designcon', name: 'DesignCon', category: 'Semiconductor', region: 'Americas', data: [
+      Y(2018,41), Y(2019,48),
+      Y(2020,null,{note:'Booth confirmed/invoiced; no leads export found.'}),
+      Y(2021,null,{status:'cancelled', note:'Cancelled/refunded.'}),
+      Y(2022,null), Y(2023,null), Y(2024,null), Y(2025,null),
+      Y(2026,43)
+    ]},
+    { id: 'slas', name: 'SLAS (formerly Lab Automation)', category: 'Analytical', region: 'Americas', data: [
+      Y(2004,64), Y(2005,81,{cost:8623}), Y(2006,267,{cost:8216}), Y(2007,39), Y(2008,61,{cost:8060}), Y(2009,240), Y(2010,46), Y(2011,43), Y(2012,40),
+      Y(2013,null,{status:'declined', note:'Renamed from "Lab Automation" to "SLAS" this year, then declined.'}),
+      Y(2014,null), Y(2015,null), Y(2016,null), Y(2017,null), Y(2018,null), Y(2019,null), Y(2020,null), Y(2021,null), Y(2022,null), Y(2023,null), Y(2024,null), Y(2025,null,{note:'13-year gap with no attendance on file.'}),
+      Y(2026,17,{cost:4600, note:'Returned to the schedule after a 13-year gap.'})
+    ]},
+    { id: 'space-tech-expo', name: 'Space Tech Expo', category: 'Aerospace', region: 'Americas', data: [
+      Y(2023,null,{status:'walked', note:'Speaker slot only — no exhibit booth, no leads collected.'}),
+      Y(2024,null,{note:'Not exhibited.'}),
+      Y(2025,14,{cost:7038, costBasis:'partial', note:'Cost is booth space + furnishings/electrical only (partial), from invoices — excludes travel, staffing, lead-retrieval tech.'}),
+      Y(2026,22,{cost:6250, costBasis:'partial', note:'Count from an internal trip report ("22 leads, ~5 qualified") — no raw leads export was saved. Cost is booth space + lead-retrieval app only (partial), from invoices — excludes travel, staffing, and furnishings.'})
+    ]},
+    { id: 'aimd-workshop', name: 'AIMD Workshop', category: 'Medical', region: 'EMEA', data: [
+      Y(2025,null,{status:'walked', note:'Attended without a booth.'}),
+      Y(2026,9,{note:'First exhibiting year (Silver sponsor). Count from the trip report\'s leads list, not a raw export — no dedicated leads spreadsheet exists.'})
+    ]},
+    { id: 'mtech-tokyo', name: 'M-Tech Tokyo', category: 'Industrial', region: 'Asia', channel: 'Distributor', data: [
+      Y(2022,null,{note:'No folder — not attended.'}),
+      Y(2023,113,{cost:4736, costBasis:'partial', note:'Cost is BSE\'s 50% share of the distributor\'s booth/exhibition invoice only (partial) — excludes BSE staff travel.'}),
+      Y(2024,null,{note:'Distributor(Moritex)-led; no BSE-collected lead data.'}),
+      Y(2025,null,{note:'No folder — not attended.'}),
+      Y(2026,null,{note:'Show occurred (Jul 1–3) but distributor-led with no BSE lead data captured.'})
+    ]},
+    { id: 'mtech-osaka', name: 'M-Tech Osaka', category: 'Industrial', region: 'Asia', channel: 'Distributor', data: [
+      Y(2022,144,{cost:4180, costBasis:'partial', note:'Cost is the distributor\'s booth/decoration/electrical invoice only (partial) — excludes BSE staff travel.'}),
+      Y(2023,null,{note:'No folder — not attended.'}),
+      Y(2024,null,{note:'No folder — not attended.'}),
+      Y(2025,null,{note:'No folder — not attended.'}),
+      Y(2026,null,{note:'Scheduled Oct 7–9, 2026 — hasn\'t occurred yet.'})
+    ]},
+    { id: 'compamed', name: 'Compamed', category: 'Medical', region: 'EMEA', data: [
+      Y(2008,120), Y(2009,107), Y(2010,53), Y(2011,76), Y(2012,62),
+      Y(2013,null), Y(2014,null), Y(2015,null), Y(2016,null), Y(2017,null), Y(2018,null,{note:'Walked only, no booth.'}),
+      Y(2019,null,{status:'declined', note:'Exhibit cancelled; walked instead.'}),
+      Y(2020,null,{status:'declined', note:'On waitlist; did not get a booth.'}),
+      Y(2021,null),
+      Y(2022,null,{status:'declined', note:'"On waiting lists for years and did not get through pre-COVID" per internal email.'}),
+      Y(2023,null,{status:'declined', note:'Booth arranged then cancelled.'}),
+      Y(2024,null,{note:'Exhibited (lead-retrieval app activated) but no leads export was saved to the archive.'}),
+      Y(2025,58,{note:'Cost on file: roughly €5,750 (booth + services deposit), not converted to USD.'}),
+      Y(2026,null,{note:'Scheduled Nov 16–19, 2026 — hasn\'t occurred yet.'})
+    ]},
+    { id: 'medtech-galway', name: 'Medtech Galway', category: 'Medical', region: 'EMEA', data: [
+      Y(2026,null,{note:'Brand-new show for the company — first year on the schedule. Scheduled Sep 23–24, 2026, hasn\'t occurred yet.'})
+    ]},
+    { id: 'aeromart-toulouse', name: 'Aeromart Toulouse', category: 'Aerospace', region: 'EMEA', data: [
+      Y(2026,null,{note:'Brand-new show for the company — first year on the schedule. Scheduled Dec 1–3, 2026, hasn\'t occurred yet.'})
+    ]}
+  ];
+
+  var SNAPSHOT_2014 = [
+    {show:'Pittcon', region:'Americas', apps:10, costPerApp:2356, rating:'Successful', comment:'"Recommend attending 2015 Pittcon in New Orleans."'},
+    {show:'Aero/Defense Supplier Summit', region:'Americas', apps:1, costPerApp:5489, rating:'Unsuccessful', comment:'"A good stepping stone into the aerospace market." Next show in 2016.'},
+    {show:'AAOS', region:'Americas', apps:5, costPerApp:3017, rating:'Successful', comment:'"A key show for BSE’s medical device business."'},
+    {show:'Electronics New England', region:'Americas', apps:5, costPerApp:2546, rating:'Successful', comment:'"Attendees who come to the show are quality."'},
+    {show:'IEEE PES T&D', region:'Americas', apps:7, costPerApp:1706, rating:'Successful', comment:'"Foot traffic was slow at times" but recommended continuing.'},
+    {show:'OTC', region:'Americas', apps:38, costPerApp:506, rating:'Successful', comment:'"All objectives were greatly exceeded."'},
+    {show:'D2P Illinois', region:'Americas', apps:4, costPerApp:1378, rating:'Successful', comment:'"Met all of our expectations."'},
+    {show:'D2P NorCal', region:'Americas', apps:3, costPerApp:2594, rating:'Successful', comment:'"Silicon Valley ranks the No. 1 tech hub — consider in future."'},
+    {show:'Global Petroleum Show (H1)', region:'Americas', apps:34, costPerApp:595, rating:'Successful', comment:'"Highly recommend attending in future years."'},
+    {show:'World of Industry', region:'EMEA', apps:1, costPerApp:24516, rating:'Unsuccessful', comment:'Consider walking instead of exhibiting next year.'},
+    {show:'Analytica Munich', region:'EMEA', apps:7, costPerApp:3128, rating:'Successful', comment:'"Stay with Analytica Munich for now."'},
+    {show:'Hannover', region:'EMEA', apps:16, costPerApp:3455, rating:'Successful', comment:'"Important since it allows us to showcase at this show of shows."'},
+    {show:'Space Power Conference', region:'EMEA', apps:1, costPerApp:4583, rating:'Unsuccessful', comment:'"A very small and specific niche market."'},
+    {show:'Analitika Moscow', region:'EMEA', apps:2, costPerApp:13687, rating:'Unsuccessful', comment:'Recommend canvassing only, to track the Russian market.'},
+    {show:'Medtec Stuttgart', region:'EMEA', apps:7, costPerApp:3869, rating:'Successful', comment:'"Good platform to increase presence in European medical devices."'},
+    {show:'Electronica China', region:'Asia', apps:13, costPerApp:398, rating:'Successful', comment:'"Turned out to be a good exhibition to return to in 2015."'},
+    {show:'Korea Chem', region:'Asia', apps:null, costPerApp:null, rating:'Evaluate', comment:'A Won Conductor (distributor) show; applications pending at time of report.'}
+  ];
+
+  var CURRENT_YEAR = 2026;
+
+  function numericPoints(show) {
+    return show.data.filter(function (d) { return typeof d.leads === 'number'; }).sort(function (a, b) { return a.year - b.year; });
+  }
+
+  function costPerLead(d) {
+    if (d.costBasis === 'partial') return null;
+    return (typeof d.cost === 'number' && typeof d.leads === 'number' && d.leads > 0) ? (d.cost / d.leads) : null;
+  }
+
+  function allDataPoints() {
+    var out = [];
+    SHOWS.forEach(function (s) { s.data.forEach(function (d) { out.push({ show: s, d: d }); }); });
+    return out;
+  }
+
+  function median(arr) {
+    if (!arr.length) return null;
+    var sorted = arr.slice().sort(function (a, b) { return a - b; });
+    var mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  function fmt(n) { return n == null ? '—' : n.toLocaleString('en-US'); }
+  function fmtMoney(n) { return n == null ? '—' : ('$' + Math.round(n).toLocaleString('en-US')); }
+  function costCell(d) {
+    if (d.cost == null) return '—';
+    var prefix = d.costBasis === 'partial' ? '~' : '';
+    var title = d.costBasis === 'partial' ? ' title="Partial cost — see notes for what\'s excluded"' : '';
+    return '<span' + title + '>' + prefix + fmtMoney(d.cost) + '</span>';
+  }
+
+  // ---------- KPI row ----------
+  function renderKPIs() {
+    var mostRecentTotal = 0, mostRecentShows = 0, grandTotal = 0;
+    SHOWS.forEach(function (s) {
+      var pts = numericPoints(s);
+      grandTotal += pts.reduce(function (sum, p) { return sum + p.leads; }, 0);
+      if (pts.length && pts[pts.length - 1].year >= CURRENT_YEAR - 1) {
+        mostRecentTotal += pts[pts.length - 1].leads;
+        mostRecentShows++;
+      }
+    });
+
+    var totalDataPoints = SHOWS.reduce(function (s, sh) { return s + numericPoints(sh).length; }, 0);
+
+    var cpls = allDataPoints().map(function (r) { return costPerLead(r.d); }).filter(function (v) { return v != null; });
+    var medianCPL = median(cpls);
+
+    var tiles = [
+      { label: 'Shows tracked', value: SHOWS.length, sub: '150+ total instances in the archive' },
+      { label: 'Leads, last 2 seasons', value: fmt(mostRecentTotal), sub: 'across ' + mostRecentShows + ' shows with recent data' },
+      { label: 'Total leads on file', value: fmt(grandTotal), sub: 'sum across all tracked shows, 2004–2026' },
+      { label: 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '—', sub: 'across ' + cpls.length + ' show-years with a full (non-partial) cost figure on file' }
+    ];
+    var row = document.getElementById('ts-kpi-row');
+    row.innerHTML = tiles.map(function (t) {
+      return '<div class="ts-tile"><div class="ts-tile-label">' + t.label + '</div><div class="ts-tile-value">' + t.value + '</div><div class="ts-tile-sub">' + t.sub + '</div></div>';
+    }).join('');
+
+    document.getElementById('ts-meta').textContent = totalDataPoints + ' show-year data points on file, 2004–2026. Last refreshed from the archive July 2026.';
+  }
+
+  function getChannel(show) { return show.channel || 'Direct'; }
+
+  // ---------- Filters ----------
+  var state = { category: 'All', region: 'All', channel: 'Direct' };
+
+  function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
+
+  function renderFilters() {
+    var cats = ['All'].concat(uniq(SHOWS.map(function (s) { return s.category; })).sort());
+    var regions = ['All'].concat(uniq(SHOWS.map(function (s) { return s.region; })).sort());
+    var channelOpts = [['Direct', 'Direct only (default)'], ['All', 'All (incl. distributor)'], ['Distributor', 'Distributor only']];
+
+    var catSel = document.getElementById('ts-cat-filter');
+    catSel.innerHTML = cats.map(function (c) { return '<option value="' + c + '">' + c + '</option>'; }).join('');
+    var regSel = document.getElementById('ts-region-filter');
+    regSel.innerHTML = regions.map(function (r) { return '<option value="' + r + '">' + r + '</option>'; }).join('');
+    var chanSel = document.getElementById('ts-channel-filter');
+    chanSel.innerHTML = channelOpts.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('');
+    chanSel.value = state.channel;
+
+    catSel.addEventListener('change', function () { state.category = catSel.value; renderAll(); });
+    regSel.addEventListener('change', function () { state.region = regSel.value; renderAll(); });
+    chanSel.addEventListener('change', function () { state.channel = chanSel.value; renderAll(); });
+  }
+
+  function filteredShows() {
+    return SHOWS.filter(function (s) {
+      if (state.category !== 'All' && s.category !== state.category) return false;
+      if (state.region !== 'All' && s.region !== state.region) return false;
+      if (state.channel !== 'All' && getChannel(s) !== state.channel) return false;
+      return true;
+    });
+  }
+
+  // ---------- Ranking bar chart ----------
+  function renderRanking() {
+    var shows = filteredShows();
+    var rows = shows.map(function (s) {
+      var pts = numericPoints(s);
+      var latest = pts.length ? pts[pts.length - 1] : null;
+      return { show: s, latest: latest };
+    }).filter(function (r) { return r.latest; })
+      .sort(function (a, b) { return b.latest.leads - a.latest.leads; });
+
+    var max = rows.length ? rows[0].latest.leads : 1;
+    var el = document.getElementById('ts-rank-list');
+    if (!rows.length) { el.innerHTML = '<p class="ts-section-desc">No shows match the current filters.</p>'; return; }
+    el.innerHTML = rows.map(function (r) {
+      var pct = Math.max(2, Math.round((r.latest.leads / max) * 100));
+      return '<div class="ts-rank-row ts-clickable" data-show-id="' + r.show.id + '" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '" title="Most recent data on file: ' + r.latest.year + '">' +
+        '<div class="ts-rank-name">' + r.show.name + '<span class="ts-rank-cat">' + r.show.category + ' · ' + r.show.region + (getChannel(r.show) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '') + '</span></div>' +
+        '<div class="ts-rank-bar-track"><div class="ts-rank-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="ts-rank-value">' + fmt(r.latest.leads) + '</div>' +
+        '<div class="ts-rank-year">' + r.latest.year + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // ---------- Small multiples ----------
+  function sparklineSVG(show) {
+    var w = 260, h = 64, padX = 4, padY = 8;
+    var all = show.data.slice().sort(function (a, b) { return a.year - b.year; });
+    var minYear = all[0].year, maxYear = all[all.length - 1].year;
+    var pts = numericPoints(show);
+    if (!pts.length) {
+      return '<svg class="ts-card-chart" viewBox="0 0 ' + w + ' ' + h + '"><text x="' + (w/2) + '" y="' + (h/2) + '" text-anchor="middle" fill="var(--text-muted)" font-size="11">No data on file</text></svg>';
+    }
+    var maxLeads = Math.max.apply(null, pts.map(function (p) { return p.leads; }));
+    var minLeads = 0;
+    function xFor(year) {
+      if (maxYear === minYear) return padX;
+      return padX + ((year - minYear) / (maxYear - minYear)) * (w - padX * 2);
+    }
+    function yFor(leads) {
+      if (maxLeads === minLeads) return h - padY;
+      return (h - padY) - ((leads - minLeads) / (maxLeads - minLeads)) * (h - padY * 2);
+    }
+    // split into segments at gaps (consecutive numeric points only)
+    var segments = [];
+    var cur = [];
+    for (var i = 0; i < all.length; i++) {
+      var d = all[i];
+      if (typeof d.leads === 'number') {
+        cur.push(d);
+      } else if (cur.length) {
+        segments.push(cur); cur = [];
+      }
+    }
+    if (cur.length) segments.push(cur);
+
+    var color = 'var(--series-1)';
+    var paths = segments.map(function (seg) {
+      var d = seg.map(function (p, idx) { return (idx === 0 ? 'M' : 'L') + xFor(p.year).toFixed(1) + ',' + yFor(p.leads).toFixed(1); }).join(' ');
+      return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />';
+    }).join('');
+
+    var dots = pts.map(function (p) {
+      var r = (p === pts[pts.length - 1]) ? 3.5 : 2.5;
+      var ring = p.flag ? 'var(--serious)' : color;
+      return '<circle cx="' + xFor(p.year).toFixed(1) + '" cy="' + yFor(p.leads).toFixed(1) + '" r="' + r + '" fill="' + ring + '" stroke="var(--card-surface)" stroke-width="1.5"><title>' + p.year + ': ' + p.leads + ' leads' + (p.flag ? ' (flagged — see notes)' : '') + '</title></circle>';
+    }).join('');
+
+    var baseline = '<line x1="' + padX + '" y1="' + (h - padY) + '" x2="' + (w - padX) + '" y2="' + (h - padY) + '" stroke="var(--gridline)" stroke-width="1" />';
+
+    return '<svg class="ts-card-chart" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' + baseline + paths + dots + '</svg>';
+  }
+
+  function renderCards() {
+    var shows = filteredShows();
+    var grid = document.getElementById('ts-card-grid');
+    if (!shows.length) { grid.innerHTML = '<p class="ts-section-desc">No shows match the current filters.</p>'; return; }
+    grid.innerHTML = shows.map(function (s) {
+      var pts = numericPoints(s);
+      var latest = pts.length ? pts[pts.length - 1] : null;
+      var flagged = s.data.some(function (d) { return d.flag; });
+      return '<div class="ts-card ts-clickable" data-show-id="' + s.id + '" tabindex="0" role="button" aria-label="View full history for ' + s.name + '">' +
+        '<div class="ts-card-head"><div><div class="ts-card-name">' + s.name + '</div><div class="ts-card-cat">' + s.category + ' · ' + s.region + (s.discontinued ? ' · discontinued' : '') + (getChannel(s) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '') + '</div></div></div>' +
+        sparklineSVG(s) +
+        '<div class="ts-card-foot"><span>' + (latest ? latest.year : '—') + '</span><span class="ts-card-latest">' + (latest ? fmt(latest.leads) + ' leads' : 'No data') + '</span></div>' +
+        (flagged ? '<div class="ts-card-note"><span class="ts-flag">▲</span> Contains a flagged/corrected data point — see full table.</div>' : '') +
+        '</div>';
+    }).join('');
+  }
+
+  // ---------- Full table ----------
+  function renderTable() {
+    var shows = filteredShows();
+    var rows = [];
+    shows.forEach(function (s) {
+      s.data.slice().sort(function (a, b) { return a.year - b.year; }).forEach(function (d) {
+        rows.push({ show: s, d: d });
+      });
+    });
+    var body = document.getElementById('ts-full-table-body');
+    body.innerHTML = rows.map(function (r) {
+      var d = r.d;
+      var statusLabel = d.status.charAt(0).toUpperCase() + d.status.slice(1).replace('-', ' ');
+      return '<tr>' +
+        '<td>' + r.show.name + '</td>' +
+        '<td>' + r.show.category + '</td>' +
+        '<td>' + getChannel(r.show) + '</td>' +
+        '<td>' + r.show.region + '</td>' +
+        '<td>' + d.year + '</td>' +
+        '<td class="ts-num">' + (d.flag ? '<span class="ts-flag">▲</span> ' : '') + fmt(d.leads) + '</td>' +
+        '<td class="ts-num">' + costCell(d) + '</td>' +
+        '<td class="ts-num">' + fmtMoney(costPerLead(d)) + '</td>' +
+        '<td class="ts-num">' + fmt(d.opportunities) + '</td>' +
+        '<td class="ts-num">' + fmtMoney(d.pipeline) + '</td>' +
+        '<td>' + statusLabel + '</td>' +
+        '<td class="ts-note-cell">' + (d.note || '') + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ---------- 2014 snapshot ----------
+  function renderSnapshot() {
+    var body = document.getElementById('ts-snapshot-body');
+    body.innerHTML = SNAPSHOT_2014.map(function (r) {
+      return '<tr>' +
+        '<td>' + r.show + '</td>' +
+        '<td>' + r.region + '</td>' +
+        '<td class="ts-num">' + (r.apps == null ? '—' : r.apps) + '</td>' +
+        '<td class="ts-num">' + fmtMoney(r.costPerApp) + '</td>' +
+        '<td><span class="ts-tag">' + r.rating + '</span></td>' +
+        '<td class="ts-note-cell">' + r.comment + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ---------- Portfolio aggregate chart ----------
+  function renderPortfolio() {
+    var shows = filteredShows();
+    var byYear = {};
+    shows.forEach(function (s) {
+      numericPoints(s).forEach(function (p) {
+        if (!byYear[p.year]) byYear[p.year] = { total: 0, count: 0, flaggedTotal: 0, flaggedShows: [] };
+        byYear[p.year].total += p.leads;
+        byYear[p.year].count++;
+        if (p.flag) {
+          byYear[p.year].flaggedTotal += p.leads;
+          byYear[p.year].flaggedShows.push(s.name + ' (' + fmt(p.leads) + ')');
+        }
+      });
+    });
+    var years = Object.keys(byYear).map(Number).sort(function (a, b) { return a - b; });
+    var el = document.getElementById('ts-portfolio-chart');
+    if (!years.length) { el.innerHTML = '<p class="ts-section-desc" style="margin:0">No data for the current filters.</p>'; return; }
+
+    var padL = 46, padR = 14, padT = 16, padB = 26;
+    var barW = 22, gap = 10;
+    var chartW = padL + padR + years.length * (barW + gap);
+    var chartH = 180;
+    var plotH = chartH - padT - padB;
+    var maxTotal = Math.max.apply(null, years.map(function (y) { return byYear[y].total; }));
+    var niceMax = niceCeil(maxTotal);
+    function yFor(v) { return padT + plotH - (v / niceMax) * plotH; }
+
+    var ticks = [0, Math.round(niceMax / 2), niceMax];
+    var gridParts = ticks.map(function (t) {
+      var y = yFor(t);
+      return '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (chartW - padR) + '" y2="' + y.toFixed(1) + '" stroke="var(--gridline)" stroke-width="1" />' +
+        '<text x="' + (padL - 8) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="var(--text-muted)">' + t.toLocaleString('en-US') + '</text>';
+    }).join('');
+
+    var flaggedYears = [];
+    var bars = years.map(function (yr, i) {
+      var x = padL + i * (barW + gap);
+      var info = byYear[yr];
+      var hasFlag = info.flaggedTotal > 0;
+      if (hasFlag) flaggedYears.push(yr);
+      var y = yFor(info.total);
+      var h = Math.max(yFor(0) - y, 1.5);
+      var labelText = info.total.toLocaleString('en-US') + (hasFlag ? ' *' : '');
+      var label = '<text x="' + (x + barW / 2) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" font-size="10" font-weight="700" fill="' + (hasFlag ? 'var(--serious)' : 'var(--text-primary)') + '">' + labelText + '</text>';
+      var yearLabel = '<text x="' + (x + barW / 2) + '" y="' + (chartH - padB + 15) + '" text-anchor="middle" font-size="9" fill="var(--text-muted)">' + yr + '</text>';
+      var title = yr + ': ' + info.total.toLocaleString('en-US') + ' leads across ' + info.count + ' show' + (info.count === 1 ? '' : 's') + ' with data on file';
+      if (hasFlag) title += '. Includes ' + info.flaggedTotal.toLocaleString('en-US') + ' leads (' + Math.round(100 * info.flaggedTotal / info.total) + '%) from flagged/unverified data points: ' + info.flaggedShows.join(', ') + '.';
+      var barColor = hasFlag ? 'var(--serious)' : 'var(--series-1)';
+      return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + h.toFixed(1) + '" rx="4" fill="' + barColor + '" fill-opacity="' + (hasFlag ? '0.55' : '1') + '"><title>' + title + '</title></rect>' + label + yearLabel;
+    }).join('');
+
+    var baseline = '<line x1="' + padL + '" y1="' + yFor(0).toFixed(1) + '" x2="' + (chartW - padR) + '" y2="' + yFor(0).toFixed(1) + '" stroke="var(--baseline)" stroke-width="1" />';
+
+    el.innerHTML = '<svg viewBox="0 0 ' + chartW + ' ' + chartH + '" style="width:100%; min-width:' + chartW + 'px; height:180px; display:block;">' + gridParts + baseline + bars + '</svg>';
+    if (flaggedYears.length) {
+      el.innerHTML += '<p style="margin:8px 2px 0; font-size:0.72rem; color:var(--text-muted)"><span class="ts-flag">*</span> ' + flaggedYears.join(', ') + (flaggedYears.length === 1 ? ' includes' : ' include') + ' a flagged/unverified data point (hover the bar for detail) &mdash; see "Data quality flags" in the footer.</p>';
+    }
+  }
+
+  function renderAll() {
+    renderPortfolio();
+    renderRanking();
+    renderCards();
+    renderTable();
+  }
+
+  // ---------- Detail view ----------
+  function niceCeil(v) {
+    if (v <= 0) return 1;
+    var exp = Math.floor(Math.log(v) / Math.LN10);
+    var base = Math.pow(10, exp);
+    var n = v / base;
+    var niceN = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+    return niceN * base;
+  }
+
+  function detailChartSVG(show) {
+    var all = show.data.slice().sort(function (a, b) { return a.year - b.year; });
+    var pts = numericPoints(show);
+    var padL = 42, padR = 14, padT = 22, padB = 26;
+    var barW = 20, gap = 14;
+    var n = all.length;
+    var chartW = padL + padR + Math.max(n, 1) * (barW + gap);
+    var chartH = 220;
+    var plotH = chartH - padT - padB;
+    var maxLeads = pts.length ? Math.max.apply(null, pts.map(function (p) { return p.leads; })) : 1;
+    var niceMax = niceCeil(maxLeads);
+
+    function yFor(v) { return padT + plotH - (v / niceMax) * plotH; }
+
+    if (!pts.length) {
+      return '<svg viewBox="0 0 480 120" style="width:100%; height:120px; display:block;"><text x="240" y="60" text-anchor="middle" fill="var(--text-muted)" font-size="12">No lead data on file for this show</text></svg>';
+    }
+
+    var ticks = [0, Math.round(niceMax / 2), niceMax];
+    var gridParts = ticks.map(function (t) {
+      var y = yFor(t);
+      return '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (chartW - padR) + '" y2="' + y.toFixed(1) + '" stroke="var(--gridline)" stroke-width="1" />' +
+        '<text x="' + (padL - 8) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="var(--text-muted)">' + t.toLocaleString('en-US') + '</text>';
+    }).join('');
+
+    var peak = pts.reduce(function (a, b) { return b.leads > a.leads ? b : a; });
+    var latest = pts[pts.length - 1];
+
+    var bars = all.map(function (d, i) {
+      var x = padL + i * (barW + gap);
+      var yearLabel = '<text x="' + (x + barW / 2) + '" y="' + (chartH - padB + 15) + '" text-anchor="middle" font-size="9" fill="var(--text-muted)">' + d.year + '</text>';
+      if (typeof d.leads === 'number') {
+        var y = yFor(d.leads);
+        var h = Math.max(yFor(0) - y, 1.5);
+        var color = d.flag ? 'var(--serious)' : (d === latest ? 'var(--series-1)' : 'var(--series-1)');
+        var isLabeled = (d === peak || d === latest);
+        var titleBits = d.year + ': ' + d.leads + ' leads';
+        if (d.cost) titleBits += ' · $' + d.cost.toLocaleString('en-US') + ' cost';
+        if (d.note) titleBits += ' — ' + d.note;
+        var valueLabel = isLabeled ? '<text x="' + (x + barW / 2) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-primary)">' + d.leads + '</text>' : '';
+        return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + h.toFixed(1) + '" rx="4" fill="' + color + '"><title>' + titleBits + '</title></rect>' + valueLabel + yearLabel;
+      }
+      var baseY = yFor(0);
+      var statusText = d.status.replace('-', ' ');
+      var titleBits2 = d.year + ': ' + statusText + (d.note ? ' — ' + d.note : '');
+      return '<rect x="' + x.toFixed(1) + '" y="' + (baseY - 3) + '" width="' + barW + '" height="3" rx="1.5" fill="var(--baseline)"><title>' + titleBits2 + '</title></rect>' + yearLabel;
+    }).join('');
+
+    var baseline = '<line x1="' + padL + '" y1="' + yFor(0).toFixed(1) + '" x2="' + (chartW - padR) + '" y2="' + yFor(0).toFixed(1) + '" stroke="var(--baseline)" stroke-width="1" />';
+
+    return '<svg viewBox="0 0 ' + chartW + ' ' + chartH + '" style="width:100%; min-width:' + chartW + 'px; height:220px; display:block;">' + gridParts + baseline + bars + '</svg>';
+  }
+
+  function showDetail(id) {
+    var show = null;
+    for (var i = 0; i < SHOWS.length; i++) { if (SHOWS[i].id === id) { show = SHOWS[i]; break; } }
+    if (!show) return;
+
+    var pts = numericPoints(show);
+    var peak = pts.length ? pts.reduce(function (a, b) { return b.leads > a.leads ? b : a; }) : null;
+    var latest = pts.length ? pts[pts.length - 1] : null;
+    var avg = pts.length ? Math.round(pts.reduce(function (s, p) { return s + p.leads; }, 0) / pts.length) : null;
+    var total = pts.reduce(function (s, p) { return s + p.leads; }, 0);
+    var cpls = show.data.map(costPerLead).filter(function (v) { return v != null; });
+    var avgCPL = cpls.length ? cpls.reduce(function (s, v) { return s + v; }, 0) / cpls.length : null;
+
+    document.getElementById('ts-modal-title-el').textContent = show.name;
+    document.getElementById('ts-modal-cat').innerHTML = show.category + ' · ' + show.region + (show.discontinued ? ' · discontinued' : '') + (getChannel(show) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '');
+
+    var stats = [
+      { label: 'Years on file', value: pts.length + ' of ' + show.data.length + ' tracked' },
+      { label: 'Latest', value: latest ? fmt(latest.leads) + ' (' + latest.year + ')' : '—' },
+      { label: 'Peak', value: peak ? fmt(peak.leads) + ' (' + peak.year + ')' : '—' },
+      { label: 'Average (years attended)', value: avg != null ? fmt(avg) : '—' },
+      { label: 'Total (all years)', value: fmt(total) },
+      { label: 'Avg cost / lead', value: avgCPL != null ? fmtMoney(avgCPL) : '—' }
+    ];
+    document.getElementById('ts-modal-stats').innerHTML = stats.map(function (t) {
+      return '<div><div class="ts-modal-stat-label">' + t.label + '</div><div class="ts-modal-stat-value">' + t.value + '</div></div>';
+    }).join('');
+
+    document.getElementById('ts-modal-chart').innerHTML = detailChartSVG(show);
+
+    var body = document.getElementById('ts-modal-table-body');
+    body.innerHTML = show.data.slice().sort(function (a, b) { return b.year - a.year; }).map(function (d) {
+      var statusLabel = d.status.charAt(0).toUpperCase() + d.status.slice(1).replace('-', ' ');
+      return '<tr>' +
+        '<td>' + d.year + '</td>' +
+        '<td class="ts-num">' + (d.flag ? '<span class="ts-flag">▲</span> ' : '') + fmt(d.leads) + '</td>' +
+        '<td class="ts-num">' + costCell(d) + '</td>' +
+        '<td class="ts-num">' + fmtMoney(costPerLead(d)) + '</td>' +
+        '<td class="ts-num">' + fmt(d.opportunities) + '</td>' +
+        '<td class="ts-num">' + fmtMoney(d.pipeline) + '</td>' +
+        '<td>' + statusLabel + '</td>' +
+        '<td class="ts-note-cell">' + (d.note || '') + '</td>' +
+        '</tr>';
+    }).join('');
+
+    document.getElementById('ts-modal-backdrop').hidden = false;
+    document.getElementById('ts-modal-close').focus();
+    try { window.location.hash = 'show=' + id; } catch (e) {}
+  }
+
+  function hideDetail() {
+    document.getElementById('ts-modal-backdrop').hidden = true;
+    try {
+      if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    } catch (e) {}
+  }
+
+  function wireDetailEvents() {
+    document.addEventListener('click', function (e) {
+      var backdrop = document.getElementById('ts-modal-backdrop');
+      if (e.target === backdrop) { hideDetail(); return; }
+      if (e.target.closest('#ts-modal-close')) { hideDetail(); return; }
+      var trigger = e.target.closest('[data-show-id]');
+      if (trigger) { showDetail(trigger.getAttribute('data-show-id')); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { hideDetail(); return; }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.matches && e.target.matches('[data-show-id]')) {
+        e.preventDefault();
+        showDetail(e.target.getAttribute('data-show-id'));
+      }
+    });
+    try {
+      window.addEventListener('hashchange', checkHash);
+    } catch (e) {}
+  }
+
+  function checkHash() {
+    try {
+      var m = /show=([\w-]+)/.exec(window.location.hash || '');
+      if (m) { showDetail(m[1]); } else { hideDetail(); }
+    } catch (e) {}
+  }
+
+  renderKPIs();
+  renderFilters();
+  renderAll();
+  renderSnapshot();
+  wireDetailEvents();
+  checkHash();
+})();
+</script>
