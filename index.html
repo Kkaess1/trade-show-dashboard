@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <title>Trade Show Lead Generation Dashboard</title>
 <style>
   .ts-root {
@@ -506,10 +510,10 @@
     return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
   }
 
-  function fmt(n) { return n == null ? '—' : n.toLocaleString('en-US'); }
-  function fmtMoney(n) { return n == null ? '—' : ('$' + Math.round(n).toLocaleString('en-US')); }
+  function fmt(n) { return n == null ? '&mdash;' : n.toLocaleString('en-US'); }
+  function fmtMoney(n) { return n == null ? '&mdash;' : ('$' + Math.round(n).toLocaleString('en-US')); }
   function costCell(d) {
-    if (d.cost == null) return '—';
+    if (d.cost == null) return '&mdash;';
     var prefix = d.costBasis === 'partial' ? '~' : '';
     var title = d.costBasis === 'partial' ? ' title="Partial cost — see notes for what\'s excluded"' : '';
     return '<span' + title + '>' + prefix + fmtMoney(d.cost) + '</span>';
