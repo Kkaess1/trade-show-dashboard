@@ -196,6 +196,10 @@
 
     <div class="ts-filters">
       <div>
+        <label for="ts-year-filter">Year</label>
+        <select class="ts-select" id="ts-year-filter"></select>
+      </div>
+      <div>
         <label for="ts-cat-filter">Category</label>
         <select class="ts-select" id="ts-cat-filter"></select>
       </div>
@@ -216,8 +220,8 @@
     </div>
 
     <div class="ts-section">
-      <h2 class="ts-section-title">Most recent lead count, ranked</h2>
-      <p class="ts-section-desc">Each show's latest year with data on file, sorted high to low.</p>
+      <h2 class="ts-section-title" id="ts-rank-title">Most recent lead count, ranked</h2>
+      <p class="ts-section-desc" id="ts-rank-desc">Each show's latest year with data on file, sorted high to low.</p>
       <p class="ts-hint">Click any show for its full history.</p>
       <div id="ts-rank-list"></div>
     </div>
@@ -521,55 +525,96 @@
 
   // ---------- KPI row ----------
   function renderKPIs() {
-    var mostRecentTotal = 0, mostRecentShows = 0, grandTotal = 0;
-    SHOWS.forEach(function (s) {
-      var pts = numericPoints(s);
-      grandTotal += pts.reduce(function (sum, p) { return sum + p.leads; }, 0);
-      if (pts.length && pts[pts.length - 1].year >= CURRENT_YEAR - 1) {
-        mostRecentTotal += pts[pts.length - 1].leads;
-        mostRecentShows++;
-      }
-    });
+    var selYear = state.year !== 'All' ? parseInt(state.year) : null;
+    var shows = filteredShows();
+    var tiles = [];
 
-    var totalDataPoints = SHOWS.reduce(function (s, sh) { return s + numericPoints(sh).length; }, 0);
+    if (selYear) {
+      var yrLeadsTotal = 0;
+      var yrShowsCount = 0;
+      var yrCpls = [];
 
-    var cpls = allDataPoints().map(function (r) { return costPerLead(r.d); }).filter(function (v) { return v != null; });
-    var medianCPL = median(cpls);
+      shows.forEach(function (s) {
+        var d = s.data.find(function (item) { return item.year === selYear; });
+        if (d && typeof d.leads === 'number') {
+          yrLeadsTotal += d.leads;
+          yrShowsCount++;
+          var cpl = costPerLead(d);
+          if (cpl != null) yrCpls.push(cpl);
+        }
+      });
 
-    var tiles = [
-      { label: 'Shows tracked', value: SHOWS.length, sub: '150+ total instances in the archive' },
-      { label: 'Leads, last 2 seasons', value: fmt(mostRecentTotal), sub: 'across ' + mostRecentShows + ' shows with recent data' },
-      { label: 'Total leads on file', value: fmt(grandTotal), sub: 'sum across all tracked shows, 2004–2026' },
-      { label: 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '—', sub: 'across ' + cpls.length + ' show-years with a full (non-partial) cost figure on file' }
-    ];
+      var yrMedianCPL = median(yrCpls);
+
+      tiles = [
+        { label: 'Shows attended in ' + selYear, value: yrShowsCount, sub: 'shows with active lead data on file in ' + selYear },
+        { label: 'Total leads in ' + selYear, value: fmt(yrLeadsTotal), sub: 'qualified leads collected in ' + selYear },
+        { label: 'Selected season', value: selYear, sub: 'program overview for ' + selYear },
+        { label: 'Median cost / lead in ' + selYear, value: yrMedianCPL != null ? fmtMoney(yrMedianCPL) : '&mdash;', sub: yrCpls.length ? ('across ' + yrCpls.length + ' show(s) with cost data') : 'no cost data on file' }
+      ];
+    } else {
+      var mostRecentTotal = 0, mostRecentShows = 0, grandTotal = 0;
+      SHOWS.forEach(function (s) {
+        var pts = numericPoints(s);
+        grandTotal += pts.reduce(function (sum, p) { return sum + p.leads; }, 0);
+        if (pts.length && pts[pts.length - 1].year >= CURRENT_YEAR - 1) {
+          mostRecentTotal += pts[pts.length - 1].leads;
+          mostRecentShows++;
+        }
+      });
+
+      var totalDataPoints = SHOWS.reduce(function (s, sh) { return s + numericPoints(sh).length; }, 0);
+      var cpls = allDataPoints().map(function (r) { return costPerLead(r.d); }).filter(function (v) { return v != null; });
+      var medianCPL = median(cpls);
+
+      tiles = [
+        { label: 'Shows tracked', value: SHOWS.length, sub: '150+ total instances in the archive' },
+        { label: 'Leads, last 2 seasons', value: fmt(mostRecentTotal), sub: 'across ' + mostRecentShows + ' shows with recent data' },
+        { label: 'Total leads on file', value: fmt(grandTotal), sub: 'sum across all tracked shows, 2004–2026' },
+        { label: 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '&mdash;', sub: 'across ' + cpls.length + ' show-years with a full (non-partial) cost figure on file' }
+      ];
+    }
+
     var row = document.getElementById('ts-kpi-row');
     row.innerHTML = tiles.map(function (t) {
       return '<div class="ts-tile"><div class="ts-tile-label">' + t.label + '</div><div class="ts-tile-value">' + t.value + '</div><div class="ts-tile-sub">' + t.sub + '</div></div>';
     }).join('');
-
-    document.getElementById('ts-meta').textContent = totalDataPoints + ' show-year data points on file, 2004–2026. Last refreshed from the archive July 2026.';
   }
 
   function getChannel(show) { return show.channel || 'Direct'; }
 
   // ---------- Filters ----------
-  var state = { category: 'All', region: 'All', channel: 'Direct' };
+  var state = { year: 'All', category: 'All', region: 'All', channel: 'Direct' };
 
   function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
 
   function renderFilters() {
+    var allYears = [];
+    SHOWS.forEach(function (s) {
+      s.data.forEach(function (d) { if (d.year) allYears.push(d.year); });
+    });
+    var years = ['All'].concat(uniq(allYears).sort(function (a, b) { return b - a; }));
     var cats = ['All'].concat(uniq(SHOWS.map(function (s) { return s.category; })).sort());
     var regions = ['All'].concat(uniq(SHOWS.map(function (s) { return s.region; })).sort());
     var channelOpts = [['Direct', 'Direct only (default)'], ['All', 'All (incl. distributor)'], ['Distributor', 'Distributor only']];
 
+    var yrSel = document.getElementById('ts-year-filter');
+    yrSel.innerHTML = years.map(function (y) { return '<option value="' + y + '">' + (y === 'All' ? 'All years (2004–2026)' : y) + '</option>'; }).join('');
+    yrSel.value = state.year;
+
     var catSel = document.getElementById('ts-cat-filter');
     catSel.innerHTML = cats.map(function (c) { return '<option value="' + c + '">' + c + '</option>'; }).join('');
+    catSel.value = state.category;
+
     var regSel = document.getElementById('ts-region-filter');
     regSel.innerHTML = regions.map(function (r) { return '<option value="' + r + '">' + r + '</option>'; }).join('');
+    regSel.value = state.region;
+
     var chanSel = document.getElementById('ts-channel-filter');
     chanSel.innerHTML = channelOpts.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('');
     chanSel.value = state.channel;
 
+    yrSel.addEventListener('change', function () { state.year = yrSel.value; renderAll(); });
     catSel.addEventListener('change', function () { state.category = catSel.value; renderAll(); });
     regSel.addEventListener('change', function () { state.region = regSel.value; renderAll(); });
     chanSel.addEventListener('change', function () { state.channel = chanSel.value; renderAll(); });
@@ -587,23 +632,53 @@
   // ---------- Ranking bar chart ----------
   function renderRanking() {
     var shows = filteredShows();
-    var rows = shows.map(function (s) {
-      var pts = numericPoints(s);
-      var latest = pts.length ? pts[pts.length - 1] : null;
-      return { show: s, latest: latest };
-    }).filter(function (r) { return r.latest; })
-      .sort(function (a, b) { return b.latest.leads - a.latest.leads; });
+    var selYear = state.year !== 'All' ? parseInt(state.year, 10) : null;
+    
+    // Update Ranking section title & description dynamically based on selected year
+    var rankTitleEl = document.getElementById('ts-rank-title');
+    var rankDescEl = document.getElementById('ts-rank-desc');
+    if (rankTitleEl && rankDescEl) {
+      if (selYear) {
+        rankTitleEl.textContent = 'Lead count ranking for ' + selYear;
+        rankDescEl.textContent = 'Shows attended in ' + selYear + ', sorted high to low by qualified lead count.';
+      } else {
+        rankTitleEl.textContent = 'Most recent lead count, ranked';
+        rankDescEl.textContent = 'Each show's latest year with data on file, sorted high to low.';
+      }
+    }
 
-    var max = rows.length ? rows[0].latest.leads : 1;
+    var rows = [];
+    shows.forEach(function (s) {
+      if (selYear) {
+        var matchPoint = s.data.find(function (d) { return d.year === selYear && typeof d.leads === 'number'; });
+        if (matchPoint) {
+          rows.push({ show: s, point: matchPoint });
+        }
+      } else {
+        var pts = numericPoints(s);
+        if (pts.length) {
+          rows.push({ show: s, point: pts[pts.length - 1] });
+        }
+      }
+    });
+
+    rows.sort(function (a, b) { return b.point.leads - a.point.leads; });
+
+    var max = rows.length ? rows[0].point.leads : 1;
     var el = document.getElementById('ts-rank-list');
-    if (!rows.length) { el.innerHTML = '<p class="ts-section-desc">No shows match the current filters.</p>'; return; }
+    if (!rows.length) {
+      var noMsg = selYear ? 'No tradeshows attended or with lead data on file for ' + selYear + '.' : 'No shows match the current filters.';
+      el.innerHTML = '<p class="ts-section-desc">' + noMsg + '</p>';
+      return;
+    }
+
     el.innerHTML = rows.map(function (r) {
-      var pct = Math.max(2, Math.round((r.latest.leads / max) * 100));
-      return '<div class="ts-rank-row ts-clickable" data-show-id="' + r.show.id + '" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '" title="Most recent data on file: ' + r.latest.year + '">' +
+      var pct = Math.max(2, Math.round((r.point.leads / max) * 100));
+      return '<div class="ts-rank-row ts-clickable" data-show-id="' + r.show.id + '" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '" title="Year: ' + r.point.year + '">' +
         '<div class="ts-rank-name">' + r.show.name + '<span class="ts-rank-cat">' + r.show.category + ' · ' + r.show.region + (getChannel(r.show) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '') + '</span></div>' +
         '<div class="ts-rank-bar-track"><div class="ts-rank-bar-fill" style="width:' + pct + '%"></div></div>' +
-        '<div class="ts-rank-value">' + fmt(r.latest.leads) + '</div>' +
-        '<div class="ts-rank-year">' + r.latest.year + '</div>' +
+        '<div class="ts-rank-value">' + fmt(r.point.leads) + '</div>' +
+        '<div class="ts-rank-year">' + r.point.year + '</div>' +
         '</div>';
     }).join('');
   }
@@ -677,10 +752,13 @@
   // ---------- Full table ----------
   function renderTable() {
     var shows = filteredShows();
+    var selYear = state.year !== 'All' ? parseInt(state.year) : null;
     var rows = [];
     shows.forEach(function (s) {
       s.data.slice().sort(function (a, b) { return a.year - b.year; }).forEach(function (d) {
-        rows.push({ show: s, d: d });
+        if (!selYear || d.year === selYear) {
+          rows.push({ show: s, d: d });
+        }
       });
     });
     var body = document.getElementById('ts-full-table-body');
@@ -767,7 +845,8 @@
       var yearLabel = '<text x="' + (x + barW / 2) + '" y="' + (chartH - padB + 15) + '" text-anchor="middle" font-size="9" fill="var(--text-muted)">' + yr + '</text>';
       var title = yr + ': ' + info.total.toLocaleString('en-US') + ' leads across ' + info.count + ' show' + (info.count === 1 ? '' : 's') + ' with data on file';
       if (hasFlag) title += '. Includes ' + info.flaggedTotal.toLocaleString('en-US') + ' leads (' + Math.round(100 * info.flaggedTotal / info.total) + '%) from flagged/unverified data points: ' + info.flaggedShows.join(', ') + '.';
-      var barColor = hasFlag ? 'var(--serious)' : 'var(--series-1)';
+      var isSelYear = (state.year !== 'All' && yr === parseInt(state.year));
+      var barColor = isSelYear ? 'var(--series-3)' : (hasFlag ? 'var(--serious)' : 'var(--series-1)');
       return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + h.toFixed(1) + '" rx="4" fill="' + barColor + '" fill-opacity="' + (hasFlag ? '0.55' : '1') + '"><title>' + title + '</title></rect>' + label + yearLabel;
     }).join('');
 
