@@ -188,9 +188,7 @@
 
     <div class="ts-header">
       <h1 class="ts-title">Trade Show Lead Generation Dashboard</h1>
-      <p class="ts-subtitle">Year-over-year lead counts and attendance history, mined from 24 years of trade show records (2004&ndash;2026). Informational only &mdash; it reports what's on file and doesn't score or recommend any show.</p>
-      <div class="ts-meta" id="ts-meta"></div>
-    </div>
+      </div>
 
     <div class="ts-kpi-row" id="ts-kpi-row"></div>
 
@@ -215,27 +213,21 @@
 
     <div class="ts-section">
       <h2 class="ts-section-title">Total leads across tracked shows, by year</h2>
-      <p class="ts-section-desc">Sum of leads across every show below with data for that year (respects the filters above). Shows come and go from the calendar over time, so this reflects program volume, not a fixed set of shows attending every year.</p>
       <div class="ts-chart-scroll" id="ts-portfolio-chart"></div>
     </div>
 
     <div class="ts-section">
       <h2 class="ts-section-title" id="ts-rank-title">Most recent lead count, ranked</h2>
-      <p class="ts-section-desc" id="ts-rank-desc">Each show's latest year with data on file, sorted high to low.</p>
-      <p class="ts-hint">Click any show for its full history.</p>
       <div id="ts-rank-list"></div>
     </div>
 
     <div class="ts-section">
       <h2 class="ts-section-title">Year-over-year trend, per show</h2>
-      <p class="ts-section-desc">Full history where it exists. Gaps in the line are years with no lead data on file (or the show wasn't attended) &mdash; they're left open, not drawn as zero.</p>
-      <p class="ts-hint">Click a card for its full history.</p>
       <div class="ts-grid" id="ts-card-grid"></div>
     </div>
 
     <div class="ts-section">
       <h2 class="ts-section-title">Full data table</h2>
-      <p class="ts-section-desc">Every data point behind the charts above, with source notes. A "~" before a cost means it's a partial figure (see the Methodology note below) &mdash; those are shown but left out of Cost/Lead math.</p>
       <div class="ts-table-scroll">
         <table class="ts-table" id="ts-full-table">
           <thead>
@@ -248,7 +240,6 @@
 
     <div class="ts-section">
       <h2 class="ts-section-title">2014 snapshot: the company's own historical rating system</h2>
-      <p class="ts-section-desc">In H1 2014, the team formally rated each show 1&ndash;10 based on applications, cost, and staff recommendations &mdash; the earliest explicit show-rating record found in the archive. Reproduced here as a historical document, not a current assessment. GPS figures reflect only Jan&ndash;Jun 2014, not the full-year total shown above.</p>
       <div class="ts-snapshot-scroll">
         <table class="ts-table" id="ts-snapshot-table">
           <thead><tr><th>Show</th><th>Region</th><th style="text-align:right">Applications</th><th style="text-align:right">Cost / App</th><th>Rating (2014, as recorded)</th><th>Staff comment</th></tr></thead>
@@ -257,16 +248,7 @@
       </div>
     </div>
 
-    <div class="ts-footer">
-      <p><strong>Scope.</strong> The archive spans 2004&ndash;2026 and contains well over 150 distinct show instances across the Americas, EMEA and Asia Pacific. This dashboard tracks 20 shows: the recurring shows with the longest attendance history, plus every show currently on the company's active 2026 exhibit calendar (as of the 05/20/26 master schedule) &mdash; several of those, like SLAS, Space Tech Expo, AIMD Workshop, M-Tech Tokyo/Osaka and Compamed, are new to this dashboard and have thinner histories precisely because they're newer or more sporadic in the archive. Dozens more one-off, past, or distributor-only shows exist in the archive (regional Design&nbsp;2&nbsp;Part events, EP China, Eurosatory, DSEI, Offshore Europe/ONS, IEEE PES T&amp;D, Farnborough/Paris Air Show, and others) along with a running log of shows evaluated and declined &mdash; those aren't broken out individually here but remain in the source folders. Medtech Galway and Aeromart Toulouse are brand-new for 2026 and genuinely have no data yet since neither show has occurred as of this dashboard's refresh date.</p>
-      <p><strong>Methodology.</strong> Lead counts come from each show's consolidated lead-export file (not per-rep duplicates), read directly from the original spreadsheets; where no spreadsheet existed, a small number of counts come from trip-report PDFs instead (noted per data point). Where a year's file was blank-template boilerplate rather than real data (a known issue with several 2022&ndash;2023 "Eloqua ready" export templates), the count shown was corrected by counting rows with a populated company field instead of the raw sheet size &mdash; those are flagged in the notes. This dashboard doesn't score, rank by performance, or flag any show as underperforming &mdash; it reports the numbers on file and leaves interpretation to the reader.</p>
-      <p><strong>Cost figures &mdash; not invoice-audited.</strong> Cost numbers come from two different kinds of source and were not independently reconciled against invoices as part of building this dashboard. Most (mainly 2011&ndash;2014) are "Grand Total" lines from internal staff-completed expense-tracking spreadsheets, taken at face value. A smaller number (mostly 2022 onward) come from an agent reading an actual invoice or receipt PDF directly &mdash; but even those are usually <em>partial</em>: booth space plus maybe one line item, not travel, staffing, shipping, or lead-retrieval tech. Every cost sourced this way is marked with a "~" and excluded from Cost/Lead (shown in the table, but not divided into a ratio) so a partial figure can't masquerade as a full one. Cost/Lead elsewhere is simple division (cost &divide; leads) wherever both are on file and the cost isn't flagged partial; it's left blank, not estimated, when either figure is missing. One figure (Global Petroleum Show 2018) was recorded in CAD, not USD, and has been left out of the Cost column entirely rather than guess-converted &mdash; the raw figure is in that row's notes instead.</p>
-      <p><strong>Opportunities &amp; Pipeline.</strong> For 2010&ndash;2013 only, a separate CRM/campaign-tracking system recorded sales Opportunities and Pipeline value tied to each show's leads, shown in the full table where available. That system's own lead counts don't always match the consolidated lead-export counts used elsewhere on this dashboard (the CRM appears to track qualified/entered leads, not raw badge scans) &mdash; so Opportunities and Pipeline are shown as additional context alongside the lead count, not reconciled into it.</p>
-      <p><strong>Channel.</strong> M-Tech Tokyo and M-Tech Osaka run through a local distributor rather than a company-staffed booth, so lead capture depends on what the distributor reports back rather than BSE's own process &mdash; they're tagged "Distributor" throughout, since their numbers aren't directly comparable to direct-exhibit shows. Missing data on a distributor show more often reflects a reporting gap than anything about the show itself. The Channel filter defaults to "Direct only," so distributor-led shows are hidden across every view above unless you switch it to "All" or "Distributor only."</p>
-      <p><strong>Data quality flags.</strong> Three data points originally looked wrong on inspection (AAOS 2009 and Hannover Messe 2009 were far outside their neighboring years; Pittcon 2008 showed just 1 lead, implausible for that show). All three were checked against a second, independent source &mdash; a contemporaneous internal email for the first two, a separate raw badge-scanner export for the third &mdash; and corrected: AAOS 2009 is 82 (was 565), Hannover Messe 2009 is 180 (was 566), Pittcon 2008 is 61 (was 1). Each row's notes explain what was found. No other data points in this dashboard have been cross-checked against a second source this way; a number that looks right was generally taken as read from its one export file.</p>
     </div>
-
-  </div>
 
   <div class="ts-modal-backdrop" id="ts-modal-backdrop" hidden>
     <div class="ts-modal" role="dialog" aria-modal="true" aria-labelledby="ts-modal-title-el" id="ts-modal">
@@ -643,7 +625,7 @@
         rankDescEl.textContent = 'Shows attended in ' + selYear + ', sorted high to low by qualified lead count.';
       } else {
         rankTitleEl.textContent = 'Most recent lead count, ranked';
-        rankDescEl.textContent = "Each show's latest year with data on file, sorted high to low.";
+        
       }
     }
 
@@ -668,7 +650,7 @@
     var el = document.getElementById('ts-rank-list');
     if (!rows.length) {
       var noMsg = selYear ? 'No tradeshows attended or with lead data on file for ' + selYear + '.' : 'No shows match the current filters.';
-      el.innerHTML = '<p class="ts-section-desc">' + noMsg + '</p>';
+      el.innerHTML = '';
       return;
     }
 
@@ -735,7 +717,7 @@
   function renderCards() {
     var shows = filteredShows();
     var grid = document.getElementById('ts-card-grid');
-    if (!shows.length) { grid.innerHTML = '<p class="ts-section-desc">No shows match the current filters.</p>'; return; }
+    if (!shows.length) { grid.innerHTML = ''; return; }
     grid.innerHTML = shows.map(function (s) {
       var pts = numericPoints(s);
       var latest = pts.length ? pts[pts.length - 1] : null;
@@ -814,7 +796,7 @@
     });
     var years = Object.keys(byYear).map(Number).sort(function (a, b) { return a - b; });
     var el = document.getElementById('ts-portfolio-chart');
-    if (!years.length) { el.innerHTML = '<p class="ts-section-desc" style="margin:0">No data for the current filters.</p>'; return; }
+    if (!years.length) { el.innerHTML = ''; return; }
 
     var padL = 46, padR = 14, padT = 16, padB = 26;
     var barW = 22, gap = 10;
