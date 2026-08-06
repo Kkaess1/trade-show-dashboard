@@ -1075,8 +1075,6 @@
     }
 
     openBtn.addEventListener('click', openUploadModal);
-    var openBtn2 = document.getElementById('ts-open-upload-btn-2');
-    if (openBtn2) openBtn2.addEventListener('click', openUploadModal);
     closeBtn.addEventListener('click', closeUploadModal);
     cancelBtn.addEventListener('click', closeUploadModal);
     backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeUploadModal(); });
