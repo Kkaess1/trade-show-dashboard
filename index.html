@@ -160,11 +160,11 @@
   .ts-footer strong { color: var(--text-secondary); }
 
   /* Clickable rows/cards */
-  .ts-rank-row.ts-clickable, .ts-card.ts-clickable { cursor: pointer; transition: background 0.12s ease, border-color 0.12s ease; }
-  .ts-rank-row.ts-clickable:hover, .ts-rank-row.ts-clickable:focus-visible { background: color-mix(in srgb, var(--series-1) 6%, transparent); }
+  .ts-rank-row.ts-clickable, .ts-card.ts-clickable, tr.ts-clickable { cursor: pointer; transition: background 0.12s ease, border-color 0.12s ease; }
+  .ts-rank-row.ts-clickable:hover, .ts-rank-row.ts-clickable:focus-visible, tr.ts-clickable:hover { background: color-mix(in srgb, var(--series-1) 8%, transparent); }
   .ts-card.ts-clickable:hover, .ts-card.ts-clickable:focus-visible { border-color: color-mix(in srgb, var(--series-1) 45%, var(--border)); }
-  .ts-rank-row.ts-clickable, .ts-card.ts-clickable { outline: none; }
-  .ts-rank-row.ts-clickable:focus-visible, .ts-card.ts-clickable:focus-visible { box-shadow: 0 0 0 2px var(--series-1); border-radius: 6px; }
+  .ts-rank-row.ts-clickable, .ts-card.ts-clickable, tr.ts-clickable { outline: none; }
+  .ts-rank-row.ts-clickable:focus-visible, .ts-card.ts-clickable:focus-visible, tr.ts-clickable:focus-visible { box-shadow: 0 0 0 2px var(--series-1); border-radius: 6px; }
   .ts-hint { font-size: 0.68rem; color: var(--text-muted); margin: -10px 0 14px; }
 
   /* Detail modal */
@@ -837,7 +837,7 @@
     body.innerHTML = rows.map(function (r) {
       var d = r.d;
       var statusLabel = d.status.charAt(0).toUpperCase() + d.status.slice(1).replace('-', ' ');
-      return '<tr>' +
+      return '<tr class="ts-clickable" data-show-id="' + r.show.id + '" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '">' +
         '<td>' + r.show.name + '</td>' +
         '<td>' + r.show.category + '</td>' +
         '<td>' + getChannel(r.show) + '</td>' +
