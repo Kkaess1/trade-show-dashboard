@@ -287,16 +287,16 @@
       <div class="ts-modal-top">
         <div>
           <h2 class="ts-modal-title" id="ts-upload-modal-title">Upload Lead Document</h2>
-          <div class="ts-modal-cat">Drag and drop an Excel (.xlsx, .xls) or CSV lead spreadsheet to auto-populate metrics.</div>
+          <div class="ts-modal-cat">Drag and drop an Excel (.xlsx, .xls) lead spreadsheet to auto-populate qualified lead metrics.</div>
         </div>
         <button class="ts-modal-close" id="ts-upload-modal-close" aria-label="Close">&#10005;</button>
       </div>
 
       <div class="ts-dropzone" id="ts-dropzone">
-        <div class="ts-dropzone-icon">📄</div>
-        <div class="ts-dropzone-text">Click to choose or drag & drop lead file here</div>
-        <div class="ts-dropzone-sub">Supports .xlsx, .xls, and .csv lead spreadsheets</div>
-        <input type="file" id="ts-file-input" accept=".xlsx,.xls,.csv" hidden />
+        <div class="ts-dropzone-icon">📊</div>
+        <div class="ts-dropzone-text">Click to choose or drag & drop Excel lead file here</div>
+        <div class="ts-dropzone-sub">Supports .xlsx & .xls lead spreadsheets (automatically filters out Cold leads)</div>
+        <input type="file" id="ts-file-input" accept=".xlsx,.xls" hidden />
       </div>
 
       <div id="ts-upload-preview" hidden>
@@ -1106,6 +1106,12 @@
     });
 
     function processUploadedFile(file) {
+      var ext = file.name.slice((file.name.lastIndexOf('.') - 1 >>> 0) + 2).toLowerCase();
+      if (ext !== 'xlsx' && ext !== 'xls') {
+        alert('Please upload an Excel lead spreadsheet (.xlsx or .xls).');
+        return;
+      }
+
       var reader = new FileReader();
       reader.onload = function (e) {
         var data = new Uint8Array(e.target.result);
@@ -1114,9 +1120,54 @@
         var worksheet = workbook.Sheets[firstSheetName];
         var jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        // Filter valid non-empty rows (excluding header)
-        var validRows = jsonRows.filter(function (r) { return r && r.length > 0 && r.some(function (cell) { return cell != null && String(cell).trim() !== ''; }); });
-        var leadCount = Math.max(0, validRows.length - 1);
+        if (!jsonRows || !jsonRows.length) {
+          alert('No data rows found in spreadsheet.');
+          return;
+        }
+
+        var headerRow = jsonRows[0] || [];
+        var dataRows = jsonRows.slice(1);
+
+        // Find rating column index (if any)
+        var ratingColIdx = -1;
+        for (var c = 0; c < headerRow.length; c++) {
+          var h = String(headerRow[c] || '').toLowerCase();
+          if (h.indexOf('rating') !== -1 || h.indexOf('status') !== -1 || h.indexOf('interest') !== -1 || h.indexOf('qualification') !== -1) {
+            ratingColIdx = c;
+            break;
+          }
+        }
+
+        var qualifiedRows = [];
+        var coldCount = 0;
+
+        dataRows.forEach(function (r) {
+          if (!r || !r.length || !r.some(function (cell) { return cell != null && String(cell).trim() !== ''; })) {
+            return; // Skip empty row
+          }
+          
+          var isCold = false;
+          if (ratingColIdx !== -1 && r[ratingColIdx] != null) {
+            var val = String(r[ratingColIdx]).trim().toLowerCase();
+            if (val === 'cold' || val.indexOf('cold') === 0) {
+              isCold = true;
+            }
+          } else {
+            // Check across all cells in the row if 'cold' appears as a lead rating value
+            isCold = r.some(function (cell) {
+              var val = String(cell || '').trim().toLowerCase();
+              return val === 'cold';
+            });
+          }
+
+          if (isCold) {
+            coldCount++;
+          } else {
+            qualifiedRows.push(r);
+          }
+        });
+
+        var leadCount = qualifiedRows.length;
 
         // Auto-detect year from filename
         var yrMatch = file.name.match(/(20\d{2})/);
@@ -1135,10 +1186,14 @@
         }
 
         document.getElementById('ts-prev-filename').textContent = file.name;
-        document.getElementById('ts-prev-sheet').textContent = 'Sheet: ' + firstSheetName + ' · File Size: ' + Math.round(file.size / 1024) + ' KB';
-        document.getElementById('ts-prev-badge').textContent = leadCount + ' Lead Rows Parsed';
+        document.getElementById('ts-prev-sheet').textContent = 'Sheet: ' + firstSheetName + ' · Size: ' + Math.round(file.size / 1024) + ' KB';
+        var badgeText = leadCount + ' Qualified Lead Rows';
+        if (coldCount > 0) {
+          badgeText += ' (' + coldCount + ' Cold leads filtered out)';
+        }
+        document.getElementById('ts-prev-badge').textContent = badgeText;
         document.getElementById('ts-up-leads').value = leadCount;
-        document.getElementById('ts-up-note').value = 'AI-Verified: Auto-parsed from uploaded file ' + file.name;
+        document.getElementById('ts-up-note').value = 'AI-Verified: Auto-parsed from Excel lead list ' + file.name + (coldCount > 0 ? ' (' + coldCount + ' Cold leads excluded)' : '');
 
         dropzone.hidden = true;
         document.getElementById('ts-upload-preview').hidden = false;
