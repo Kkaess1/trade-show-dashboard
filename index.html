@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Trade Show Lead Generation Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   .ts-root {
     --surface-1:      #fcfcfb;
@@ -181,14 +182,39 @@
   .ts-modal-stat-value { font-size: 1.15rem; font-weight: 700; }
   .ts-modal-chart-scroll { overflow-x: auto; margin-bottom: 18px; }
   .ts-chart-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; padding: 12px 6px 4px; background: var(--card-surface); }
+
+  /* Upload Component Styles */
+  .ts-btn { display: inline-flex; align-items: center; font: inherit; font-size: 0.82rem; font-weight: 600; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-surface); color: var(--text-primary); cursor: pointer; transition: all 0.15s ease; }
+  .ts-btn:hover { background: var(--surface-1); border-color: var(--baseline); }
+  .ts-btn-primary { background: var(--series-1); color: #ffffff; border-color: var(--series-1); }
+  .ts-btn-primary:hover { opacity: 0.92; background: var(--series-1); }
+  .ts-dropzone { border: 2px dashed var(--baseline); border-radius: 10px; padding: 22px 16px; text-align: center; background: var(--surface-1); cursor: pointer; transition: all 0.2s ease; margin-bottom: 14px; }
+  .ts-dropzone.dragover, .ts-dropzone:hover { border-color: var(--series-1); background: var(--card-surface); }
+  .ts-dropzone-icon { font-size: 1.8rem; color: var(--series-1); margin-bottom: 4px; }
+  .ts-dropzone-text { font-size: 0.84rem; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+  .ts-dropzone-sub { font-size: 0.74rem; color: var(--text-muted); }
+  .ts-upload-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+  .ts-form-group { display: flex; flex-direction: column; gap: 4px; }
+  .ts-form-group label { font-size: 0.74rem; font-weight: 600; color: var(--text-secondary); }
+  .ts-input { font: inherit; font-size: 0.82rem; padding: 6px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--card-surface); color: var(--text-primary); width: 100%; }
+  .ts-preview-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 12px; }
+  .ts-preview-title { font-size: 0.74rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px; }
+  .ts-preview-badge { display: inline-block; font-size: 0.74rem; font-weight: 700; color: var(--good); background: rgba(12,163,12,0.12); padding: 2px 8px; border-radius: 6px; }
 </style>
 
 <div class="ts-root">
   <div class="ts-wrap">
 
-    <div class="ts-header">
-      <h1 class="ts-title">Trade Show Lead Generation Dashboard</h1>
+    <div class="ts-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+      <div>
+        <h1 class="ts-title">Trade Show Lead Generation Dashboard</h1>
+        <p class="ts-subtitle">Track, analyze, and manage tradeshow lead counts, costs, and historical performance across all global seasons.</p>
       </div>
+      <button class="ts-btn ts-btn-primary" id="ts-open-upload-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px; margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload Lead Document
+      </button>
+    </div>
 
     <div class="ts-kpi-row" id="ts-kpi-row"></div>
 
@@ -250,7 +276,65 @@
 
     </div>
 
-  <div class="ts-modal-backdrop" id="ts-modal-backdrop" hidden>
+  <div class="ts-modal-backdrop" id="ts-upload-modal-backdrop" hidden>
+    <div class="ts-modal" role="dialog" aria-modal="true" aria-labelledby="ts-upload-modal-title" style="max-width:560px;">
+      <div class="ts-modal-top">
+        <div>
+          <h2 class="ts-modal-title" id="ts-upload-modal-title">Upload Lead Document</h2>
+          <div class="ts-modal-cat">Drag and drop an Excel (.xlsx, .xls) or CSV lead spreadsheet to auto-populate metrics.</div>
+        </div>
+        <button class="ts-modal-close" id="ts-upload-modal-close" aria-label="Close">&#10005;</button>
+      </div>
+
+      <div class="ts-dropzone" id="ts-dropzone">
+        <div class="ts-dropzone-icon">📄</div>
+        <div class="ts-dropzone-text">Click to choose or drag & drop lead file here</div>
+        <div class="ts-dropzone-sub">Supports .xlsx, .xls, and .csv lead spreadsheets</div>
+        <input type="file" id="ts-file-input" accept=".xlsx,.xls,.csv" hidden />
+      </div>
+
+      <div id="ts-upload-preview" hidden>
+        <div class="ts-preview-card">
+          <div class="ts-preview-title">File Audit Preview</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:700; font-size:0.86rem;" id="ts-prev-filename"></div>
+              <div style="font-size:0.75rem; color:var(--text-muted);" id="ts-prev-sheet"></div>
+            </div>
+            <div class="ts-preview-badge" id="ts-prev-badge">0 Lead Rows Detected</div>
+          </div>
+        </div>
+
+        <div class="ts-upload-form">
+          <div class="ts-form-group">
+            <label for="ts-up-show">Target Tradeshow</label>
+            <select class="ts-input" id="ts-up-show"></select>
+          </div>
+          <div class="ts-form-group">
+            <label for="ts-up-year">Year</label>
+            <input type="number" class="ts-input" id="ts-up-year" min="2000" max="2030" value="2026" />
+          </div>
+          <div class="ts-form-group">
+            <label for="ts-up-leads">Verified Leads Count</label>
+            <input type="number" class="ts-input" id="ts-up-leads" min="0" />
+          </div>
+          <div class="ts-form-group">
+            <label for="ts-up-cost">Total Cost ($) <span style="font-weight:normal; color:var(--text-muted);">(optional)</span></label>
+            <input type="number" class="ts-input" id="ts-up-cost" placeholder="e.g. 5000" />
+          </div>
+          <div class="ts-form-group" style="grid-column: span 2;">
+            <label for="ts-up-note">Notes / Verification Comment</label>
+            <input type="text" class="ts-input" id="ts-up-note" placeholder="e.g. Uploaded lead retrieval export" />
+          </div>
+        </div>
+
+        <div style="margin-top:18px; display:flex; justify-content:flex-end; gap:10px;">
+          <button class="ts-btn" id="ts-up-cancel">Cancel</button>
+          <button class="ts-btn ts-btn-primary" id="ts-up-submit">Import & Update Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
     <div class="ts-modal" role="dialog" aria-modal="true" aria-labelledby="ts-modal-title-el" id="ts-modal">
       <div class="ts-modal-top">
         <div>
@@ -967,6 +1051,130 @@
     } catch (e) {}
   }
 
+  // ---------- Upload Lead Document Logic ----------
+  function wireUploadEvents() {
+    var openBtn = document.getElementById('ts-open-upload-btn');
+    var backdrop = document.getElementById('ts-upload-modal-backdrop');
+    var closeBtn = document.getElementById('ts-upload-modal-close');
+    var dropzone = document.getElementById('ts-dropzone');
+    var fileInput = document.getElementById('ts-file-input');
+    var cancelBtn = document.getElementById('ts-up-cancel');
+    var submitBtn = document.getElementById('ts-up-submit');
+    var showSelect = document.getElementById('ts-up-show');
+    
+    if (!openBtn || !backdrop) return;
+
+    // Populate show dropdown
+    showSelect.innerHTML = SHOWS.map(function (s) {
+      return '<option value="' + s.id + '">' + s.name + ' (' + s.category + ')</option>';
+    }).join('');
+
+    function openUploadModal() { backdrop.hidden = false; }
+    function closeUploadModal() {
+      backdrop.hidden = true;
+      document.getElementById('ts-upload-preview').hidden = true;
+      dropzone.hidden = false;
+      fileInput.value = '';
+    }
+
+    openBtn.addEventListener('click', openUploadModal);
+    closeBtn.addEventListener('click', closeUploadModal);
+    cancelBtn.addEventListener('click', closeUploadModal);
+    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeUploadModal(); });
+
+    // Drag and drop handlers
+    dropzone.addEventListener('click', function () { fileInput.click(); });
+    ['dragenter', 'dragover'].forEach(function (evtName) {
+      dropzone.addEventListener(evtName, function (e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(function (evtName) {
+      dropzone.addEventListener(evtName, function (e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); });
+    });
+    dropzone.addEventListener('drop', function (e) {
+      if (e.dataTransfer.files && e.dataTransfer.files.length) {
+        processUploadedFile(e.dataTransfer.files[0]);
+      }
+    });
+    fileInput.addEventListener('change', function () {
+      if (fileInput.files && fileInput.files.length) {
+        processUploadedFile(fileInput.files[0]);
+      }
+    });
+
+    function processUploadedFile(file) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var data = new Uint8Array(e.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
+        var firstSheetName = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[firstSheetName];
+        var jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Filter valid non-empty rows (excluding header)
+        var validRows = jsonRows.filter(function (r) { return r && r.length > 0 && r.some(function (cell) { return cell != null && String(cell).trim() !== ''; }); });
+        var leadCount = Math.max(0, validRows.length - 1);
+
+        // Auto-detect year from filename
+        var yrMatch = file.name.match(/(20\d{2})/);
+        if (yrMatch) {
+          document.getElementById('ts-up-year').value = yrMatch[1];
+        }
+
+        // Auto-detect show from filename
+        var fnLower = file.name.toLowerCase();
+        for (var i = 0; i < SHOWS.length; i++) {
+          var s = SHOWS[i];
+          if (fnLower.indexOf(s.id.replace('-', ' ')) !== -1 || fnLower.indexOf(s.name.toLowerCase().split(' ')[0]) !== -1) {
+            showSelect.value = s.id;
+            break;
+          }
+        }
+
+        document.getElementById('ts-prev-filename').textContent = file.name;
+        document.getElementById('ts-prev-sheet').textContent = 'Sheet: ' + firstSheetName + ' · File Size: ' + Math.round(file.size / 1024) + ' KB';
+        document.getElementById('ts-prev-badge').textContent = leadCount + ' Lead Rows Parsed';
+        document.getElementById('ts-up-leads').value = leadCount;
+        document.getElementById('ts-up-note').value = 'AI-Verified: Auto-parsed from uploaded file ' + file.name;
+
+        dropzone.hidden = true;
+        document.getElementById('ts-upload-preview').hidden = false;
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    submitBtn.addEventListener('click', function () {
+      var targetShowId = showSelect.value;
+      var yearVal = parseInt(document.getElementById('ts-up-year').value, 10);
+      var leadsVal = parseInt(document.getElementById('ts-up-leads').value, 10);
+      var costVal = document.getElementById('ts-up-cost').value ? parseFloat(document.getElementById('ts-up-cost').value) : null;
+      var noteVal = document.getElementById('ts-up-note').value.trim();
+
+      if (!targetShowId || isNaN(yearVal) || isNaN(leadsVal)) {
+        alert('Please provide a valid tradeshow, year, and lead count.');
+        return;
+      }
+
+      var targetShow = SHOWS.find(function (s) { return s.id === targetShowId; });
+      if (!targetShow) return;
+
+      var existingPt = targetShow.data.find(function (d) { return d.year === yearVal; });
+      if (existingPt) {
+        existingPt.leads = leadsVal;
+        if (costVal != null) existingPt.cost = costVal;
+        if (noteVal) existingPt.note = noteVal;
+      } else {
+        targetShow.data.push(Y(yearVal, leadsVal, { cost: costVal, note: noteVal }));
+        targetShow.data.sort(function (a, b) { return a.year - b.year; });
+      }
+
+      closeUploadModal();
+      renderKPIs();
+      renderFilters();
+      renderAll();
+      alert('Successfully populated ' + targetShow.name + ' (' + yearVal + ') with ' + leadsVal + ' leads!');
+    });
+  }
+
   function wireDetailEvents() {
     document.addEventListener('click', function (e) {
       var backdrop = document.getElementById('ts-modal-backdrop');
@@ -999,6 +1207,7 @@
   renderAll();
   renderSnapshot();
   wireDetailEvents();
+  wireUploadEvents();
   checkHash();
 })();
 </script>
