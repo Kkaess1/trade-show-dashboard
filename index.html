@@ -263,7 +263,7 @@
       <div class="ts-table-scroll">
         <table class="ts-table" id="ts-full-table">
           <thead>
-            <tr><th>Show</th><th>Category</th><th>Channel</th><th>Region</th><th>Year</th><th style="text-align:right">Leads</th><th style="text-align:right">Cost</th><th style="text-align:right">Cost/Lead</th><th style="text-align:right">Opportunities</th><th style="text-align:right">Pipeline</th><th>Status</th><th>Notes</th></tr>
+            <tr><th>Show</th><th>Category</th><th>Channel</th><th>Region</th><th>Year</th><th style="text-align:right">Leads</th><th style="text-align:right">Cost</th><th style="text-align:right">Cost/Lead</th><th>Status</th><th>Notes</th></tr>
           </thead>
           <tbody id="ts-full-table-body"></tbody>
         </table>
@@ -353,7 +353,7 @@
       <div class="ts-modal-chart-scroll" id="ts-modal-chart"></div>
       <div class="ts-table-scroll">
         <table class="ts-table" id="ts-modal-table">
-          <thead><tr><th>Year</th><th style="text-align:right">Leads</th><th style="text-align:right">Cost</th><th style="text-align:right">Cost/Lead</th><th style="text-align:right">Opportunities</th><th style="text-align:right">Pipeline</th><th>Status</th><th>Notes</th></tr></thead>
+          <thead><tr><th>Year</th><th style="text-align:right">Leads</th><th style="text-align:right">Cost</th><th style="text-align:right">Cost/Lead</th><th>Status</th><th>Notes</th></tr></thead>
           <tbody id="ts-modal-table-body"></tbody>
         </table>
       </div>
@@ -846,8 +846,6 @@
         '<td class="ts-num">' + (d.flag ? '<span class="ts-flag">▲</span> ' : '') + fmt(d.leads) + '</td>' +
         '<td class="ts-num">' + costCell(d) + '</td>' +
         '<td class="ts-num">' + fmtMoney(costPerLead(d)) + '</td>' +
-        '<td class="ts-num">' + fmt(d.opportunities) + '</td>' +
-        '<td class="ts-num">' + fmtMoney(d.pipeline) + '</td>' +
         '<td>' + statusLabel + '</td>' +
         '<td class="ts-note-cell">' + (d.note || '') + '</td>' +
         '</tr>';
@@ -1038,8 +1036,6 @@
         '<td class="ts-num">' + (d.flag ? '<span class="ts-flag">▲</span> ' : '') + fmt(d.leads) + '</td>' +
         '<td class="ts-num">' + costCell(d) + '</td>' +
         '<td class="ts-num">' + fmtMoney(costPerLead(d)) + '</td>' +
-        '<td class="ts-num">' + fmt(d.opportunities) + '</td>' +
-        '<td class="ts-num">' + fmtMoney(d.pipeline) + '</td>' +
         '<td>' + statusLabel + '</td>' +
         '<td class="ts-note-cell">' + (d.note || '') + '</td>' +
         '</tr>';
