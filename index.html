@@ -743,7 +743,7 @@
 
     el.innerHTML = rows.map(function (r) {
       var pct = Math.max(2, Math.round((r.point.leads / max) * 100));
-      return '<div class="ts-rank-row ts-clickable" data-show-id="' + r.show.id + '" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '" title="Year: ' + r.point.year + '">' +
+      return '<div class="ts-rank-row ts-clickable" data-show-id="' + r.show.id + '" onclick="window.tsShowDetail(\'' + r.show.id + '\')" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '" title="Year: ' + r.point.year + '">' +
         '<div class="ts-rank-name">' + r.show.name + '<span class="ts-rank-cat">' + r.show.category + ' · ' + r.show.region + (getChannel(r.show) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '') + '</span></div>' +
         '<div class="ts-rank-bar-track"><div class="ts-rank-bar-fill" style="width:' + pct + '%"></div></div>' +
         '<div class="ts-rank-value">' + fmt(r.point.leads) + '</div>' +
@@ -809,7 +809,7 @@
       var pts = numericPoints(s);
       var latest = pts.length ? pts[pts.length - 1] : null;
       var flagged = s.data.some(function (d) { return d.flag; });
-      return '<div class="ts-card ts-clickable" data-show-id="' + s.id + '" tabindex="0" role="button" aria-label="View full history for ' + s.name + '">' +
+      return '<div class="ts-card ts-clickable" data-show-id="' + s.id + '" onclick="window.tsShowDetail(\'' + s.id + '\')" tabindex="0" role="button" aria-label="View full history for ' + s.name + '">' +
         '<div class="ts-card-head"><div><div class="ts-card-name">' + s.name + '</div><div class="ts-card-cat">' + s.category + ' · ' + s.region + (s.discontinued ? ' · discontinued' : '') + (getChannel(s) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '') + '</div></div></div>' +
         sparklineSVG(s) +
         '<div class="ts-card-foot"><span>' + (latest ? latest.year : '—') + '</span><span class="ts-card-latest">' + (latest ? fmt(latest.leads) + ' leads' : 'No data') + '</span></div>' +
@@ -834,7 +834,7 @@
     body.innerHTML = rows.map(function (r) {
       var d = r.d;
       var statusLabel = d.status.charAt(0).toUpperCase() + d.status.slice(1).replace('-', ' ');
-      return '<tr class="ts-clickable" data-show-id="' + r.show.id + '" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '">' +
+      return '<tr class="ts-clickable" data-show-id="' + r.show.id + '" onclick="window.tsShowDetail(\'' + r.show.id + '\')" tabindex="0" role="button" aria-label="View full history for ' + r.show.name + '">' +
         '<td>' + r.show.name + '</td>' +
         '<td>' + r.show.category + '</td>' +
         '<td>' + getChannel(r.show) + '</td>' +
@@ -996,8 +996,17 @@
   }
 
   function showDetail(id) {
+    if (!id) return;
     var show = null;
     for (var i = 0; i < SHOWS.length; i++) { if (SHOWS[i].id === id) { show = SHOWS[i]; break; } }
+    if (!show) {
+      for (var i = 0; i < SHOWS.length; i++) {
+        if (SHOWS[i].name.toLowerCase().indexOf(String(id).toLowerCase()) !== -1 || String(id).toLowerCase().indexOf(SHOWS[i].id) !== -1) {
+          show = SHOWS[i];
+          break;
+        }
+      }
+    }
     if (!show) return;
 
     var pts = numericPoints(show);
@@ -1229,25 +1238,39 @@
     });
   }
 
+  function getShowIdFromTarget(target) {
+    while (target && target !== document.body && target !== document) {
+      if (target.getAttribute) {
+        var sid = target.getAttribute('data-show-id');
+        if (sid) return sid;
+      }
+      target = target.parentElement || target.parentNode;
+    }
+    return null;
+  }
+
   function wireDetailEvents() {
     document.addEventListener('click', function (e) {
       var backdrop = document.getElementById('ts-modal-backdrop');
       if (e.target === backdrop) { hideDetail(); return; }
-      if (e.target.closest('#ts-modal-close')) { hideDetail(); return; }
-      var trigger = e.target.closest('[data-show-id]');
-      if (trigger) { showDetail(trigger.getAttribute('data-show-id')); }
+      if (e.target && e.target.closest && e.target.closest('#ts-modal-close')) { hideDetail(); return; }
+      var sid = getShowIdFromTarget(e.target);
+      if (sid) { showDetail(sid); }
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { hideDetail(); return; }
-      if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.matches && e.target.matches('[data-show-id]')) {
+      var sid = getShowIdFromTarget(e.target);
+      if ((e.key === 'Enter' || e.key === ' ') && sid) {
         e.preventDefault();
-        showDetail(e.target.getAttribute('data-show-id'));
+        showDetail(sid);
       }
     });
     try {
       window.addEventListener('hashchange', checkHash);
     } catch (e) {}
   }
+
+  window.tsShowDetail = showDetail;
 
   function checkHash() {
     try {
