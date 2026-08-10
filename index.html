@@ -170,6 +170,13 @@
   .ts-rank-row.ts-clickable:focus-visible, .ts-card.ts-clickable:focus-visible, tr.ts-clickable:focus-visible { box-shadow: 0 0 0 2px var(--series-1); border-radius: 6px; }
   .ts-hint { font-size: 0.68rem; color: var(--text-muted); margin: -10px 0 14px; }
 
+  /* Lead-grade coverage banner */
+  .ts-coverage-note { margin: -6px 0 18px; padding: 9px 12px; font-size: 0.74rem; line-height: 1.45;
+    color: var(--text-secondary); background: color-mix(in srgb, var(--warning) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--warning) 35%, var(--border)); border-radius: 8px; max-width: 90ch; }
+  .ts-coverage-note[hidden] { display: none; }
+  .ts-coverage-note strong { color: var(--text-primary); }
+
   /* Detail modal */
   .ts-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: flex-start; justify-content: center; padding: 5vh 16px; z-index: 100; overflow-y: auto; }
   .ts-modal-backdrop[hidden] { display: none; }
@@ -266,10 +273,16 @@
         <label for="ts-channel-filter">Channel</label>
         <select class="ts-select" id="ts-channel-filter"></select>
       </div>
+      <div>
+        <label for="ts-quality-filter">Lead grade</label>
+        <select class="ts-select" id="ts-quality-filter"></select>
+      </div>
     </div>
 
+    <p class="ts-coverage-note" id="ts-coverage-note" hidden></p>
+
     <div class="ts-section">
-      <h2 class="ts-section-title">Total leads across tracked shows, by year</h2>
+      <h2 class="ts-section-title" id="ts-portfolio-title">Total leads across tracked shows, by year</h2>
       <div class="ts-chart-scroll" id="ts-portfolio-chart"></div>
     </div>
 
@@ -857,6 +870,99 @@
     return '<span' + title + '>' + prefix + fmtMoney(d.cost) + '</span>';
   }
 
+  // ---------- Lead-grade (hot/warm/cold) filter ----------
+  // Cold rows are stripped out when a show's lead file is read, so `leads` is
+  // already hot + warm + unrated and `raw` is the pre-filter row count. Only a
+  // minority of show-years carry a per-lead rating at all; the rest are wholly
+  // unrated and simply cannot answer "how many were hot?".
+  var QUALITY = {
+    qualified: { label: 'Hot + Warm (qualified)', noun: 'qualified leads', graded: false },
+    hot:       { label: 'Hot only',               noun: 'hot leads',       graded: true },
+    warm:      { label: 'Warm only',              noun: 'warm leads',      graded: true },
+    cold:      { label: 'Cold (excluded — audit)', noun: 'cold leads',     graded: true }
+  };
+  var QUALITY_ORDER = ['qualified', 'hot', 'warm', 'cold'];
+
+  function activeQuality() { return QUALITY[state.quality] || QUALITY.qualified; }
+  function isGraded() { return activeQuality().graded; }
+
+  // Every show, carrying the selected grade but ignoring the category/region/
+  // channel selectors — the archive-wide KPI tiles have always been scoped this
+  // way, and only the grade should move them.
+  function qualityScopedShows() {
+    var shows = SHOWS.map(projectShow);
+    if (isGraded()) {
+      shows = shows.filter(function (s) {
+        return s.data.some(function (d) { return typeof d.leads === 'number'; });
+      });
+    }
+    return shows;
+  }
+
+  // A show-year is "rated" only if its source file actually carried Hot/Warm/Cold
+  // markings. Unrated years are not zero — they are unknown, so a graded view
+  // drops them rather than pretending they scored nothing.
+  function hasRating(d) { return !!(d.hot || d.warm || d.cold); }
+
+  // Lead count for the selected grade, or null when this point can't answer.
+  function leadsOf(d) {
+    if (!isGraded()) return typeof d.leads === 'number' ? d.leads : null;
+    if (typeof d.leads !== 'number' || !hasRating(d)) return null;
+    return d[state.quality];
+  }
+
+  // Rendering reads `.leads` in a dozen places, so rather than thread the grade
+  // through all of them we hand the renderers a projection of each show whose
+  // `leads` already is the selected grade. Ungraded years become null (no data).
+  function projectShow(s) {
+    if (!isGraded()) return s;
+    var out = {};
+    for (var k in s) { if (Object.prototype.hasOwnProperty.call(s, k)) out[k] = s[k]; }
+    out.data = s.data.map(function (d) {
+      var copy = {};
+      for (var dk in d) { if (Object.prototype.hasOwnProperty.call(d, dk)) copy[dk] = d[dk]; }
+      copy.leads = leadsOf(d);
+      copy.rated = hasRating(d);
+      return copy;
+    });
+    return out;
+  }
+
+  // How much of the archive the current grade can actually speak for.
+  function gradeCoverage() {
+    var ratedYears = 0, totalYears = 0, ratedLeads = 0, totalLeads = 0, gradeLeads = 0;
+    SHOWS.forEach(function (s) {
+      s.data.forEach(function (d) {
+        if (typeof d.leads !== 'number') return;
+        totalYears++; totalLeads += d.leads;
+        if (hasRating(d)) {
+          ratedYears++; ratedLeads += d.leads;
+          gradeLeads += (d[state.quality] || 0);
+        }
+      });
+    });
+    return { ratedYears: ratedYears, totalYears: totalYears, ratedLeads: ratedLeads, totalLeads: totalLeads, gradeLeads: gradeLeads };
+  }
+
+  function renderCoverageNote() {
+    var el = document.getElementById('ts-coverage-note');
+    if (!el) return;
+    if (!isGraded()) { el.hidden = true; el.innerHTML = ''; return; }
+    var c = gradeCoverage();
+    var q = activeQuality();
+    var body = 'Showing <strong>' + q.label.toLowerCase() + '</strong>. Only <strong>' + c.ratedYears +
+      ' of ' + c.totalYears + ' show-years</strong> on file carry a per-lead Hot/Warm/Cold rating' +
+      ' (ratings start in 2017); the rest are unrated and are hidden in this view rather than shown as zero.';
+    if (state.quality === 'cold') {
+      body += ' Cold leads are <strong>never</strong> counted in any headline figure &mdash; this is an audit view of what was discarded (' +
+        fmt(c.gradeLeads) + ' rows across the rated years).';
+    } else {
+      body += ' That is <strong>' + fmt(c.gradeLeads) + '</strong> ' + q.noun + ' out of ' + fmt(c.totalLeads) + ' qualified leads archive-wide.';
+    }
+    el.innerHTML = body;
+    el.hidden = false;
+  }
+
   // ---------- KPI row ----------
   function renderKPIs() {
     var selYear = state.year !== 'All' ? parseInt(state.year) : null;
@@ -882,13 +988,14 @@
 
       tiles = [
         { label: 'Shows attended in ' + selYear, value: yrShowsCount, sub: 'shows with active lead data on file in ' + selYear },
-        { label: 'Total leads in ' + selYear, value: fmt(yrLeadsTotal), sub: 'qualified leads collected in ' + selYear },
+        { label: 'Total leads in ' + selYear, value: fmt(yrLeadsTotal), sub: activeQuality().noun + ' collected in ' + selYear },
         { label: 'Selected season', value: selYear, sub: 'program overview for ' + selYear },
         { label: 'Median cost / lead in ' + selYear, value: yrMedianCPL != null ? fmtMoney(yrMedianCPL) : '&mdash;', sub: yrCpls.length ? ('across ' + yrCpls.length + ' show(s) with cost data') : 'no cost data on file' }
       ];
     } else {
+      var scoped = qualityScopedShows();
       var mostRecentTotal = 0, mostRecentShows = 0, grandTotal = 0;
-      SHOWS.forEach(function (s) {
+      scoped.forEach(function (s) {
         var pts = numericPoints(s);
         grandTotal += pts.reduce(function (sum, p) { return sum + p.leads; }, 0);
         if (pts.length && pts[pts.length - 1].year >= CURRENT_YEAR - 1) {
@@ -897,15 +1004,19 @@
         }
       });
 
-      var totalDataPoints = SHOWS.reduce(function (s, sh) { return s + numericPoints(sh).length; }, 0);
-      var cpls = allDataPoints().map(function (r) { return costPerLead(r.d); }).filter(function (v) { return v != null; });
+      var totalDataPoints = scoped.reduce(function (s, sh) { return s + numericPoints(sh).length; }, 0);
+      var cpls = [];
+      scoped.forEach(function (s) { s.data.forEach(function (d) { var v = costPerLead(d); if (v != null) cpls.push(v); }); });
       var medianCPL = median(cpls);
+      var graded = isGraded();
 
       tiles = [
-        { label: 'Shows tracked', value: SHOWS.length, sub: totalDataPoints + ' show-years with a verified lead file' },
+        { label: 'Shows tracked', value: scoped.length,
+          sub: totalDataPoints + ' show-years with ' + (graded ? 'a rated lead file' : 'a verified lead file') },
         { label: 'Leads, last 2 seasons', value: fmt(mostRecentTotal), sub: 'across ' + mostRecentShows + ' shows with recent data' },
-        { label: 'Total leads on file', value: fmt(grandTotal), sub: 'cold-rated leads excluded, 2004–2026' },
-        { label: 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '&mdash;', sub: 'across ' + cpls.length + ' show-years with both leads and documented cost' }
+        { label: graded ? 'Total ' + activeQuality().noun : 'Total leads on file', value: fmt(grandTotal),
+          sub: graded ? 'rated show-years only, 2017–2026' : 'cold-rated leads excluded, 2004–2026' },
+        { label: graded ? 'Median cost / ' + state.quality + ' lead' : 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '&mdash;', sub: 'across ' + cpls.length + ' show-years with both leads and documented cost' }
       ];
     }
 
@@ -918,9 +1029,12 @@
   function getChannel(show) { return show.channel || 'Direct'; }
 
   // ---------- Filters ----------
-  var state = { year: 'All', category: 'All', region: 'All', channel: 'Direct' };
+  var state = { year: 'All', category: 'All', region: 'All', channel: 'Direct', quality: 'qualified' };
 
   function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
+  function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  var filtersBound = false;
 
   function renderFilters() {
     var allYears = [];
@@ -948,19 +1062,37 @@
     chanSel.innerHTML = channelOpts.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('');
     chanSel.value = state.channel;
 
+    var qualSel = document.getElementById('ts-quality-filter');
+    qualSel.innerHTML = QUALITY_ORDER.map(function (k) { return '<option value="' + k + '">' + QUALITY[k].label + '</option>'; }).join('');
+    qualSel.value = state.quality;
+
+    // renderFilters() runs again after an upload, so bind the change handlers
+    // once or every upload would stack another listener on every select.
+    if (filtersBound) return;
+    filtersBound = true;
     yrSel.addEventListener('change', function () { state.year = yrSel.value; renderAll(); });
     catSel.addEventListener('change', function () { state.category = catSel.value; renderAll(); });
     regSel.addEventListener('change', function () { state.region = regSel.value; renderAll(); });
     chanSel.addEventListener('change', function () { state.channel = chanSel.value; renderAll(); });
+    qualSel.addEventListener('change', function () { state.quality = qualSel.value; renderAll(); });
   }
 
   function filteredShows() {
-    return SHOWS.filter(function (s) {
+    var shows = SHOWS.filter(function (s) {
       if (state.category !== 'All' && s.category !== state.category) return false;
       if (state.region !== 'All' && s.region !== state.region) return false;
       if (state.channel !== 'All' && getChannel(s) !== state.channel) return false;
       return true;
-    });
+    }).map(projectShow);
+
+    // Under a graded view, drop shows that have no rated year at all instead of
+    // parading them with empty charts.
+    if (isGraded()) {
+      shows = shows.filter(function (s) {
+        return s.data.some(function (d) { return typeof d.leads === 'number'; });
+      });
+    }
+    return shows;
   }
 
   // ---------- Ranking bar chart ----------
@@ -971,14 +1103,18 @@
     // Update Ranking section title & description dynamically based on selected year
     var rankTitleEl = document.getElementById('ts-rank-title');
     var rankDescEl = document.getElementById('ts-rank-desc');
-    if (rankTitleEl && rankDescEl) {
+    var noun = activeQuality().noun;
+    if (rankTitleEl) {
       if (selYear) {
-        rankTitleEl.textContent = 'Lead count ranking for ' + selYear;
-        rankDescEl.textContent = 'Shows attended in ' + selYear + ', sorted high to low by qualified lead count.';
+        rankTitleEl.textContent = (isGraded() ? capitalise(noun) : 'Lead count') + ' ranking for ' + selYear;
       } else {
-        rankTitleEl.textContent = 'Most recent lead count, ranked';
-        
+        rankTitleEl.textContent = isGraded() ? 'Most recent ' + noun + ', ranked' : 'Most recent lead count, ranked';
       }
+    }
+    if (rankDescEl) {
+      rankDescEl.textContent = selYear
+        ? 'Shows attended in ' + selYear + ', sorted high to low by ' + noun + '.'
+        : 'Each show’s latest season on file, sorted high to low by ' + noun + '.';
     }
 
     var rows = [];
@@ -1077,7 +1213,7 @@
       return '<div class="ts-card ts-clickable" data-show-id="' + s.id + '" tabindex="0" role="button" aria-label="View full history for ' + s.name + '">' +
         '<div class="ts-card-head"><div><div class="ts-card-name">' + s.name + '</div><div class="ts-card-cat">' + s.category + ' · ' + s.region + (s.discontinued ? ' · discontinued' : '') + (getChannel(s) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '') + '</div></div></div>' +
         sparklineSVG(s) +
-        '<div class="ts-card-foot"><span>' + (latest ? latest.year : '—') + '</span><span class="ts-card-latest">' + (latest ? fmt(latest.leads) + ' leads' : 'No data') + '</span></div>' +
+        '<div class="ts-card-foot"><span>' + (latest ? latest.year : '—') + '</span><span class="ts-card-latest">' + (latest ? fmt(latest.leads) + ' ' + (isGraded() ? state.quality + ' ' : '') + 'leads' : 'No data') + '</span></div>' +
         (flagged ? '<div class="ts-card-note"><span class="ts-flag">▲</span> Contains a flagged/corrected data point — see full table.</div>' : '') +
         '</div>';
     }).join('');
@@ -1090,9 +1226,11 @@
     var rows = [];
     shows.forEach(function (s) {
       s.data.slice().sort(function (a, b) { return a.year - b.year; }).forEach(function (d) {
-        if (!selYear || d.year === selYear) {
-          rows.push({ show: s, d: d });
-        }
+        if (selYear && d.year !== selYear) return;
+        // A graded view can only speak for rated years, so unrated rows are
+        // withheld rather than shown as a dash that reads like "attended, zero".
+        if (isGraded() && typeof d.leads !== 'number') return;
+        rows.push({ show: s, d: d });
       });
     });
     var body = document.getElementById('ts-full-table-body');
@@ -1132,6 +1270,12 @@
   // ---------- Portfolio aggregate chart ----------
   function renderPortfolio() {
     var shows = filteredShows();
+    var pTitle = document.getElementById('ts-portfolio-title');
+    if (pTitle) {
+      pTitle.textContent = isGraded()
+        ? 'Total ' + activeQuality().noun + ' across rated shows, by year'
+        : 'Total leads across tracked shows, by year';
+    }
     var byYear = {};
     shows.forEach(function (s) {
       numericPoints(s).forEach(function (p) {
@@ -1191,6 +1335,8 @@
   }
 
   function renderAll() {
+    renderCoverageNote();
+    renderKPIs();
     renderPortfolio();
     renderRanking();
     renderCards();
