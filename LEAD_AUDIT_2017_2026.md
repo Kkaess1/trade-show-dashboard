@@ -1,6 +1,6 @@
 # Lead recount, 2017–2026
 
-This audit covers every dashboard show-year from 2017 onward that has a lead source file: 61 files in total. Each dashboard source name was resolved to one unique workbook or CSV in the trade-show archive.
+This audit covers every dashboard show-year from 2017 onward that has a lead source file: 62 files in total. Each dashboard source name was resolved to one unique workbook or CSV in the trade-show archive.
 
 ## Counting rules
 
@@ -15,6 +15,7 @@ This audit covers every dashboard show-year from 2017 onward that has a lead sou
 
 ## Notable corrections
 
+- Automatica 2025 was added using the supplied 2025 reference workbook: 11 combined Hot + Warm leads out of 50 total, leaving 39 Cold. The workbook does not provide a separate Hot-versus-Warm split, so the dashboard does not infer one.
 - Compamed 2025 has 58 worksheet records, two of which are Bal Seal staff. The workbook's explicit, separate interest columns contain 5 Hot and 9 Warm external records, so the corrected qualified count is **14**, not 58. Six records are explicitly Cold and the remaining 36 valid records are blank/unqualified, giving a Cold residual of 42.
 - OTC 2026 contains three Bal Seal staff scans. After removing those, it has 64 valid records: 8 Hot, 19 Warm, and 37 Cold, for 27 qualified leads.
 - OTC 2022 now uses the original show-close rating instead of a later expanded CRM template: 1 Hot, 15 Warm, and 31 residual Cold across 47 valid records. Hannover Messe 2022 remains 34 qualified (8 Hot + 26 Warm); its 22-record figure is the separate General Interest/current-customer group.

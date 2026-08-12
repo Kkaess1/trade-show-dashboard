@@ -1,6 +1,6 @@
 # Trade-show differentiator audit, 2017–2026
 
-The dashboard’s show detail view now includes source-backed context intended to help compare why one show-year may have performed differently from another. All 61 show-years with lead data from 2017 onward have a synopsis. Two additional Space Tech Expo years are included because BSE used a speaker/workshop format in 2023 and has a post-show market report for 2026 despite having no saved lead export.
+The dashboard’s show detail view now includes source-backed context intended to help compare why one show-year may have performed differently from another. All 62 show-years with lead data from 2017 onward have a synopsis. Four additional show-years are included without a master lead export: Space Tech Expo 2023/2026, Aerospace & Defense Meetings Turin 2025, and FEINDEF 2025.
 
 ## Evidence hierarchy
 
