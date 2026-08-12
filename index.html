@@ -6,22 +6,30 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Trade Show Lead Generation Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   .ts-root {
-    --surface-1:      #fcfcfb;
-    --page-plane:     #f9f9f7;
-    --text-primary:   #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted:     #898781;
-    --gridline:       #e1e0d9;
-    --baseline:       #c3c2b7;
-    --border:         rgba(11,11,11,0.10);
+    --brand-blue:     #28495a;
+    --brand-blue-deep:#1a303b;
+    --brand-orange:   #f05329;
+    --brand-sky:      #0072ce;
+    --surface-1:      #f7f9fa;
+    --page-plane:     #eeefef;
+    --text-primary:   #1a262b;
+    --text-secondary: #52636c;
+    --text-muted:     #8996a3;
+    --heading-color:  #28495a;
+    --gridline:       #d5dce0;
+    --baseline:       #aeb9bf;
+    --border:         rgba(40,73,90,0.16);
     --card-surface:   #ffffff;
 
-    --series-1: #2a78d6; /* blue */
-    --series-2: #1baf7a; /* aqua */
-    --series-3: #eda100; /* yellow */
+    --series-1: #28495a; /* Bal Seal slate */
+    --series-2: #0072ce; /* technical blue */
+    --series-3: #f05329; /* Bal Seal orange */
     --series-4: #008300; /* green */
     --series-5: #4a3aa7; /* violet */
     --series-6: #e34948; /* red */
@@ -34,26 +42,27 @@
     --critical: #d03b3b;
     --neutral-badge: #6b6a64;
 
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: "Noto Sans", Arial, sans-serif;
     color: var(--text-primary);
     background: var(--page-plane);
     line-height: 1.4;
   }
   @media (prefers-color-scheme: dark) {
     .ts-root {
-      --surface-1:      #1a1a19;
-      --page-plane:     #0d0d0d;
+      --surface-1:      #17242a;
+      --page-plane:     #10191d;
       --text-primary:   #ffffff;
-      --text-secondary: #c3c2b7;
-      --text-muted:     #898781;
-      --gridline:       #2c2c2a;
-      --baseline:       #383835;
+      --text-secondary: #c8d1d5;
+      --text-muted:     #8996a3;
+      --heading-color:  #ffffff;
+      --gridline:       #314149;
+      --baseline:       #52636c;
       --border:         rgba(255,255,255,0.10);
-      --card-surface:   #17171a;
+      --card-surface:   #1a282f;
 
-      --series-1: #3987e5;
-      --series-2: #199e70;
-      --series-3: #c98500;
+      --series-1: #6fa5bd;
+      --series-2: #48a7e8;
+      --series-3: #f05329;
       --series-4: #008300;
       --series-5: #9085e9;
       --series-6: #e66767;
@@ -68,23 +77,25 @@
     }
   }
   :root[data-theme="dark"] .ts-root {
-      --surface-1:      #1a1a19;
-      --page-plane:     #0d0d0d;
+      --surface-1:      #17242a;
+      --page-plane:     #10191d;
       --text-primary:   #ffffff;
-      --text-secondary: #c3c2b7;
-      --text-muted:     #898781;
-      --gridline:       #2c2c2a;
-      --baseline:       #383835;
+      --text-secondary: #c8d1d5;
+      --text-muted:     #8996a3;
+      --heading-color:  #ffffff;
+      --gridline:       #314149;
+      --baseline:       #52636c;
       --border:         rgba(255,255,255,0.10);
-      --card-surface:   #17171a;
-      --series-1: #3987e5; --series-2: #199e70; --series-3: #c98500; --series-4: #008300;
+      --card-surface:   #1a282f;
+      --series-1: #6fa5bd; --series-2: #48a7e8; --series-3: #f05329; --series-4: #008300;
       --series-5: #9085e9; --series-6: #e66767; --series-7: #d55181; --series-8: #d95926;
       --warning: #fab219; --neutral-badge: #9a988f;
   }
   :root[data-theme="light"] .ts-root {
-      --surface-1: #fcfcfb; --page-plane: #f9f9f7; --text-primary:#0b0b0b; --text-secondary:#52514e;
-      --card-surface:#ffffff; --border: rgba(11,11,11,0.10);
-      --series-1: #2a78d6; --series-2: #1baf7a; --series-3: #eda100; --series-4: #008300;
+      --surface-1: #f7f9fa; --page-plane: #eeefef; --text-primary:#1a262b; --text-secondary:#52636c;
+      --text-muted:#8996a3; --heading-color:#28495a; --gridline:#d5dce0; --baseline:#aeb9bf;
+      --card-surface:#ffffff; --border: rgba(40,73,90,0.16);
+      --series-1: #28495a; --series-2: #0072ce; --series-3: #f05329; --series-4: #008300;
       --series-5: #4a3aa7; --series-6: #e34948; --series-7: #e87ba4; --series-8: #eb6834;
       --warning:#b9790a; --neutral-badge:#6b6a64;
   }
@@ -92,15 +103,22 @@
   .ts-root * { box-sizing: border-box; }
   .ts-wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
 
-  .ts-header { margin-bottom: 22px; }
-  .ts-title { font-size: 1.65rem; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
-  .ts-subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0; max-width: 68ch; }
-  .ts-meta { color: var(--text-muted); font-size: 0.78rem; margin-top: 8px; }
+  .ts-header { position: relative; margin-bottom: 22px; padding: 24px 26px 26px; overflow: hidden;
+    background: linear-gradient(118deg, var(--brand-blue-deep), var(--brand-blue)); color: #fff;
+    border-radius: 3px; box-shadow: 0 8px 24px rgba(26,48,59,0.16); }
+  .ts-header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--brand-orange); }
+  .ts-brand-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; color: #fff;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .ts-brand-mark { display: inline-block; width: 18px; height: 3px; background: var(--brand-orange); }
+  .ts-title, .ts-section-title, .ts-card-name, .ts-modal-title, .ts-yr-heading {
+    font-family: "franklin-gothic-urw", "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif; }
+  .ts-title { font-size: 1.8rem; font-weight: 500; margin: 0 0 6px; letter-spacing: 0; line-height: 1.15; }
+  .ts-meta { color: rgba(255,255,255,0.64); font-size: 0.78rem; margin-top: 8px; }
 
   /* KPI row */
   .ts-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 22px 0 26px; }
   @media (max-width: 760px) { .ts-kpi-row { grid-template-columns: repeat(2, 1fr); } }
-  .ts-tile { background: var(--card-surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .ts-tile { background: var(--card-surface); border: 1px solid var(--border); border-top: 3px solid var(--brand-blue); border-radius: 3px; padding: 12px 16px 14px; box-shadow: 0 3px 12px rgba(40,73,90,0.05); }
   .ts-tile-label { font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 6px; }
   .ts-tile-value { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.01em; }
   .ts-tile-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
@@ -111,7 +129,8 @@
   .ts-select { font: inherit; font-size: 0.82rem; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--border); background: var(--card-surface); color: var(--text-primary); }
 
   .ts-section { margin: 34px 0; }
-  .ts-section-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; }
+  .ts-section-title { display: flex; align-items: center; gap: 8px; font-size: 1.08rem; font-weight: 500; margin: 0 0 4px; color: var(--heading-color); }
+  .ts-section-title::before { content: ""; flex: 0 0 auto; width: 4px; height: 1em; background: var(--brand-orange); }
   .ts-section-desc { font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 16px; max-width: 72ch; }
 
   /* Neutral informational tags */
@@ -124,7 +143,7 @@
   .ts-rank-name { font-size: 0.83rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ts-rank-cat { font-size: 0.68rem; color: var(--text-muted); display: block; font-weight: 400; }
   .ts-rank-bar-track { position: relative; height: 22px; background: var(--gridline); border-radius: 4px; overflow: hidden; }
-  .ts-rank-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--series-1); }
+  .ts-rank-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: linear-gradient(90deg, var(--brand-blue), #426b7e); }
   .ts-rank-value { font-size: 0.83rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
   .ts-rank-year { font-size: 0.68rem; color: var(--text-muted); text-align: right; }
 
@@ -132,7 +151,7 @@
   .ts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   @media (max-width: 900px) { .ts-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px) { .ts-grid { grid-template-columns: 1fr; } }
-  .ts-card { background: var(--card-surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 10px; }
+  .ts-card { background: var(--card-surface); border: 1px solid var(--border); border-radius: 3px; padding: 14px 14px 10px; box-shadow: 0 3px 12px rgba(40,73,90,0.04); }
   .ts-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; gap: 8px; }
   .ts-card-name { font-size: 0.9rem; font-weight: 700; }
   .ts-card-cat { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 8px; }
@@ -165,7 +184,7 @@
   /* Clickable rows/cards */
   .ts-rank-row.ts-clickable, .ts-card.ts-clickable, tr.ts-clickable { cursor: pointer; transition: background 0.12s ease, border-color 0.12s ease; }
   .ts-rank-row.ts-clickable:hover, .ts-rank-row.ts-clickable:focus-visible, tr.ts-clickable:hover { background: color-mix(in srgb, var(--series-1) 8%, transparent); }
-  .ts-card.ts-clickable:hover, .ts-card.ts-clickable:focus-visible { border-color: color-mix(in srgb, var(--series-1) 45%, var(--border)); }
+  .ts-card.ts-clickable:hover, .ts-card.ts-clickable:focus-visible { border-color: var(--brand-orange); transform: translateY(-1px); }
   .ts-rank-row.ts-clickable, .ts-card.ts-clickable, tr.ts-clickable { outline: none; }
   .ts-rank-row.ts-clickable:focus-visible, .ts-card.ts-clickable:focus-visible, tr.ts-clickable:focus-visible { box-shadow: 0 0 0 2px var(--series-1); border-radius: 6px; }
   .ts-hint { font-size: 0.68rem; color: var(--text-muted); margin: -10px 0 14px; }
@@ -222,8 +241,8 @@
   /* Upload Component Styles */
   .ts-btn { display: inline-flex; align-items: center; font: inherit; font-size: 0.82rem; font-weight: 600; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-surface); color: var(--text-primary); cursor: pointer; transition: all 0.15s ease; }
   .ts-btn:hover { background: var(--surface-1); border-color: var(--baseline); }
-  .ts-btn-primary { background: var(--series-1); color: #ffffff; border-color: var(--series-1); }
-  .ts-btn-primary:hover { opacity: 0.92; background: var(--series-1); }
+  .ts-btn-primary { background: var(--brand-orange); color: #ffffff; border-color: var(--brand-orange); border-radius: 2px; }
+  .ts-btn-primary:hover { background: #d9441f; border-color: #d9441f; }
   .ts-dropzone { border: 2px dashed var(--baseline); border-radius: 10px; padding: 22px 16px; text-align: center; background: var(--surface-1); cursor: pointer; transition: all 0.2s ease; margin-bottom: 14px; }
   .ts-dropzone.dragover, .ts-dropzone:hover { border-color: var(--series-1); background: var(--card-surface); }
   .ts-dropzone-icon { font-size: 1.8rem; color: var(--series-1); margin-bottom: 4px; }
@@ -243,10 +262,8 @@
 
     <div class="ts-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
       <div>
+        <div class="ts-brand-kicker"><span class="ts-brand-mark"></span>Bal Seal Engineering</div>
         <h1 class="ts-title">Trade Show Lead Generation Dashboard</h1>
-        <p class="ts-subtitle">Lead counts and costs for every exhibited show, 2004&ndash;2026. Each year is read from
-        that show's single master lead file, with cold-rated leads excluded, and costed from the invoices and expense
-        reports in its folder. Click any show &mdash; then any year &mdash; for the underlying numbers.</p>
       </div>
       <button class="ts-btn ts-btn-primary" id="ts-open-upload-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px; margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -329,13 +346,13 @@
       <em>master</em> file is counted &mdash; per-rep copies, daily partial downloads, mailing-label extracts
       and archived drafts are all excluded. The exact file used is named under "Source" in each year's
       drill-down.</p>
-      <p><strong>Cold leads are excluded.</strong> Where the master file carries a lead rating
-      (<code>Lead Rank</code>, <code>Lead Ranking</code>, <code>Product Interest Level</code>,
-      <code>Lead Interest</code>, iCapture's <code>Q&#8239;n:&#8239;Lead Ranking</code>, or the free-text
-      "Hot/Warm/Cold?" survey field), rows marked <strong>Cold</strong> are removed from the lead count.
-      Hot, Warm and unrated rows are kept. Ratings appear in most shows from 2017&ndash;2018 onward; earlier
-      files carry no rating, so every row counts. Each year's drill-down shows the full mix and how many
-      cold rows were dropped.</p>
+      <p><strong>From 2017 onward, the lead count is Hot + Warm only.</strong> Every workbook was reviewed
+      using its own schema. Staff-entered Hot/Warm fields are authoritative; legacy
+      <code>Application</code>/<code>Potential Application</code>, iCapture questions, and distributor
+      A/B grades are mapped to Hot/Warm. When no usable classification exists, the application notes are
+      reviewed individually: concrete active applications are Hot, plausible future applications are Warm,
+      and general interest, vendors, internal/test scans, blanks, and "no application" records are excluded.
+      Cold is the residual of valid source rows minus Hot and Warm. Earlier ungraded files remain unchanged.</p>
       <p><strong>Costs are what the archive documents.</strong> Where the show folder holds the company's own
       expense report (<em>"&hellip; Expense Breakdown / Estimated Expenses / Final Expenses"</em>) those itemised
       figures are used, preferring a final/actual report over an estimate &mdash; these cover most shows through
@@ -459,6 +476,7 @@
       warm: extra.warm || 0,
       cold: extra.cold || 0,
       unrated: extra.unrated || 0,
+      ratingBasis: extra.ratingBasis || null,
       src: extra.src || null,
       // cost
       cost: (typeof extra.cost === 'number') ? extra.cost : null,
@@ -488,16 +506,16 @@
       Y(2014,null,{note:'No show folder on file.'}),
       Y(2015,null,{note:'No show folder on file.'}),
       Y(2016,70,{raw:70,src:'MD&M West 2016 Leads.xls',cost:12274,costBasis:'invoices',costItems:[['Booth space',8450],['Furniture/decor',2782],['Lead retrieval',1041]],costDocs:6,costOcr:1}),
-      Y(2017,40,{raw:40,src:'MD&M West 2017 leads.xls',cost:12416,costBasis:'invoices',costItems:[['Furniture/decor',6334],['Booth space',5500],['Lead retrieval',582]],costDocs:9}),
-      Y(2018,41,{raw:41,hot:9,warm:5,cold:0,unrated:27,src:'MD&M West 2018 leads.xlsx',cost:9670,costBasis:'invoices',costItems:[['Booth space',5650],['Furniture/decor',3217],['Lead retrieval',803]],costDocs:6}),
-      Y(2019,12,{raw:40,hot:4,warm:8,cold:28,unrated:0,src:'Export-MDMAnaheim2019-2019-02-08.xlsx',cost:7868,costBasis:'invoices',costItems:[['Booth space',5850],['Lead retrieval',1220],['Electrical',798]],costDocs:4}),
-      Y(2020,8,{raw:16,hot:4,warm:4,cold:8,unrated:0,src:'Export-MDMWest2020-2020-02-14.xlsx',cost:10224,costBasis:'invoices',costItems:[['Booth space',6475],['Other',2524],['Lead retrieval',1225]],costDocs:3,costOcr:1}),
-      Y(2021,14,{raw:14,src:'All Leads for IMEW2021 Consolidated (2).xlsx',cost:8397,costBasis:'invoices',costItems:[['Booth space',6475],['Furniture/decor',1172],['Lead retrieval',750]],costDocs:4}),
-      Y(2022,28,{raw:28,src:'imengineeringwest-leads-2022-04-14.xlsx',cost:6865,costBasis:'invoices',costItems:[['Booth space',6300],['Lead retrieval',550],['Registration',15]],costDocs:4}),
-      Y(2023,10,{raw:16,hot:1,warm:9,cold:6,unrated:0,src:'Eloqua ready template - MD&M WEST.xlsx',cost:10042,costBasis:'invoices',costItems:[['Booth space',6700],['Electrical',2418],['Lead retrieval',600],['AV/internet',219],['Freight/drayage',72],['Furniture/decor',32]],costDocs:6}),
+      Y(2017,20,{raw:40,hot:12,warm:8,cold:20,unrated:0,ratingBasis:'source classification',src:'MD&M West 2017 leads.xls',cost:12416,costBasis:'invoices',costItems:[['Furniture/decor',6334],['Booth space',5500],['Lead retrieval',582]],costDocs:9}),
+      Y(2018,14,{raw:41,hot:9,warm:5,cold:27,unrated:0,ratingBasis:'source classification',src:'MD&M West 2018 leads.xlsx',cost:9670,costBasis:'invoices',costItems:[['Booth space',5650],['Furniture/decor',3217],['Lead retrieval',803]],costDocs:6}),
+      Y(2019,12,{raw:40,hot:4,warm:8,cold:28,unrated:0,ratingBasis:'source classification',src:'Export-MDMAnaheim2019-2019-02-08.xlsx',cost:7868,costBasis:'invoices',costItems:[['Booth space',5850],['Lead retrieval',1220],['Electrical',798]],costDocs:4}),
+      Y(2020,8,{raw:16,hot:4,warm:4,cold:8,unrated:0,ratingBasis:'source classification',src:'Export-MDMWest2020-2020-02-14.xlsx',cost:10224,costBasis:'invoices',costItems:[['Booth space',6475],['Other',2524],['Lead retrieval',1225]],costDocs:3,costOcr:1}),
+      Y(2021,13,{raw:14,hot:8,warm:5,cold:1,unrated:0,ratingBasis:'AI note review',src:'All Leads for IMEW2021 Consolidated (2).xlsx',cost:8397,costBasis:'invoices',costItems:[['Booth space',6475],['Furniture/decor',1172],['Lead retrieval',750]],costDocs:4}),
+      Y(2022,4,{raw:28,hot:0,warm:4,cold:24,unrated:0,ratingBasis:'source Opportunity tag',src:'imengineeringwest-leads-2022-04-14.xlsx',cost:6865,costBasis:'invoices',costItems:[['Booth space',6300],['Lead retrieval',550],['Registration',15]],costDocs:4}),
+      Y(2023,10,{raw:16,hot:1,warm:9,cold:6,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - MD&M WEST.xlsx',cost:10042,costBasis:'invoices',costItems:[['Booth space',6700],['Electrical',2418],['Lead retrieval',600],['AV/internet',219],['Freight/drayage',72],['Furniture/decor',32]],costDocs:6}),
       Y(2024,null,{status:'cancelled',cost:6800,costBasis:'invoices',costItems:[['Booth space',6800]],costDocs:2,note:'Informa Markets invoice on file; no leads export saved.'}),
       Y(2025,null,{cost:10368,costBasis:'invoices',costItems:[['Booth space',7990],['Furniture/decor',2378]],costDocs:2,note:'Booth and furnishing invoices on file; no leads export saved.'}),
-      Y(2026,35,{raw:35,src:'MD&M West Sales Leads - 02-06-26.xlsx',cost:3462,costBasis:'partial',costItems:[['Furniture/decor',3462]],costDocs:1})
+      Y(2026,19,{raw:32,hot:13,warm:6,cold:13,unrated:0,ratingBasis:'AI note review',src:'MD&M West Sales Leads - 02-06-26.xlsx',cost:3462,costBasis:'partial',costItems:[['Furniture/decor',3462]],costDocs:1})
     ]},
     { id:'mdm-minn', name:'MD&M Minneapolis', category:'Medical', region:'Americas', data: [
       Y(2004,27,{raw:27,src:'MD&M Minn. 2004 Leads.xls',cost:11408,costBasis:'actual-rollup',costItems:[['Booth space',6600],['Freight/drayage',3201],['Labor/cleaning',2170],['Furniture/decor',2002],['Lead retrieval',332],['AV/internet',214],['Electrical',90]],costDocs:1,costSrc:'MD&M Minn. 2004 Final Expenses.xls'}),
@@ -513,15 +531,15 @@
       Y(2014,12,{raw:12,src:'MD&M Minn. 2014 Leads.xls',cost:5080,costBasis:'invoices',costItems:[['Booth space',2050],['Furniture/decor',1545],['Other',985],['Lead retrieval',500]],costDocs:5}),
       Y(2015,9,{raw:9,src:'MD&M Minn. 2015 Leads.xls',cost:3955,costBasis:'invoices',costItems:[['Booth space',1770],['Furniture/decor',1362],['Lead retrieval',823]],costDocs:5}),
       Y(2016,22,{raw:22,src:'MD&M Minn. 2016 leads.xls',cost:6590,costBasis:'invoices',costItems:[['Booth space',4475],['Furniture/decor',1156],['Lead retrieval',958]],costDocs:6}),
-      Y(2017,22,{raw:22,hot:7,warm:9,cold:0,unrated:6,src:'Import Ready MD&M Minneapolis 2017 Leads.xlsx',cost:7531,costBasis:'invoices',costItems:[['Booth space',4550],['Furniture/decor',2981]],costDocs:4}),
-      Y(2018,19,{raw:19,hot:4,warm:7,cold:0,unrated:8,src:'MD&M Leads .xlsx',cost:8154,costBasis:'invoices',costItems:[['Booth space',4700],['Furniture/decor',2562],['Lead retrieval',571],['Other',320]],costDocs:8}),
-      Y(2019,16,{raw:21,hot:4,warm:12,cold:5,unrated:0,src:'Export-MDMMinneapolis-2019-10-24.xlsx',cost:11356,costBasis:'invoices',costItems:[['Booth space',4825],['Furniture/decor',2661],['Other',2645],['Lead retrieval',1225]],costDocs:9,costOcr:1}),
+      Y(2017,16,{raw:22,hot:7,warm:9,cold:6,unrated:0,ratingBasis:'source classification',src:'Import Ready MD&M Minneapolis 2017 Leads.xlsx',cost:7531,costBasis:'invoices',costItems:[['Booth space',4550],['Furniture/decor',2981]],costDocs:4}),
+      Y(2018,11,{raw:15,hot:4,warm:7,cold:4,unrated:0,ratingBasis:'source classification',src:'MD&M Leads .xlsx',cost:8154,costBasis:'invoices',costItems:[['Booth space',4700],['Furniture/decor',2562],['Lead retrieval',571],['Other',320]],costDocs:8}),
+      Y(2019,16,{raw:21,hot:4,warm:12,cold:5,unrated:0,ratingBasis:'source classification',src:'Export-MDMMinneapolis-2019-10-24.xlsx',cost:11356,costBasis:'invoices',costItems:[['Booth space',4825],['Furniture/decor',2661],['Other',2645],['Lead retrieval',1225]],costDocs:9,costOcr:1}),
       Y(2020,null,{status:'cancelled',cost:5250,costBasis:'invoices',costItems:[['Booth space',5250]],costDocs:1,costOcr:1,note:'COVID-limited; not meaningfully held.'}),
       Y(2021,null,{cost:5900,costBasis:'invoices',costItems:[['Booth space',5900]],costDocs:1,note:'Leads folder present but empty.'}),
-      Y(2022,7,{raw:15,hot:1,warm:6,cold:8,unrated:0,src:'Eloqua ready template - MD&M.xlsx',cost:10363,costBasis:'invoices',costItems:[['Booth space',6750],['Furniture/decor',1724],['Freight/drayage',1643],['AV/internet',245]],costDocs:10}),
+      Y(2022,7,{raw:15,hot:1,warm:6,cold:8,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - MD&M.xlsx',cost:10363,costBasis:'invoices',costItems:[['Booth space',6750],['Furniture/decor',1724],['Freight/drayage',1643],['AV/internet',245]],costDocs:10}),
       Y(2023,null,{cost:9398,costBasis:'invoices',costItems:[['Booth space',6725],['Furniture/decor',1641],['Freight/drayage',1033]],costDocs:4,costOcr:1,note:'No leads export saved.'}),
       Y(2024,null,{cost:6725,costBasis:'invoices',costItems:[['Booth space',6725]],costDocs:1,note:'No leads export saved.'}),
-      Y(2025,19,{raw:19,src:'MD&M Raw Lead Export - 10-23-25.xls',cost:11774,costBasis:'invoices',costItems:[['Booth space',7070],['Freight/drayage',2183],['Furniture/decor',1787],['Lead retrieval',695],['Other',39]],costDocs:9}),
+      Y(2025,9,{raw:13,hot:2,warm:7,cold:4,unrated:0,ratingBasis:'AI note review',src:'MD&M Raw Lead Export - 10-23-25.xls',cost:11774,costBasis:'invoices',costItems:[['Booth space',7070],['Freight/drayage',2183],['Furniture/decor',1787],['Lead retrieval',695],['Other',39]],costDocs:9}),
       Y(2026,null,{note:'Scheduled Oct 2026 - hasn\'t occurred yet.'})
     ]},
     { id:'mdm-east', name:'MD&M East', category:'Medical', region:'Americas', discontinued:true, data: [
@@ -551,10 +569,10 @@
       Y(2014,124,{raw:124,src:'Pittcon Leads.xls',cost:3139,costBasis:'actual-rollup',costItems:[['Furniture/decor',1629],['Lead retrieval',500],['Other',451],['Electrical',245],['Booth space',162],['Labor/cleaning',152]],costDocs:1,costSrc:'Pittcon Expense Breakdown 2013.xls'}),
       Y(2015,72,{raw:72,src:'Pittcon 2015 Leads.xls',cost:7270,costBasis:'invoices',costItems:[['Other',4969],['Booth space',1411],['Lead retrieval',750],['Labor/cleaning',140]],costDocs:8}),
       Y(2016,69,{raw:69,src:'Pittcon 2016 leads.xls',cost:2117,costBasis:'invoices',costItems:[['Booth space',1367],['Lead retrieval',750]],costDocs:3}),
-      Y(2017,44,{raw:44,src:'Pittcon 2017 leads.xls',cost:3083,costBasis:'invoices',costItems:[['Booth space',1915],['Other',651],['Lead retrieval',517]],costDocs:5}),
-      Y(2018,44,{raw:44,hot:9,warm:11,cold:0,unrated:24,src:'Pittcon Leads 2018.xlsx',cost:4867,costBasis:'invoices',costItems:[['Other',1948],['Furniture/decor',1604],['Lead retrieval',499],['Electrical',472],['Freight/drayage',344]],costDocs:6,costOcr:1}),
-      Y(2019,48,{raw:48,src:'Export-PITTCON2019-2019-03-29.csv',cost:3571,costBasis:'invoices',costItems:[['Booth space',2771],['Other',800]],costDocs:5}),
-      Y(2020,16,{raw:34,hot:1,warm:15,cold:18,unrated:0,src:'PITTCON2020LeadCapture-2020-03-09.xlsx',cost:3150,costBasis:'invoices',costItems:[['Booth space',3150]],costDocs:2}),
+      Y(2017,21,{raw:44,hot:5,warm:16,cold:23,unrated:0,ratingBasis:'source classification',src:'Pittcon 2017 leads.xls',cost:3083,costBasis:'invoices',costItems:[['Booth space',1915],['Other',651],['Lead retrieval',517]],costDocs:5}),
+      Y(2018,20,{raw:44,hot:9,warm:11,cold:24,unrated:0,ratingBasis:'source classification',src:'Pittcon Leads 2018.xlsx',cost:4867,costBasis:'invoices',costItems:[['Other',1948],['Furniture/decor',1604],['Lead retrieval',499],['Electrical',472],['Freight/drayage',344]],costDocs:6,costOcr:1}),
+      Y(2019,30,{raw:48,hot:13,warm:17,cold:18,unrated:0,ratingBasis:'source classification',src:'Export-PITTCON2019-2019-03-29.csv',cost:3571,costBasis:'invoices',costItems:[['Booth space',2771],['Other',800]],costDocs:5}),
+      Y(2020,16,{raw:34,hot:1,warm:15,cold:18,unrated:0,ratingBasis:'source classification',src:'PITTCON2020LeadCapture-2020-03-09.xlsx',cost:3150,costBasis:'invoices',costItems:[['Booth space',3150]],costDocs:2}),
       Y(2021,null,{status:'declined',cost:3275,costBasis:'invoices',costItems:[['Booth space',3275]],costDocs:1,note:'Show went all-virtual; BSE did not participate.'}),
       Y(2022,null,{status:'declined',note:'Folder explicitly marked "PITTCON 2022 (NO)".'}),
       Y(2023,null,{note:'Not on the schedule.'}),
@@ -576,16 +594,16 @@
       Y(2014,114,{raw:114,src:'OTC 2014 Leads.xls',cost:17657,costBasis:'invoices',costItems:[['Booth space',7000],['Furniture/decor',4376],['Other',3502],['Electrical',1551],['AV/internet',898],['Registration',329]],costDocs:13,costOcr:1}),
       Y(2015,102,{raw:102,src:'OTC 2015 Leads.xls',cost:12640,costBasis:'invoices',costItems:[['Booth space',7200],['Furniture/decor',3882],['Lead retrieval',701],['Other',362],['Registration',307],['Electrical',188]],costDocs:9,costOcr:1}),
       Y(2016,72,{raw:72,src:'OTC 2016 leads.xls',cost:10293,costBasis:'invoices',costItems:[['Other',5400],['Registration',2459],['Furniture/decor',1201],['Lead retrieval',594],['Electrical',519],['Booth space',120]],costDocs:8}),
-      Y(2017,80,{raw:80,src:'OTC 2017 leads.xls',cost:11375,costBasis:'invoices',costItems:[['Booth space',7200],['Furniture/decor',2609],['Lead retrieval',594],['Other',463],['Registration',309],['Electrical',199]],costDocs:8,costOcr:1}),
-      Y(2018,118,{raw:118,src:'OTC 2018 leads-export-1525724604217.xls',cost:13106,costBasis:'invoices',costItems:[['Booth space',7200],['Registration',1749],['Other',1743],['Furniture/decor',1610],['Electrical',661],['Labor/cleaning',142]],costDocs:12}),
-      Y(2019,64,{raw:119,hot:34,warm:30,cold:55,unrated:0,src:'OTC2019LeadCapture-2019-05-14.xlsx',cost:11821,costBasis:'invoices',costItems:[['Booth space',7500],['Registration',1749],['Furniture/decor',1748],['Lead retrieval',704],['Other',120]],costDocs:9,costOcr:3}),
+      Y(2017,40,{raw:80,hot:17,warm:23,cold:40,unrated:0,ratingBasis:'source classification',src:'OTC 2017 leads.xls',cost:11375,costBasis:'invoices',costItems:[['Booth space',7200],['Furniture/decor',2609],['Lead retrieval',594],['Other',463],['Registration',309],['Electrical',199]],costDocs:8,costOcr:1}),
+      Y(2018,44,{raw:118,hot:12,warm:32,cold:74,unrated:0,ratingBasis:'source classification',src:'OTC 2018 leads-export-1525724604217.xls',cost:13106,costBasis:'invoices',costItems:[['Booth space',7200],['Registration',1749],['Other',1743],['Furniture/decor',1610],['Electrical',661],['Labor/cleaning',142]],costDocs:12}),
+      Y(2019,64,{raw:119,hot:34,warm:30,cold:55,unrated:0,ratingBasis:'source classification',src:'OTC2019LeadCapture-2019-05-14.xlsx',cost:11821,costBasis:'invoices',costItems:[['Booth space',7500],['Registration',1749],['Furniture/decor',1748],['Lead retrieval',704],['Other',120]],costDocs:9,costOcr:3}),
       Y(2020,null,{status:'cancelled',cost:8896,costBasis:'invoices',costItems:[['Other',7500],['Booth space',1036],['Electrical',360]],costDocs:4,costOcr:1,note:'COVID cancellation - only badge registration exports on file.'}),
       Y(2021,null,{note:'Booth confirmed/paid but no leads export was filed.'}),
-      Y(2022,37,{raw:50,hot:3,warm:31,cold:13,unrated:3,src:'Lead Ready Template-OTC.xlsx',cost:7242,costBasis:'invoices',costItems:[['Booth space',4000],['Freight/drayage',1470],['Electrical',896],['Lead retrieval',629],['Other',192],['AV/internet',55]],costDocs:12,costOcr:4}),
-      Y(2023,44,{raw:84,hot:13,warm:31,cold:40,unrated:0,src:'Eloqua ready template - OTC.xlsx',cost:9336,costBasis:'invoices',costItems:[['Booth space',4000],['Furniture/decor',3468],['Freight/drayage',1347],['Lead retrieval',410],['Electrical',110]],costDocs:9}),
-      Y(2024,32,{raw:48,hot:7,warm:25,cold:16,unrated:0,src:'Eloqua ready template - OTC 2024.xlsx',cost:4737,costBasis:'invoices',costItems:[['Freight/drayage',1667],['Booth space',1647],['Furniture/decor',1423]],costDocs:5}),
-      Y(2025,33,{raw:33,src:'leads-OTC251-2025-05-14.csv',cost:8043,costBasis:'invoices',costItems:[['Booth space',4400],['Freight/drayage',1727],['Furniture/decor',1458],['Lead retrieval',457]],costDocs:5}),
-      Y(2026,58,{raw:67,hot:9,warm:19,cold:9,unrated:30,src:'Raw Lead Export - OTC 2026 - 05-07-26.xlsx',cost:15818,costBasis:'invoices',costItems:[['Booth space',8400],['Furniture/decor',3335],['Freight/drayage',2481],['Lead retrieval',765],['Other',569],['AV/internet',150],['Electrical',118]],costDocs:13})
+      Y(2022,16,{raw:47,hot:1,warm:15,cold:31,unrated:0,ratingBasis:'source show-close rating',src:'otc leads - raw at show close - 05-05-22.xlsx',cost:7242,costBasis:'invoices',costItems:[['Booth space',4000],['Freight/drayage',1470],['Electrical',896],['Lead retrieval',629],['Other',192],['AV/internet',55]],costDocs:12,costOcr:4}),
+      Y(2023,44,{raw:84,hot:13,warm:31,cold:40,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - OTC.xlsx',cost:9336,costBasis:'invoices',costItems:[['Booth space',4000],['Furniture/decor',3468],['Freight/drayage',1347],['Lead retrieval',410],['Electrical',110]],costDocs:9}),
+      Y(2024,32,{raw:48,hot:7,warm:25,cold:16,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - OTC 2024.xlsx',cost:4737,costBasis:'invoices',costItems:[['Freight/drayage',1667],['Booth space',1647],['Furniture/decor',1423]],costDocs:5}),
+      Y(2025,19,{raw:31,hot:12,warm:7,cold:12,unrated:0,ratingBasis:'AI note review',src:'leads-OTC251-2025-05-14.csv',cost:8043,costBasis:'invoices',costItems:[['Booth space',4400],['Freight/drayage',1727],['Furniture/decor',1458],['Lead retrieval',457]],costDocs:5}),
+      Y(2026,27,{raw:64,hot:8,warm:19,cold:37,unrated:0,ratingBasis:'source classification',src:'Raw Lead Export - OTC 2026 - 05-07-26.xlsx',cost:15818,costBasis:'invoices',costItems:[['Booth space',8400],['Furniture/decor',3335],['Freight/drayage',2481],['Lead retrieval',765],['Other',569],['AV/internet',150],['Electrical',118]],costDocs:13})
     ]},
     { id:'aaos', name:'AAOS', category:'Medical', region:'Americas', data: [
       Y(2008,70,{raw:70,src:'AAOS Import Ready.xls',cost:6652,costBasis:'actual-rollup',costItems:[['Booth space',3300],['Furniture/decor',1649],['AV/internet',694],['Labor/cleaning',349],['Lead retrieval',325],['Freight/drayage',243],['Electrical',92]],costDocs:1,costSrc:'AAOS Expense Breakdown.xls'}),
@@ -597,12 +615,12 @@
       Y(2014,41,{raw:41,src:'AAOS 2014 Lead.xls',cost:9809,costBasis:'invoices',costItems:[['Furniture/decor',5057],['Booth space',3700],['Lead retrieval',490],['Other',467],['Freight/drayage',95]],costDocs:11}),
       Y(2015,97,{raw:97,src:'AAOS 2015 Leads.xls',cost:9147,costBasis:'invoices',costItems:[['Furniture/decor',3826],['Booth space',3800],['Lead retrieval',869],['Other',653]],costDocs:9}),
       Y(2016,55,{raw:55,src:'AAOS 2016 leads-3.9.16.xlsx',cost:6612,costBasis:'invoices',costItems:[['Booth space',3800],['Furniture/decor',1492],['Lead retrieval',867],['Electrical',290],['Other',163]],costDocs:9}),
-      Y(2017,42,{raw:42,src:'AAOS 2017 leads.xls',cost:7210,costBasis:'invoices',costItems:[['Booth space',3800],['Furniture/decor',2538],['Lead retrieval',625],['Other',247]],costDocs:7}),
-      Y(2018,35,{raw:35,hot:6,warm:14,cold:0,unrated:15,src:'AAOS 2018 Leads.xlsx',cost:8828,costBasis:'invoices',costItems:[['Booth space',3800],['Other',3427],['Lead retrieval',685],['Freight/drayage',502],['Electrical',232],['Furniture/decor',182]],costDocs:8}),
-      Y(2019,15,{raw:36,hot:7,warm:8,cold:21,unrated:0,src:'AAOS Raw Spread Sheet.xlsx',cost:7589,costBasis:'invoices',costItems:[['Booth space',3895],['Furniture/decor',1917],['Lead retrieval',1000],['Electrical',422],['Other',355]],costDocs:9}),
+      Y(2017,11,{raw:42,hot:2,warm:9,cold:31,unrated:0,ratingBasis:'source classification',src:'AAOS 2017 leads.xls',cost:7210,costBasis:'invoices',costItems:[['Booth space',3800],['Furniture/decor',2538],['Lead retrieval',625],['Other',247]],costDocs:7}),
+      Y(2018,20,{raw:35,hot:6,warm:14,cold:15,unrated:0,ratingBasis:'source classification',src:'AAOS 2018 Leads.xlsx',cost:8828,costBasis:'invoices',costItems:[['Booth space',3800],['Other',3427],['Lead retrieval',685],['Freight/drayage',502],['Electrical',232],['Furniture/decor',182]],costDocs:8}),
+      Y(2019,15,{raw:36,hot:7,warm:8,cold:21,unrated:0,ratingBasis:'source classification',src:'AAOS Raw Spread Sheet.xlsx',cost:7589,costBasis:'invoices',costItems:[['Booth space',3895],['Furniture/decor',1917],['Lead retrieval',1000],['Electrical',422],['Other',355]],costDocs:9}),
       Y(2020,null,{status:'cancelled',cost:9717,costBasis:'invoices',costItems:[['Other',4169],['Booth space',3950],['Lead retrieval',1010],['Freight/drayage',588]],costDocs:10,note:'COVID cancellation.'}),
       Y(2021,null,{note:'No show folder on file.'}),
-      Y(2022,17,{raw:17,hot:9,warm:5,cold:0,unrated:3,src:'Eloqua Ready Template-AAOS, MH - 03-28-22.xlsx',cost:8623,costBasis:'invoices',costItems:[['Booth space',4202],['Furniture/decor',3570],['Freight/drayage',513],['Other',337]],costDocs:6,costOcr:1}),
+      Y(2022,14,{raw:14,hot:9,warm:5,cold:0,unrated:0,ratingBasis:'source classification',src:'Eloqua Ready Template-AAOS, MH - 03-28-22.xlsx',cost:8623,costBasis:'invoices',costItems:[['Booth space',4202],['Furniture/decor',3570],['Freight/drayage',513],['Other',337]],costDocs:6,costOcr:1}),
       Y(2023,null,{status:'declined',note:'Folder explicitly marked "DECLINED".'}),
       Y(2024,null,{note:'Not on the schedule.'}),
       Y(2025,null,{note:'Not on the schedule.'}),
@@ -620,12 +638,12 @@
       Y(2014,130,{raw:130,src:'Hannover 2014 Leads.xls'}),
       Y(2015,144,{raw:144,src:'Hannover 2015 leads.xlsx'}),
       Y(2016,130,{raw:130,src:'Hannover 2016 leads.xls'}),
-      Y(2017,163,{raw:163,src:'Hannover 2017 leads.xls'}),
-      Y(2018,101,{raw:101,hot:10,warm:29,cold:0,unrated:62,src:'Hannover 2018 Leads  .xlsx'}),
+      Y(2017,43,{raw:163,hot:8,warm:35,cold:120,unrated:0,ratingBasis:'source classification',src:'Hannover 2017 leads.xls'}),
+      Y(2018,39,{raw:101,hot:10,warm:29,cold:62,unrated:0,ratingBasis:'source classification',src:'Hannover 2018 Leads  .xlsx'}),
       Y(2019,null,{note:'Show folder on file but no leads export saved.'}),
       Y(2020,null,{status:'cancelled',cost:382,costBasis:'partial',costItems:[['Other',382]],costDocs:1,note:'COVID cancellation.'}),
       Y(2021,null,{status:'declined',note:'Declined due to COVID-era travel restrictions.'}),
-      Y(2022,34,{raw:34,hot:8,warm:26,cold:0,unrated:0,src:'Eloqua Ready Template-Hannover.xlsx',cost:402,costBasis:'partial',costItems:[['Booth space',402]],costDocs:1}),
+      Y(2022,34,{raw:56,hot:8,warm:26,cold:22,unrated:0,ratingBasis:'source show-close rating',src:'Hannover leads - 06-02-22.xlsx',cost:402,costBasis:'partial',costItems:[['Booth space',402]],costDocs:1}),
       Y(2023,null,{cost:1063,costBasis:'partial',costItems:[['Furniture/decor',638],['Registration',425]],costDocs:2,note:'Show folder on file but no leads export saved.'}),
       Y(2024,null,{cost:4787,costBasis:'invoices',costItems:[['Booth space',4340],['Registration',447]],costDocs:2,note:'Booth invoice on file; no leads export saved.'}),
       Y(2025,null,{cost:7782,costBasis:'invoices',costItems:[['Booth space',5955],['Furniture/decor',1363],['Registration',464]],costDocs:3,note:'Deutsche Messe booth invoice on file; no leads export saved.'}),
@@ -642,11 +660,11 @@
       Y(2015,null,{note:'Biennial show - not held.'}),
       Y(2016,81,{raw:81,src:'Analytica 2016 leads.xls'}),
       Y(2017,null,{note:'Biennial show - not held.'}),
-      Y(2018,80,{raw:80,hot:9,warm:24,cold:0,unrated:47,src:'Analytica 2018 Leads .xlsx'}),
+      Y(2018,33,{raw:80,hot:9,warm:24,cold:47,unrated:0,ratingBasis:'source classification',src:'Analytica 2018 Leads .xlsx'}),
       Y(2019,null,{note:'Biennial show - not held.'}),
       Y(2020,null,{cost:376,costBasis:'partial',costItems:[['Furniture/decor',376]],costDocs:3,note:'Postponed to Oct 2020; not attended.'}),
       Y(2021,null,{note:'Biennial show - not held.'}),
-      Y(2022,34,{raw:51,hot:9,warm:25,cold:17,unrated:0,src:'Eloqua ready template - Analytica.xlsx',cost:272,costBasis:'partial',costItems:[['Other',272]],costDocs:1}),
+      Y(2022,34,{raw:51,hot:9,warm:25,cold:17,unrated:0,ratingBasis:'source show-close rating',src:'Copy of Bal Seal Engineering Europe BV - VisitorData_2022.06.24_10.36.23  PLUS Qualifiying  WWr   28. June 2022.xlsx',cost:272,costBasis:'partial',costItems:[['Other',272]],costDocs:1}),
       Y(2023,null,{note:'Biennial show - not held.'}),
       Y(2024,null,{cost:1430,costBasis:'partial',costItems:[['Furniture/decor',1430]],costDocs:1,note:'Show folder on file (pre-show promo only); no leads export saved.'}),
       Y(2025,null,{note:'Biennial show - not held.'}),
@@ -661,15 +679,15 @@
       Y(2014,28,{raw:28,src:'Biomed San Jose 2014 Leads.xls',cost:6207,costBasis:'invoices',costItems:[['Furniture/decor',5209],['Lead retrieval',504],['Booth space',493]],costDocs:6}),
       Y(2015,41,{raw:41,src:'Biomed San Jose 2015 Leads.xls',cost:7634,costBasis:'invoices',costItems:[['Booth space',4250],['Furniture/decor',2554],['Lead retrieval',831]],costDocs:5}),
       Y(2016,55,{raw:55,src:'Biomed San Jose 2016 leads.xls',cost:7144,costBasis:'invoices',costItems:[['Booth space',4450],['Furniture/decor',2255],['Lead retrieval',439]],costDocs:6}),
-      Y(2017,42,{raw:42,hot:5,warm:9,cold:0,unrated:28,src:'Biomed San Jose 2017 leads.xlsx',cost:8994,costBasis:'invoices',costItems:[['Booth space',5075],['Furniture/decor',2670],['Other',664],['Lead retrieval',586]],costDocs:6}),
-      Y(2018,23,{raw:48,hot:6,warm:10,cold:25,unrated:7,src:'Export-BIOMEDeviceSanJose2018-2018-12-07.xlsx',cost:7054,costBasis:'invoices',costItems:[['Booth space',5175],['Lead retrieval',1220],['Other',614],['Registration',45]],costDocs:6}),
-      Y(2019,18,{raw:24,hot:9,warm:9,cold:6,unrated:0,src:'Spread Sheet from Icapture.xlsx',cost:8791,costBasis:'invoices',costItems:[['Booth space',5375],['Furniture/decor',2191],['Lead retrieval',1225]],costDocs:3}),
+      Y(2017,14,{raw:41,hot:5,warm:9,cold:27,unrated:0,ratingBasis:'source classification',src:'Biomed San Jose 2017 leads.xlsx',cost:8994,costBasis:'invoices',costItems:[['Booth space',5075],['Furniture/decor',2670],['Other',664],['Lead retrieval',586]],costDocs:6}),
+      Y(2018,16,{raw:48,hot:6,warm:10,cold:32,unrated:0,ratingBasis:'source classification',src:'Export-BIOMEDeviceSanJose2018-2018-12-07.xlsx',cost:7054,costBasis:'invoices',costItems:[['Booth space',5175],['Lead retrieval',1220],['Other',614],['Registration',45]],costDocs:6}),
+      Y(2019,18,{raw:24,hot:9,warm:9,cold:6,unrated:0,ratingBasis:'source classification',src:'Spread Sheet from Icapture.xlsx',cost:8791,costBasis:'invoices',costItems:[['Booth space',5375],['Furniture/decor',2191],['Lead retrieval',1225]],costDocs:3}),
       Y(2020,null,{cost:5650,costBasis:'invoices',costItems:[['Booth space',5650]],costDocs:1,note:'Show folder on file but no leads export saved.'}),
-      Y(2021,27,{raw:27,src:'BioMed Leads final draft.xlsx',cost:8009,costBasis:'invoices',costItems:[['Booth space',5300],['Furniture/decor',2109],['Other',550],['Freight/drayage',50]],costDocs:5}),
-      Y(2022,21,{raw:32,hot:9,warm:12,cold:11,unrated:0,src:'Eloqua ready template - BIOMED Silicon Valley.xlsx',cost:8642,costBasis:'invoices',costItems:[['Booth space',5150],['Furniture/decor',2439],['Lead retrieval',550],['Electrical',309],['AV/internet',194]],costDocs:7,costOcr:1}),
+      Y(2021,12,{raw:26,hot:5,warm:7,cold:14,unrated:0,ratingBasis:'AI note review',src:'BioMed Leads final draft.xlsx',cost:8009,costBasis:'invoices',costItems:[['Booth space',5300],['Furniture/decor',2109],['Other',550],['Freight/drayage',50]],costDocs:5}),
+      Y(2022,21,{raw:32,hot:9,warm:12,cold:11,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - BIOMED Silicon Valley.xlsx',cost:8642,costBasis:'invoices',costItems:[['Booth space',5150],['Furniture/decor',2439],['Lead retrieval',550],['Electrical',309],['AV/internet',194]],costDocs:7,costOcr:1}),
       Y(2023,null,{cost:7692,costBasis:'invoices',costItems:[['Booth space',6700],['Freight/drayage',992]],costDocs:3,note:'Exhibited (post-show report on file) but no leads export was saved.'}),
       Y(2024,null,{note:'Lead-retrieval package purchased; no leads export saved.'}),
-      Y(2025,25,{raw:25,src:'MeDevice Leads 11-20-25.xls',cost:11825,costBasis:'invoices',costItems:[['Booth space',7460],['Electrical',1614],['Furniture/decor',1494],['Freight/drayage',1257]],costDocs:7}),
+      Y(2025,8,{raw:22,hot:4,warm:4,cold:14,unrated:0,ratingBasis:'AI note review',src:'MeDevice Leads 11-20-25.xls',cost:11825,costBasis:'invoices',costItems:[['Booth space',7460],['Electrical',1614],['Furniture/decor',1494],['Freight/drayage',1257]],costDocs:7}),
       Y(2026,null,{cost:500,costBasis:'partial',costItems:[['Booth space',500]],costDocs:1,note:'Scheduled Nov 2026 - hasn\'t occurred yet.'})
     ]},
     { id:'biomed-boston', name:'BIOMEDevice Boston / Electronics New England', category:'Medical', region:'Americas', discontinued:true, data: [
@@ -681,14 +699,14 @@
       Y(2014,42,{raw:42,src:'ENE 2014 Leads.xls',cost:9083,costBasis:'invoices',costItems:[['Furniture/decor',6050],['Booth space',1540],['AV/internet',738],['Lead retrieval',478],['Electrical',277]],costDocs:7}),
       Y(2015,33,{raw:33,src:'ENE 2015 leads.xls',cost:4673,costBasis:'invoices',costItems:[['Furniture/decor',2406],['Booth space',1620],['Lead retrieval',647]],costDocs:4}),
       Y(2016,26,{raw:26,src:'ENE 2016 leads.xls',cost:7599,costBasis:'invoices',costItems:[['Booth space',4825],['Furniture/decor',1902],['Lead retrieval',610],['Electrical',262]],costDocs:5}),
-      Y(2017,58,{raw:58,src:'ENE 2017 leads.xls',cost:11328,costBasis:'invoices',costItems:[['Furniture/decor',6616],['Booth space',4450],['Electrical',262]],costDocs:4}),
-      Y(2018,30,{raw:30,hot:4,warm:10,cold:0,unrated:16,src:'BioMed Boston 2018 Leads  .xlsx',cost:9228,costBasis:'invoices',costItems:[['Booth space',5075],['Furniture/decor',1798],['Other',1522],['Lead retrieval',589],['Electrical',244]],costDocs:8}),
-      Y(2019,8,{raw:34,hot:2,warm:6,cold:26,unrated:0,src:'Export-BioMEDeviceBostonElectronicsNewEnglandLeadCapture-2019-05-17.xlsx',cost:6649,costBasis:'invoices',costItems:[['Booth space',5175],['Other',1245],['Furniture/decor',229]],costDocs:4}),
+      Y(2017,18,{raw:58,hot:6,warm:12,cold:40,unrated:0,ratingBasis:'source classification',src:'ENE 2017 leads.xls',cost:11328,costBasis:'invoices',costItems:[['Furniture/decor',6616],['Booth space',4450],['Electrical',262]],costDocs:4}),
+      Y(2018,14,{raw:27,hot:4,warm:10,cold:13,unrated:0,ratingBasis:'source classification',src:'BioMed Boston 2018 Leads  .xlsx',cost:9228,costBasis:'invoices',costItems:[['Booth space',5075],['Furniture/decor',1798],['Other',1522],['Lead retrieval',589],['Electrical',244]],costDocs:8}),
+      Y(2019,8,{raw:34,hot:2,warm:6,cold:26,unrated:0,ratingBasis:'source classification',src:'Export-BioMEDeviceBostonElectronicsNewEnglandLeadCapture-2019-05-17.xlsx',cost:6649,costBasis:'invoices',costItems:[['Booth space',5175],['Other',1245],['Furniture/decor',229]],costDocs:4}),
       Y(2020,null,{status:'cancelled',cost:5450,costBasis:'invoices',costItems:[['Booth space',5450]],costDocs:1,note:'Postponed to Sept 2020; ultimately did not occur.'}),
       Y(2021,null,{note:'No show folder on file.'}),
-      Y(2022,19,{raw:19,src:'All leads for BIOMEDevice Boston.xlsx',cost:10399,costBasis:'invoices',costItems:[['Booth space',5625],['Furniture/decor',2526],['Freight/drayage',1210],['Lead retrieval',550],['Electrical',245],['AV/internet',242]],costDocs:10}),
+      Y(2022,7,{raw:19,hot:3,warm:4,cold:12,unrated:0,ratingBasis:'source classification',src:'All leads for BIOMEDevice Boston.xlsx',cost:10399,costBasis:'invoices',costItems:[['Booth space',5625],['Furniture/decor',2526],['Freight/drayage',1210],['Lead retrieval',550],['Electrical',245],['AV/internet',242]],costDocs:10}),
       Y(2023,null,{cost:2839,costBasis:'partial',costItems:[['Furniture/decor',2362],['Freight/drayage',331],['Electrical',145]],costDocs:5,note:'Show folder on file but no leads export saved.'}),
-      Y(2024,18,{raw:24,hot:5,warm:11,cold:6,unrated:2,src:'XPressLeads_BMDB0924_2507877 (1).xls',cost:8835,costBasis:'invoices',costItems:[['Booth space',5775],['Furniture/decor',2410],['Lead retrieval',650]],costDocs:5}),
+      Y(2024,16,{raw:24,hot:5,warm:11,cold:8,unrated:0,ratingBasis:'source classification',src:'XPressLeads_BMDB0924_2507877 (1).xls',cost:8835,costBasis:'invoices',costItems:[['Booth space',5775],['Furniture/decor',2410],['Lead retrieval',650]],costDocs:5}),
       Y(2025,null,{note:'No show folder on file.'}),
       Y(2026,null,{note:'No show folder on file.'})
     ]},
@@ -704,9 +722,9 @@
       Y(2014,71,{raw:71,src:'GPS 2014 Leads.XLS',cost:7900,costBasis:'invoices',costItems:[['Booth space',5500],['Other',1209],['AV/internet',704],['Lead retrieval',488]],costDocs:7,costOcr:1}),
       Y(2015,84,{raw:84,src:'GPS 2015 leads.xls',cost:7600,costBasis:'invoices',costItems:[['Booth space',5500],['Lead retrieval',1177],['Other',766],['Freight/drayage',157]],costDocs:10,costOcr:1}),
       Y(2016,50,{raw:50,src:'GPS 2016 Leads.xls',cost:4114,costBasis:'invoices',costItems:[['Booth space',1736],['Lead retrieval',1228],['Freight/drayage',1150]],costDocs:5}),
-      Y(2017,32,{raw:32,src:'GPS 2017 leads.xls',cost:9717,costBasis:'invoices',costItems:[['Booth space',8750],['Lead retrieval',708],['Electrical',259]],costDocs:4}),
-      Y(2018,49,{raw:49,hot:12,warm:15,cold:0,unrated:22,src:'GPS 2018 Leads Spread Sheet.xlsx',cost:2817,costBasis:'partial',costItems:[['Freight/drayage',1677],['Lead retrieval',619],['Electrical',411],['Other',110]],costDocs:6}),
-      Y(2019,28,{raw:49,hot:16,warm:12,cold:21,unrated:0,src:'Spread Sheet for GPS.xlsx',cost:11430,costBasis:'invoices',costItems:[['Booth space',6211],['Freight/drayage',3820],['Other',1068],['Electrical',330]],costDocs:7,costOcr:1}),
+      Y(2017,22,{raw:32,hot:17,warm:5,cold:10,unrated:0,ratingBasis:'source classification',src:'GPS 2017 leads.xls',cost:9717,costBasis:'invoices',costItems:[['Booth space',8750],['Lead retrieval',708],['Electrical',259]],costDocs:4}),
+      Y(2018,27,{raw:49,hot:12,warm:15,cold:22,unrated:0,ratingBasis:'source classification',src:'GPS 2018 Leads Spread Sheet.xlsx',cost:2817,costBasis:'partial',costItems:[['Freight/drayage',1677],['Lead retrieval',619],['Electrical',411],['Other',110]],costDocs:6}),
+      Y(2019,28,{raw:49,hot:16,warm:12,cold:21,unrated:0,ratingBasis:'source classification',src:'Spread Sheet for GPS.xlsx',cost:11430,costBasis:'invoices',costItems:[['Booth space',6211],['Freight/drayage',3820],['Other',1068],['Electrical',330]],costDocs:7,costOcr:1}),
       Y(2020,null,{status:'declined',note:'Contract cancelled/refunded.'}),
       Y(2021,null,{note:'Not on the schedule.'}),
       Y(2022,null,{note:'Not on the schedule.'}),
@@ -716,22 +734,22 @@
       Y(2026,null,{note:'Not on the schedule.'})
     ]},
     { id:'robotics-summit', name:'Robotics Summit & Expo', category:'Robotics', region:'Americas', data: [
-      Y(2022,33,{raw:33,src:'Robotics Summit & Expo  - Raw Leads - 05-11-22, 321p ET.xlsx',cost:9504,costBasis:'invoices',costItems:[['Furniture/decor',5315],['Booth space',2225],['Freight/drayage',1064],['Lead retrieval',423],['AV/internet',282],['Electrical',195]],costDocs:9}),
-      Y(2023,17,{raw:27,hot:7,warm:10,cold:10,unrated:0,src:'Eloqua ready template - Robotics Summit.xlsx',cost:12188,costBasis:'invoices',costItems:[['Other',4940],['Booth space',2470],['Freight/drayage',2195],['Furniture/decor',2123],['Lead retrieval',265],['Electrical',195]],costDocs:9}),
-      Y(2024,46,{raw:46,src:'Leads List.xlsx',cost:5619,costBasis:'invoices',costItems:[['Booth space',4990],['Lead retrieval',530],['Furniture/decor',99]],costDocs:5}),
-      Y(2025,26,{raw:33,hot:8,warm:14,cold:7,unrated:4,src:'Robotics Summit Leads List.xlsx',cost:7851,costBasis:'invoices',costItems:[['Booth space',4995],['Furniture/decor',2188],['Freight/drayage',668]],costDocs:4}),
-      Y(2026,26,{raw:39,hot:8,warm:18,cold:13,unrated:0,src:'Robotics Summit & Expo 2026 - Lead Export - 05-29-26.xlsx',cost:9085,costBasis:'invoices',costItems:[['Booth space',5150],['Furniture/decor',2359],['Freight/drayage',1577]],costDocs:6})
+      Y(2022,10,{raw:31,hot:2,warm:8,cold:21,unrated:0,ratingBasis:'source classification',src:'Robotics Summit & Expo  - Raw Leads - 05-11-22, 321p ET.xlsx',cost:9504,costBasis:'invoices',costItems:[['Furniture/decor',5315],['Booth space',2225],['Freight/drayage',1064],['Lead retrieval',423],['AV/internet',282],['Electrical',195]],costDocs:9}),
+      Y(2023,17,{raw:27,hot:7,warm:10,cold:10,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - Robotics Summit.xlsx',cost:12188,costBasis:'invoices',costItems:[['Other',4940],['Booth space',2470],['Freight/drayage',2195],['Furniture/decor',2123],['Lead retrieval',265],['Electrical',195]],costDocs:9}),
+      Y(2024,22,{raw:46,hot:7,warm:15,cold:24,unrated:0,ratingBasis:'source classification',src:'Leads List.xlsx',cost:5619,costBasis:'invoices',costItems:[['Booth space',4990],['Lead retrieval',530],['Furniture/decor',99]],costDocs:5}),
+      Y(2025,22,{raw:33,hot:8,warm:14,cold:11,unrated:0,ratingBasis:'source classification',src:'Robotics Summit Leads List.xlsx',cost:7851,costBasis:'invoices',costItems:[['Booth space',4995],['Furniture/decor',2188],['Freight/drayage',668]],costDocs:4}),
+      Y(2026,26,{raw:39,hot:8,warm:18,cold:13,unrated:0,ratingBasis:'source classification',src:'Robotics Summit & Expo 2026 - Lead Export - 05-29-26.xlsx',cost:9085,costBasis:'invoices',costItems:[['Booth space',5150],['Furniture/decor',2359],['Freight/drayage',1577]],costDocs:6})
     ]},
     { id:'designcon', name:'DesignCon', category:'Semiconductor', region:'Americas', data: [
-      Y(2018,34,{raw:34,hot:10,warm:8,cold:0,unrated:16,src:'DesignCon 2018 Leads.xlsx',cost:3285,costBasis:'invoices',costItems:[['Booth space',2009],['Freight/drayage',912],['Electrical',364]],costDocs:4}),
-      Y(2019,15,{raw:48,hot:4,warm:11,cold:33,unrated:0,src:'DesignCon 2019.xlsx',cost:12076,costBasis:'invoices',costItems:[['Other',6420],['Booth space',5000],['Electrical',606],['Freight/drayage',50]],costDocs:6}),
+      Y(2018,18,{raw:34,hot:10,warm:8,cold:16,unrated:0,ratingBasis:'source classification',src:'DesignCon 2018 Leads.xlsx',cost:3285,costBasis:'invoices',costItems:[['Booth space',2009],['Freight/drayage',912],['Electrical',364]],costDocs:4}),
+      Y(2019,15,{raw:48,hot:4,warm:11,cold:33,unrated:0,ratingBasis:'source classification',src:'DesignCon 2019.xlsx',cost:12076,costBasis:'invoices',costItems:[['Other',6420],['Booth space',5000],['Electrical',606],['Freight/drayage',50]],costDocs:6}),
       Y(2020,null,{note:'Booth confirmed/invoiced; no leads export saved.'}),
       Y(2021,null,{status:'cancelled',cost:5575,costBasis:'invoices',costItems:[['Booth space',5575]],costDocs:1,costOcr:1,note:'Informa Markets invoice on file; show not attended.'}),
       Y(2022,null,{note:'Not on the schedule.'}),
       Y(2023,null,{note:'Not on the schedule.'}),
       Y(2024,null,{note:'Not on the schedule.'}),
       Y(2025,null,{note:'Not on the schedule.'}),
-      Y(2026,28,{raw:43,hot:8,warm:16,cold:15,unrated:4,src:'DesignCon Leads.xls',cost:16046,costBasis:'invoices',costItems:[['Booth space',7025],['Furniture/decor',6330],['Freight/drayage',1692],['Lead retrieval',725],['AV/internet',275]],costDocs:9,costOcr:1})
+      Y(2026,24,{raw:43,hot:8,warm:16,cold:19,unrated:0,ratingBasis:'source classification',src:'DesignCon Leads.xls',cost:16046,costBasis:'invoices',costItems:[['Booth space',7025],['Furniture/decor',6330],['Freight/drayage',1692],['Lead retrieval',725],['AV/internet',275]],costDocs:9,costOcr:1})
     ]},
     { id:'slas', name:'SLAS (formerly Lab Automation)', category:'Analytical', region:'Americas', data: [
       Y(2004,63,{raw:63,src:'Lab Tradeshow Tracking.xls'}),
@@ -756,12 +774,12 @@
       Y(2023,null),
       Y(2024,null),
       Y(2025,null,{note:'Returned to the schedule for 2026.'}),
-      Y(2026,13,{raw:15,hot:2,warm:0,cold:2,unrated:11,src:'All Scans Lead-Retrieval-Summary - SLAS 2026 - Clean.xlsx',cost:7038,costBasis:'invoices',costItems:[['Booth space',4600],['Freight/drayage',1808],['Lead retrieval',390],['AV/internet',240]],costDocs:9,costOcr:3})
+      Y(2026,2,{raw:15,hot:2,warm:0,cold:13,unrated:0,ratingBasis:'source classification',src:'All Scans Lead-Retrieval-Summary - SLAS 2026 - Clean.xlsx',cost:7038,costBasis:'invoices',costItems:[['Booth space',4600],['Freight/drayage',1808],['Lead retrieval',390],['AV/internet',240]],costDocs:9,costOcr:3})
     ]},
     { id:'space-tech-expo', name:'Space Tech Expo', category:'Aerospace', region:'Americas', data: [
       Y(2023,null,{status:'walked',note:'Speaker slot only - no exhibit booth, no leads collected.'}),
       Y(2024,null,{note:'Not exhibited.'}),
-      Y(2025,7,{raw:14,hot:1,warm:1,cold:7,unrated:5,src:'Connections Space Tech Expo USA 2025.xlsx',cost:7715,costBasis:'invoices',costItems:[['Booth space',5446],['Furniture/decor',1885],['Electrical',384]],costDocs:5}),
+      Y(2025,2,{raw:14,hot:1,warm:1,cold:12,unrated:0,ratingBasis:'source classification',src:'Connections Space Tech Expo USA 2025.xlsx',cost:7715,costBasis:'invoices',costItems:[['Booth space',5446],['Furniture/decor',1885],['Electrical',384]],costDocs:5}),
       Y(2026,null,{cost:4607,costBasis:'invoices',costItems:[['Booth space',2900],['Furniture/decor',1559],['AV/internet',148]],costDocs:5,note:'Post-show report on file ("22 leads, ~5 qualified") but no leads export was saved.'})
     ]},
     { id:'aimd-workshop', name:'AIMD Workshop', category:'Medical', region:'EMEA', data: [
@@ -770,7 +788,7 @@
     ]},
     { id:'mtech-tokyo', name:'M-Tech Tokyo', category:'Industrial', region:'Asia', channel:'Distributor', data: [
       Y(2022,null,{note:'No show folder - not attended.'}),
-      Y(2023,113,{raw:113,src:'BSE_M-Tech東京2023引合いリスト.xlsx',cost:204,costBasis:'partial',costItems:[['Booth space',204]],costDocs:2}),
+      Y(2023,28,{raw:113,hot:9,warm:19,cold:85,unrated:0,ratingBasis:'source grade',src:'BSE_M-Tech東京2023引合いリスト.xlsx',cost:204,costBasis:'partial',costItems:[['Booth space',204]],costDocs:2}),
       Y(2024,null,{note:'Distributor (Moritex) led; no BSE-collected lead data.'}),
       Y(2025,null,{note:'No show folder - not attended.'}),
       Y(2026,null,{note:'Show occurred (Jul 1-3) but distributor-led with no BSE lead data captured.'})
@@ -786,7 +804,7 @@
       Y(2019,null,{note:'No show folder - not attended.'}),
       Y(2020,null,{note:'No show folder - not attended.'}),
       Y(2021,null,{note:'No show folder - not attended.'}),
-      Y(2022,144,{raw:144,src:'Mtech2022Inquirylist.xlsx',cost:142,costBasis:'partial',costItems:[['Booth space',142]],costDocs:1}),
+      Y(2022,25,{raw:144,hot:2,warm:23,cold:119,unrated:0,ratingBasis:'source grade',src:'Mtech2022Inquirylist.xlsx',cost:142,costBasis:'partial',costItems:[['Booth space',142]],costDocs:1}),
       Y(2023,null,{note:'No show folder - not attended.'}),
       Y(2024,null,{note:'No show folder - not attended.'}),
       Y(2025,null,{note:'No show folder - not attended.'}),
@@ -810,7 +828,7 @@
       Y(2022,null,{status:'declined',note:'"On waiting lists for years and did not get through pre-COVID" per internal email.'}),
       Y(2023,null,{status:'declined',cost:2526,costBasis:'partial',costItems:[['Furniture/decor',2090],['Sponsorship',436]],costDocs:2,note:'Booth arranged then cancelled.'}),
       Y(2024,null,{note:'Exhibited (lead-retrieval app activated) but no leads export was saved.'}),
-      Y(2025,58,{raw:58,src:'Compamed 2025 Leads.xlsx',cost:4242,costBasis:'invoices',costItems:[['Furniture/decor',2313],['Booth space',1766],['Lead retrieval',162]],costDocs:6}),
+      Y(2025,14,{raw:56,hot:5,warm:9,cold:42,unrated:0,ratingBasis:'source classification',src:'Compamed 2025 Leads.xlsx',cost:4242,costBasis:'invoices',costItems:[['Furniture/decor',2313],['Booth space',1766],['Lead retrieval',162]],costDocs:6}),
       Y(2026,null,{note:'Scheduled Nov 16-19, 2026 - hasn\'t occurred yet.'})
     ]},
     { id:'medtech-galway', name:'Medtech Galway', category:'Medical', region:'EMEA', data: [
@@ -875,10 +893,9 @@
   }
 
   // ---------- Lead-grade (hot/warm/cold) filter ----------
-  // Cold rows are stripped out when a show's lead file is read, so `leads` is
-  // already hot + warm + unrated and `raw` is the pre-filter row count. Only a
-  // minority of show-years carry a per-lead rating at all; the rest are wholly
-  // unrated and simply cannot answer "how many were hot?".
+  // From 2017 onward, `leads` is Hot + Warm and `raw` is the valid source-row
+  // count after removing worksheet summaries, templates, internal staff, and
+  // test scans. Cold is the residual. Older ungraded years remain unchanged.
   var QUALITY = {
     qualified: { label: 'Hot + Warm (qualified)', noun: 'qualified leads', graded: false },
     hot:       { label: 'Hot only',               noun: 'hot leads',       graded: true },
@@ -903,9 +920,9 @@
     return shows;
   }
 
-  // A show-year is "rated" only if its source file actually carried Hot/Warm/Cold
-  // markings. Unrated years are not zero — they are unknown, so a graded view
-  // drops them rather than pretending they scored nothing.
+  // A show-year is rated when its workbook supplied a classification or its
+  //
+  // narrative application notes were reviewed under the documented rubric.
   function hasRating(d) { return !!(d.hot || d.warm || d.cold); }
 
   // Lead count for the selected grade, or null when this point can't answer.
@@ -955,11 +972,10 @@
     if (!isGraded()) { el.hidden = true; el.innerHTML = ''; return; }
     var c = gradeCoverage();
     var q = activeQuality();
-    var body = 'Showing <strong>' + q.label.toLowerCase() + '</strong>. Only <strong>' + c.ratedYears +
-      ' of ' + c.totalYears + ' show-years</strong> on file carry a per-lead Hot/Warm/Cold rating' +
-      ' (ratings start in 2017); the rest are unrated and are hidden in this view rather than shown as zero.';
+    var body = 'Showing <strong>' + q.label.toLowerCase() + '</strong>. <strong>' + c.ratedYears +
+      ' of ' + c.totalYears + ' show-years</strong> in the selected range have an audited Hot/Warm/Cold split.';
     if (state.quality === 'cold') {
-      body += ' Cold leads are <strong>never</strong> counted in any headline figure &mdash; this is an audit view of what was discarded (' +
+      body += ' Cold leads are <strong>never</strong> counted in any headline figure &mdash; this is an audit view of the residual (' +
         fmt(c.gradeLeads) + ' rows across the rated years).';
     } else {
       body += ' That is <strong>' + fmt(c.gradeLeads) + '</strong> ' + q.noun + ' out of ' + fmt(c.totalLeads) + ' qualified leads archive-wide.';
@@ -1024,7 +1040,7 @@
           sub: totalDataPoints + ' show-years with ' + (graded ? 'a rated lead file' : 'a verified lead file') },
         { label: 'Leads, last 2 seasons', value: fmt(mostRecentTotal), sub: 'across ' + mostRecentShows + ' shows with recent data' },
         { label: graded ? 'Total ' + activeQuality().noun : 'Total leads on file', value: fmt(grandTotal),
-          sub: graded ? 'rated show-years only, 2017–2026' : 'cold-rated leads excluded, 2004–2026' },
+          sub: graded ? 'rated show-years only, 2017–2026' : 'audited qualification rules, 2004–2026' },
         { label: graded ? 'Median cost / ' + state.quality + ' lead' : 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '&mdash;', sub: 'across ' + cpls.length + ' show-years with both leads and documented cost' }
       ];
     }
@@ -1573,7 +1589,7 @@
     var tiles = [
       ['Qualified leads', d.leads == null ? '&mdash;' : fmt(d.leads),
        d.cold ? (d.cold + ' cold excluded') : (d.leads == null ? statusLabelOf(d) : 'no cold-rated rows')],
-      ['Rows in source file', d.raw == null ? '&mdash;' : fmt(d.raw), d.raw != null ? 'before cold filter' : ''],
+      ['Valid source rows', d.raw == null ? '&mdash;' : fmt(d.raw), d.raw != null ? 'after test/internal cleanup' : ''],
       ['Documented cost', d.cost == null ? '&mdash;' : (d.costBasis === 'partial' ? '~' : '') + fmtMoney(d.cost),
        d.cost == null ? 'nothing on file' : (COST_BASIS_LABEL[d.costBasis] || '')],
       ['Cost per lead', cpl == null ? '&mdash;' : fmtMoney(cpl),
@@ -1608,6 +1624,7 @@
     } else {
       out += '<p class="ts-yr-empty">No lead file on file for this year.</p>';
     }
+    if (d.ratingBasis) out += '<p class="ts-yr-src">Classification: ' + d.ratingBasis + '</p>';
     if (d.src) out += '<p class="ts-yr-src">Source: <code>' + d.src + '</code></p>';
     out += '</div>';
 
