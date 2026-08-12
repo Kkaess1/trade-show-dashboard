@@ -258,8 +258,12 @@
 
     <div class="ts-filters">
       <div>
-        <label for="ts-year-filter">Year</label>
-        <select class="ts-select" id="ts-year-filter"></select>
+        <label for="ts-year-start-filter">From year</label>
+        <select class="ts-select" id="ts-year-start-filter"></select>
+      </div>
+      <div>
+        <label for="ts-year-end-filter">To year</label>
+        <select class="ts-select" id="ts-year-end-filter"></select>
       </div>
       <div>
         <label for="ts-cat-filter">Category</label>
@@ -581,7 +585,7 @@
       Y(2023,44,{raw:84,hot:13,warm:31,cold:40,unrated:0,src:'Eloqua ready template - OTC.xlsx',cost:9336,costBasis:'invoices',costItems:[['Booth space',4000],['Furniture/decor',3468],['Freight/drayage',1347],['Lead retrieval',410],['Electrical',110]],costDocs:9}),
       Y(2024,32,{raw:48,hot:7,warm:25,cold:16,unrated:0,src:'Eloqua ready template - OTC 2024.xlsx',cost:4737,costBasis:'invoices',costItems:[['Freight/drayage',1667],['Booth space',1647],['Furniture/decor',1423]],costDocs:5}),
       Y(2025,33,{raw:33,src:'leads-OTC251-2025-05-14.csv',cost:8043,costBasis:'invoices',costItems:[['Booth space',4400],['Freight/drayage',1727],['Furniture/decor',1458],['Lead retrieval',457]],costDocs:5}),
-      Y(2026,58,{raw:67,hot:9,warm:19,cold:9,unrated:30,src:'Raw Lead Export - OTC 2026 - 05-07-26.xlsx',cost:20062,costBasis:'invoices',costItems:[['Booth space',8400],['Electrical',8365],['Freight/drayage',2413],['Lead retrieval',765],['AV/internet',118]],costDocs:12})
+      Y(2026,58,{raw:67,hot:9,warm:19,cold:9,unrated:30,src:'Raw Lead Export - OTC 2026 - 05-07-26.xlsx',cost:15818,costBasis:'invoices',costItems:[['Booth space',8400],['Furniture/decor',3335],['Freight/drayage',2481],['Lead retrieval',765],['Other',569],['AV/internet',150],['Electrical',118]],costDocs:13})
     ]},
     { id:'aaos', name:'AAOS', category:'Medical', region:'Americas', data: [
       Y(2008,70,{raw:70,src:'AAOS Import Ready.xls',cost:6652,costBasis:'actual-rollup',costItems:[['Booth space',3300],['Furniture/decor',1649],['AV/internet',694],['Labor/cleaning',349],['Lead retrieval',325],['Freight/drayage',243],['Electrical',92]],costDocs:1,costSrc:'AAOS Expense Breakdown.xls'}),
@@ -933,6 +937,7 @@
     var ratedYears = 0, totalYears = 0, ratedLeads = 0, totalLeads = 0, gradeLeads = 0;
     SHOWS.forEach(function (s) {
       s.data.forEach(function (d) {
+        if (!inSelectedYearRange(d.year)) return;
         if (typeof d.leads !== 'number') return;
         totalYears++; totalLeads += d.leads;
         if (hasRating(d)) {
@@ -965,32 +970,36 @@
 
   // ---------- KPI row ----------
   function renderKPIs() {
-    var selYear = state.year !== 'All' ? parseInt(state.year) : null;
     var shows = filteredShows();
     var tiles = [];
 
-    if (selYear) {
+    if (!isFullYearRange()) {
       var yrLeadsTotal = 0;
       var yrShowsCount = 0;
       var yrCpls = [];
 
       shows.forEach(function (s) {
-        var d = s.data.find(function (item) { return item.year === selYear; });
-        if (d && typeof d.leads === 'number') {
+        var hasLeads = false;
+        s.data.forEach(function (d) {
+          if (typeof d.leads !== 'number') return;
           yrLeadsTotal += d.leads;
-          yrShowsCount++;
+          hasLeads = true;
           var cpl = costPerLead(d);
           if (cpl != null) yrCpls.push(cpl);
-        }
+        });
+        if (hasLeads) yrShowsCount++;
       });
 
       var yrMedianCPL = median(yrCpls);
+      var selectedRange = selectedYearLabel();
+      var bounds = selectedYearBounds();
+      var seasonCount = bounds.end - bounds.start + 1;
 
       tiles = [
-        { label: 'Shows attended in ' + selYear, value: yrShowsCount, sub: 'shows with active lead data on file in ' + selYear },
-        { label: 'Total leads in ' + selYear, value: fmt(yrLeadsTotal), sub: activeQuality().noun + ' collected in ' + selYear },
-        { label: 'Selected season', value: selYear, sub: 'program overview for ' + selYear },
-        { label: 'Median cost / lead in ' + selYear, value: yrMedianCPL != null ? fmtMoney(yrMedianCPL) : '&mdash;', sub: yrCpls.length ? ('across ' + yrCpls.length + ' show(s) with cost data') : 'no cost data on file' }
+        { label: 'Shows attended, ' + selectedRange, value: yrShowsCount, sub: 'shows with active lead data in the selected range' },
+        { label: 'Total leads, ' + selectedRange, value: fmt(yrLeadsTotal), sub: activeQuality().noun + ' collected in the selected range' },
+        { label: seasonCount === 1 ? 'Selected season' : 'Selected range', value: selectedRange, sub: seasonCount + ' season' + (seasonCount === 1 ? '' : 's') + ' selected' },
+        { label: 'Median cost / lead, ' + selectedRange, value: yrMedianCPL != null ? fmtMoney(yrMedianCPL) : '&mdash;', sub: yrCpls.length ? ('across ' + yrCpls.length + ' show-year(s) with cost data') : 'no cost data on file' }
       ];
     } else {
       var scoped = qualityScopedShows();
@@ -1029,26 +1038,54 @@
   function getChannel(show) { return show.channel || 'Direct'; }
 
   // ---------- Filters ----------
-  var state = { year: 'All', category: 'All', region: 'All', channel: 'Direct', quality: 'qualified' };
+  var state = { yearStart: 'All', yearEnd: 'All', category: 'All', region: 'All', channel: 'Direct', quality: 'qualified' };
 
   function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
   function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
+  function archiveYears() {
+    var years = [];
+    SHOWS.forEach(function (s) {
+      s.data.forEach(function (d) { if (d.year) years.push(d.year); });
+    });
+    return uniq(years).sort(function (a, b) { return a - b; });
+  }
+
+  function selectedYearBounds() {
+    var years = archiveYears();
+    return {
+      start: state.yearStart === 'All' ? years[0] : parseInt(state.yearStart, 10),
+      end: state.yearEnd === 'All' ? years[years.length - 1] : parseInt(state.yearEnd, 10)
+    };
+  }
+
+  function inSelectedYearRange(year) {
+    var bounds = selectedYearBounds();
+    return year >= bounds.start && year <= bounds.end;
+  }
+
+  function isFullYearRange() { return state.yearStart === 'All' && state.yearEnd === 'All'; }
+
+  function selectedYearLabel() {
+    var bounds = selectedYearBounds();
+    return bounds.start === bounds.end ? String(bounds.start) : bounds.start + '-' + bounds.end;
+  }
+
   var filtersBound = false;
 
   function renderFilters() {
-    var allYears = [];
-    SHOWS.forEach(function (s) {
-      s.data.forEach(function (d) { if (d.year) allYears.push(d.year); });
-    });
-    var years = ['All'].concat(uniq(allYears).sort(function (a, b) { return b - a; }));
+    var allYears = archiveYears();
+    var yearsDesc = allYears.slice().sort(function (a, b) { return b - a; });
     var cats = ['All'].concat(uniq(SHOWS.map(function (s) { return s.category; })).sort());
     var regions = ['All'].concat(uniq(SHOWS.map(function (s) { return s.region; })).sort());
     var channelOpts = [['Direct', 'Direct only (default)'], ['All', 'All (incl. distributor)'], ['Distributor', 'Distributor only']];
 
-    var yrSel = document.getElementById('ts-year-filter');
-    yrSel.innerHTML = years.map(function (y) { return '<option value="' + y + '">' + (y === 'All' ? 'All years (2004–2026)' : y) + '</option>'; }).join('');
-    yrSel.value = state.year;
+    var yrStartSel = document.getElementById('ts-year-start-filter');
+    var yrEndSel = document.getElementById('ts-year-end-filter');
+    yrStartSel.innerHTML = '<option value="All">Earliest (' + allYears[0] + ')</option>' + yearsDesc.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
+    yrEndSel.innerHTML = '<option value="All">Latest (' + allYears[allYears.length - 1] + ')</option>' + yearsDesc.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
+    yrStartSel.value = state.yearStart;
+    yrEndSel.value = state.yearEnd;
 
     var catSel = document.getElementById('ts-cat-filter');
     catSel.innerHTML = cats.map(function (c) { return '<option value="' + c + '">' + c + '</option>'; }).join('');
@@ -1070,7 +1107,22 @@
     // once or every upload would stack another listener on every select.
     if (filtersBound) return;
     filtersBound = true;
-    yrSel.addEventListener('change', function () { state.year = yrSel.value; renderAll(); });
+    yrStartSel.addEventListener('change', function () {
+      state.yearStart = yrStartSel.value;
+      if (state.yearStart !== 'All' && state.yearEnd !== 'All' && parseInt(state.yearStart, 10) > parseInt(state.yearEnd, 10)) {
+        state.yearEnd = state.yearStart;
+        yrEndSel.value = state.yearEnd;
+      }
+      renderAll();
+    });
+    yrEndSel.addEventListener('change', function () {
+      state.yearEnd = yrEndSel.value;
+      if (state.yearStart !== 'All' && state.yearEnd !== 'All' && parseInt(state.yearEnd, 10) < parseInt(state.yearStart, 10)) {
+        state.yearStart = state.yearEnd;
+        yrStartSel.value = state.yearStart;
+      }
+      renderAll();
+    });
     catSel.addEventListener('change', function () { state.category = catSel.value; renderAll(); });
     regSel.addEventListener('change', function () { state.region = regSel.value; renderAll(); });
     chanSel.addEventListener('change', function () { state.channel = chanSel.value; renderAll(); });
@@ -1085,6 +1137,15 @@
       return true;
     }).map(projectShow);
 
+    // Keep every dashboard view on the same inclusive year range. Copies are
+    // used here so opening a show still displays its complete archived history.
+    shows = shows.map(function (s) {
+      var copy = {};
+      for (var k in s) { if (Object.prototype.hasOwnProperty.call(s, k)) copy[k] = s[k]; }
+      copy.data = s.data.filter(function (d) { return inSelectedYearRange(d.year); });
+      return copy;
+    }).filter(function (s) { return s.data.length > 0; });
+
     // Under a graded view, drop shows that have no rated year at all instead of
     // parading them with empty charts.
     if (isGraded()) {
@@ -1098,37 +1159,34 @@
   // ---------- Ranking bar chart ----------
   function renderRanking() {
     var shows = filteredShows();
-    var selYear = state.year !== 'All' ? parseInt(state.year, 10) : null;
+    var bounds = selectedYearBounds();
+    var singleYear = bounds.start === bounds.end;
+    var narrowedRange = !isFullYearRange();
     
     // Update Ranking section title & description dynamically based on selected year
     var rankTitleEl = document.getElementById('ts-rank-title');
     var rankDescEl = document.getElementById('ts-rank-desc');
     var noun = activeQuality().noun;
     if (rankTitleEl) {
-      if (selYear) {
-        rankTitleEl.textContent = (isGraded() ? capitalise(noun) : 'Lead count') + ' ranking for ' + selYear;
+      if (singleYear) {
+        rankTitleEl.textContent = (isGraded() ? capitalise(noun) : 'Lead count') + ' ranking for ' + selectedYearLabel();
+      } else if (narrowedRange) {
+        rankTitleEl.textContent = 'Most recent ' + (isGraded() ? noun : 'lead count') + ' in ' + selectedYearLabel() + ', ranked';
       } else {
         rankTitleEl.textContent = isGraded() ? 'Most recent ' + noun + ', ranked' : 'Most recent lead count, ranked';
       }
     }
     if (rankDescEl) {
-      rankDescEl.textContent = selYear
-        ? 'Shows attended in ' + selYear + ', sorted high to low by ' + noun + '.'
+      rankDescEl.textContent = narrowedRange
+        ? 'Each show\'s latest season in ' + selectedYearLabel() + ', sorted high to low by ' + noun + '.'
         : 'Each show’s latest season on file, sorted high to low by ' + noun + '.';
     }
 
     var rows = [];
     shows.forEach(function (s) {
-      if (selYear) {
-        var matchPoint = s.data.find(function (d) { return d.year === selYear && typeof d.leads === 'number'; });
-        if (matchPoint) {
-          rows.push({ show: s, point: matchPoint });
-        }
-      } else {
-        var pts = numericPoints(s);
-        if (pts.length) {
-          rows.push({ show: s, point: pts[pts.length - 1] });
-        }
+      var pts = numericPoints(s);
+      if (pts.length) {
+        rows.push({ show: s, point: pts[pts.length - 1] });
       }
     });
 
@@ -1137,7 +1195,7 @@
     var max = rows.length ? rows[0].point.leads : 1;
     var el = document.getElementById('ts-rank-list');
     if (!rows.length) {
-      var noMsg = selYear ? 'No tradeshows attended or with lead data on file for ' + selYear + '.' : 'No shows match the current filters.';
+      var noMsg = narrowedRange ? 'No tradeshows attended or with lead data on file for ' + selectedYearLabel() + '.' : 'No shows match the current filters.';
       el.innerHTML = '';
       return;
     }
@@ -1222,11 +1280,9 @@
   // ---------- Full table ----------
   function renderTable() {
     var shows = filteredShows();
-    var selYear = state.year !== 'All' ? parseInt(state.year) : null;
     var rows = [];
     shows.forEach(function (s) {
       s.data.slice().sort(function (a, b) { return a.year - b.year; }).forEach(function (d) {
-        if (selYear && d.year !== selYear) return;
         // A graded view can only speak for rated years, so unrated rows are
         // withheld rather than shown as a dash that reads like "attended, zero".
         if (isGraded() && typeof d.leads !== 'number') return;
@@ -1321,7 +1377,7 @@
       var yearLabel = '<text x="' + (x + barW / 2) + '" y="' + (chartH - padB + 15) + '" text-anchor="middle" font-size="9" fill="var(--text-muted)">' + yr + '</text>';
       var title = yr + ': ' + info.total.toLocaleString('en-US') + ' leads across ' + info.count + ' show' + (info.count === 1 ? '' : 's') + ' with data on file';
       if (hasFlag) title += '. Includes ' + info.flaggedTotal.toLocaleString('en-US') + ' leads (' + Math.round(100 * info.flaggedTotal / info.total) + '%) from flagged/unverified data points: ' + info.flaggedShows.join(', ') + '.';
-      var isSelYear = (state.year !== 'All' && yr === parseInt(state.year));
+      var isSelYear = !isFullYearRange() && inSelectedYearRange(yr);
       var barColor = isSelYear ? 'var(--series-3)' : (hasFlag ? 'var(--serious)' : 'var(--series-1)');
       return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + h.toFixed(1) + '" rx="4" fill="' + barColor + '" fill-opacity="' + (hasFlag ? '0.55' : '1') + '"><title>' + title + '</title></rect>' + label + yearLabel;
     }).join('');
