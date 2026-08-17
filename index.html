@@ -274,6 +274,10 @@
   .ts-yr-list { list-style: none; margin: 0; padding: 0; font-size: 0.76rem; }
   .ts-yr-list li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-bottom: 1px solid var(--gridline); }
   .ts-yr-list li:last-child { border-bottom: none; }
+  /* Documented but excluded from the counted cost. */
+  .ts-yr-uncounted { color: var(--text-muted); }
+  .ts-yr-uncounted span:last-child { font-weight: 400; text-decoration: line-through; }
+  .ts-yr-uncounted em { font-style: normal; font-size: 0.85em; opacity: 0.8; }
   .ts-yr-list li span:last-child { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
   .ts-yr-src { font-size: 0.7rem; color: var(--text-muted); margin-top: 10px; word-break: break-word; }
   .ts-yr-src code { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-size: 0.68rem; background: var(--gridline); padding: 1px 5px; border-radius: 4px; }
@@ -371,7 +375,7 @@
           <label for="ts-compare-metric">Compare</label>
           <select class="ts-select" id="ts-compare-metric">
             <option value="leads">Leads</option>
-            <option value="cost">Documented cost</option>
+            <option value="cost">Booth space cost</option>
             <option value="cpl">Cost per lead</option>
             <option value="mix">Lead mix (H / W / C)</option>
           </select>
@@ -521,7 +525,7 @@
             <input type="number" class="ts-input" id="ts-up-leads" min="0" />
           </div>
           <div class="ts-form-group">
-            <label for="ts-up-cost">Total Cost ($) <span style="font-weight:normal; color:var(--text-muted);">(optional)</span></label>
+            <label for="ts-up-cost">Booth space cost ($) <span style="font-weight:normal; color:var(--text-muted);">(optional)</span></label>
             <input type="number" class="ts-input" id="ts-up-cost" placeholder="e.g. 5000" />
           </div>
           <div class="ts-form-group" style="grid-column: span 2;">
@@ -1067,9 +1071,30 @@
     return show.data.filter(function (d) { return typeof d.leads === 'number'; }).sort(function (a, b) { return a.year - b.year; });
   }
 
+  // A show-year's cost is the booth-space line and nothing else. The archive
+  // documents wildly different depths per year - a handful are full invoice
+  // rollups with furniture, freight and electrical, most are booth space alone -
+  // so comparing documented totals across years was never like for like. Booth
+  // space is the one line present in nearly every costed year, so it is the only
+  // figure that compares. The rest stays in costItems and is shown, uncounted,
+  // in the year detail.
+  function boothCost(d) {
+    if (!d.costItems || !d.costItems.length) return null;
+    // Every charge was refunded, so nothing was actually paid.
+    if (d.costBasis === 'refunded') return 0;
+    for (var i = 0; i < d.costItems.length; i++) {
+      var label = String(d.costItems[i][0] || '');
+      if (label.indexOf('Booth space') === 0) {
+        return typeof d.costItems[i][1] === 'number' ? d.costItems[i][1] : null;
+      }
+    }
+    return null;
+  }
+
   function costPerLead(d) {
-    if (d.costBasis === 'partial') return null;
-    return (typeof d.cost === 'number' && typeof d.leads === 'number' && d.leads > 0) ? (d.cost / d.leads) : null;
+    var booth = boothCost(d);
+    return (typeof booth === 'number' && booth > 0 && typeof d.leads === 'number' && d.leads > 0)
+      ? (booth / d.leads) : null;
   }
 
   function allDataPoints() {
@@ -1092,11 +1117,18 @@
     return (r < 0 ? '&minus;$' : '$') + Math.abs(r).toLocaleString('en-US');
   }
   function costCell(d) {
-    if (d.cost == null) return '&mdash;';
-    var prefix = d.costBasis === 'partial' ? '~' : '';
-    var title = d.costBasis === 'partial' ? ' title="Partial cost — see notes for what\'s excluded"'
-      : (d.costBasis === 'refunded' ? ' title="Charges were documented but refunded in full — see notes"' : '');
-    return '<span' + title + '>' + prefix + fmtMoney(d.cost) + '</span>';
+    var booth = boothCost(d);
+    if (booth == null) {
+      // A cost total exists but no booth-space line, so there is no comparable
+      // figure for this year.
+      return d.cost != null
+        ? '<span title="No booth-space line in this year&apos;s documents — other charges are on file but are not counted">&mdash;</span>'
+        : '&mdash;';
+    }
+    var title = d.costBasis === 'refunded'
+      ? ' title="Booth space was invoiced but refunded in full — see notes"'
+      : ' title="Booth space only — other charges are listed in the year detail but not counted"';
+    return '<span' + title + '>' + fmtMoney(booth) + '</span>';
   }
 
   // ---------- Lead-grade (hot/warm/cold) filter ----------
@@ -1203,7 +1235,7 @@
         { label: 'Shows attended, ' + selectedRange, value: yrShowsCount, sub: 'shows with active lead data in the selected range' },
         { label: 'Total leads, ' + selectedRange, value: fmt(yrLeadsTotal), sub: activeQuality().noun + ' collected in the selected range' },
         { label: seasonCount === 1 ? 'Selected season' : 'Selected range', value: selectedRange, sub: seasonCount + ' season' + (seasonCount === 1 ? '' : 's') + ' selected' },
-        { label: 'Median cost / lead, ' + selectedRange, value: yrMedianCPL != null ? fmtMoney(yrMedianCPL) : '&mdash;', sub: yrCpls.length ? ('across ' + yrCpls.length + ' show-year(s) with cost data') : 'no cost data on file' }
+        { label: 'Median cost / lead, ' + selectedRange, value: yrMedianCPL != null ? fmtMoney(yrMedianCPL) : '&mdash;', sub: yrCpls.length ? ('booth space ÷ leads, across ' + yrCpls.length + ' show-year(s)') : 'no booth-space cost on file' }
       ];
     } else {
       var scoped = qualityScopedShows();
@@ -1229,7 +1261,7 @@
         { label: 'Leads, last 2 seasons', value: fmt(mostRecentTotal), sub: 'across ' + mostRecentShows + ' shows with recent data' },
         { label: graded ? 'Total ' + activeQuality().noun : 'Total leads on file', value: fmt(grandTotal),
           sub: isAllGrades() ? 'all valid leads on file, 2004–2026' : (graded ? 'rated show-years only, 2017–2026' : 'audited qualification rules, 2004–2026') },
-        { label: graded ? 'Median cost / selected lead' : 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '&mdash;', sub: 'across ' + cpls.length + ' show-years with both leads and documented cost' }
+        { label: graded ? 'Median cost / selected lead' : 'Median cost / lead', value: medianCPL != null ? fmtMoney(medianCPL) : '&mdash;', sub: 'booth space ÷ leads, across ' + cpls.length + ' show-years with both'  }
       ];
     }
 
@@ -1515,7 +1547,7 @@
 
   var COMPARE_METRICS = {
     leads: { label: 'Leads', higherIsBetter: true },
-    cost: { label: 'Documented cost', higherIsBetter: false },
+    cost: { label: 'Booth space cost', higherIsBetter: false },
     cpl: { label: 'Cost per lead', higherIsBetter: false },
     mix: { label: 'Lead mix (H / W / C)', higherIsBetter: true }
   };
@@ -1526,7 +1558,7 @@
   // not having exhibited at all.
   function compareCell(metric, d, projected) {
     if (metric === 'cost') {
-      return { value: typeof d.cost === 'number' ? d.cost : null, html: costCell(d) };
+      return { value: boothCost(d), html: costCell(d) };
     }
     if (metric === 'cpl') {
       var cpl = costPerLead(projected);
@@ -1570,8 +1602,10 @@
         var t = totals[i];
         t.shows++;
         if (typeof projected.leads === 'number') t.leads += projected.leads;
-        if (typeof d.cost === 'number') t.cost += d.cost;
-        if (d.costBasis === 'partial') t.partial = true;
+        var booth = boothCost(d);
+        // A year is incomplete when some show it ran has no booth figure at all,
+        // so the column total understates rather than being merely approximate.
+        if (typeof booth === 'number') t.cost += booth; else t.partial = true;
         var cpl = costPerLead(projected);
         if (cpl != null) t.cpls.push(cpl);
         return compareCell(metric, d, projected);
@@ -1605,7 +1639,7 @@
       footRow('Selected leads', totals.map(function (t) {
         return '<td class="ts-matrix-footnum">' + fmt(t.leads) + '</td>';
       }).join('')) +
-      footRow('Documented cost', totals.map(function (t) {
+      footRow('Booth space cost', totals.map(function (t) {
         return '<td class="ts-matrix-footnum">' + (t.partial ? '~' : '') + fmtMoney(t.cost || null) + '</td>';
       }).join('')) +
       footRow('Median $ / lead', totals.map(function (t) {
@@ -1937,7 +1971,8 @@
         var color = d.flag ? 'var(--serious)' : (d === latest ? 'var(--series-1)' : 'var(--series-1)');
         var isLabeled = (d === peak || d === latest);
         var titleBits = d.year + ': ' + d.leads + ' leads';
-        if (d.cost) titleBits += ' · $' + d.cost.toLocaleString('en-US') + ' cost';
+        var tipBooth = boothCost(d);
+        if (tipBooth) titleBits += ' · $' + tipBooth.toLocaleString('en-US') + ' booth space';
         if (d.note) titleBits += ' — ' + d.note;
         var valueLabel = isLabeled ? '<text x="' + (x + barW / 2) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text-primary)">' + d.leads + '</text>' : '';
         return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + h.toFixed(1) + '" rx="4" fill="' + color + '"><title>' + titleBits + '</title></rect>' + valueLabel + yearLabel;
@@ -1974,7 +2009,7 @@
     var total = pts.reduce(function (s, p) { return s + p.leads; }, 0);
     var cpls = show.data.map(costPerLead).filter(function (v) { return v != null; });
     var avgCPL = cpls.length ? cpls.reduce(function (s, v) { return s + v; }, 0) / cpls.length : null;
-    var costTotal = show.data.reduce(function (s, d) { return s + (d.cost || 0); }, 0);
+    var costTotal = show.data.reduce(function (s, d) { return s + (boothCost(d) || 0); }, 0);
 
     document.getElementById('ts-modal-title-el').textContent = show.name;
     document.getElementById('ts-modal-cat').innerHTML = show.category + ' · ' + show.region + (show.discontinued ? ' · discontinued' : '') + (getChannel(show) === 'Distributor' ? '<span class="ts-channel-tag">Distributor</span>' : '');
@@ -1985,7 +2020,7 @@
       { label: 'Peak', value: peak ? fmt(peak.leads) + ' (' + peak.year + ')' : '—' },
       { label: 'Average (years attended)', value: avg != null ? fmt(avg) : '—' },
       { label: 'Total leads (all years)', value: fmt(total) },
-      { label: 'Total documented cost', value: costTotal ? fmtMoney(costTotal) : '—' },
+      { label: 'Total booth space cost', value: costTotal ? fmtMoney(costTotal) : '—' },
       { label: 'Avg cost / lead', value: avgCPL != null ? fmtMoney(avgCPL) : '—' }
     ];
     document.getElementById('ts-modal-stats').innerHTML = stats.map(function (t) {
@@ -2082,14 +2117,17 @@
 
     // headline numbers for this year alone
     var cpl = costPerLead(d);
+    var booth = boothCost(d);
     var tiles = [
       ['Qualified leads', d.leads == null ? '&mdash;' : fmt(d.leads),
        d.cold ? (d.cold + ' cold excluded') : (d.leads == null ? statusLabelOf(d) : 'no cold-rated rows')],
       ['Valid source rows', d.raw == null ? '&mdash;' : fmt(d.raw), d.raw != null ? 'after test/internal cleanup' : ''],
-      ['Documented cost', d.cost == null ? '&mdash;' : (d.costBasis === 'partial' ? '~' : '') + fmtMoney(d.cost),
-       d.cost == null ? 'nothing on file' : (COST_BASIS_LABEL[d.costBasis] || '')],
+      ['Booth space cost', booth == null ? '&mdash;' : fmtMoney(booth),
+       booth == null
+         ? (d.cost != null ? 'no booth-space line on file' : 'nothing on file')
+         : (d.costBasis === 'refunded' ? (COST_BASIS_LABEL[d.costBasis] || '') : 'booth space only')],
       ['Cost per lead', cpl == null ? '&mdash;' : fmtMoney(cpl),
-       cpl == null ? (d.costBasis === 'partial' ? 'partial cost — not comparable' : 'needs both leads and cost') : 'this year only']
+       cpl == null ? (booth == null ? 'needs a booth-space figure' : 'needs both leads and booth space') : 'booth space ÷ leads, this year']
     ];
     if (typeof d.opportunities === 'number') {
       tiles.push(['CRM opportunities', fmt(d.opportunities), 'from CRM pipeline report']);
@@ -2130,9 +2168,17 @@
     // ---- cost column
     out += '<div><p class="ts-yr-sub">Cost breakdown</p>';
     if (d.costItems && d.costItems.length) {
+      // Booth space is the counted figure; everything else stays visible as
+      // documentation but is dimmed and struck from the total.
       out += '<ul class="ts-yr-list">' + d.costItems.map(function (it) {
-        return '<li><span>' + it[0] + '</span><span>' + fmtMoney(it[1]) + '</span></li>';
-      }).join('') + '<li><span><strong>Total</strong></span><span>' + fmtMoney(d.cost) + '</span></li></ul>';
+        var counts = String(it[0] || '').indexOf('Booth space') === 0;
+        return '<li' + (counts ? '' : ' class="ts-yr-uncounted"') + '><span>' + it[0] +
+          (counts ? '' : ' <em>not counted</em>') + '</span><span>' + fmtMoney(it[1]) + '</span></li>';
+      }).join('') +
+      '<li><span><strong>Counted cost</strong></span><span><strong>' +
+        (booth == null ? '&mdash;' : fmtMoney(booth)) + '</strong></span></li></ul>' +
+      '<p class="ts-yr-src">Only booth space is counted, so cost compares like for like across years. ' +
+        'The other lines are what the show folder documents for this year.</p>';
       if (d.costSrc) out += '<p class="ts-yr-src">Source: <code>' + d.costSrc + '</code></p>';
       else if (d.costDocs) {
         out += '<p class="ts-yr-src">From ' + d.costDocs + ' invoice/PO document' + (d.costDocs === 1 ? '' : 's') + ' in the show folder' +
@@ -2140,7 +2186,8 @@
                '.</p>';
       }
     } else if (d.cost != null) {
-      out += '<ul class="ts-yr-list"><li><span>Documented total</span><span>' + fmtMoney(d.cost) + '</span></li></ul>';
+      out += '<ul class="ts-yr-list"><li class="ts-yr-uncounted"><span>Documented total <em>not counted</em></span><span>' + fmtMoney(d.cost) + '</span></li></ul>' +
+             '<p class="ts-yr-src">No line-item breakdown on file, so no booth-space figure can be separated out for this year.</p>';
       if (d.costSrc) out += '<p class="ts-yr-src">Source: <code>' + d.costSrc + '</code></p>';
     } else {
       out += '<p class="ts-yr-empty">No invoice, PO or expense report for this year was found in the archive.</p>';
@@ -2338,10 +2385,16 @@
       var existingPt = targetShow.data.find(function (d) { return d.year === yearVal; });
       if (existingPt) {
         existingPt.leads = leadsVal;
-        if (costVal != null) existingPt.cost = costVal;
+        if (costVal != null) {
+          existingPt.cost = costVal;
+          existingPt.costItems = [['Booth space', costVal]];
+          existingPt.costBasis = existingPt.costBasis || 'partial';
+        }
         if (noteVal) existingPt.note = noteVal;
       } else {
-        targetShow.data.push(Y(yearVal, leadsVal, { cost: costVal, note: noteVal }));
+        targetShow.data.push(Y(yearVal, leadsVal, costVal != null
+          ? { cost: costVal, costItems: [['Booth space', costVal]], costBasis: 'partial', note: noteVal }
+          : { note: noteVal }));
         targetShow.data.sort(function (a, b) { return a.year - b.year; });
       }
 
