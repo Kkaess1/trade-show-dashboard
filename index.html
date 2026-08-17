@@ -161,7 +161,6 @@
      on the right, which is where they have to be to compare across. */
   .ts-matrix-showhead { width: auto; min-width: 190px; }
   .ts-matrix-yearcol { width: 104px; }
-  .ts-matrix-trendcol { width: 78px; }
   .ts-matrix tbody tr { cursor: pointer; }
   .ts-matrix tbody tr:hover, .ts-matrix tbody tr:focus-visible { background: color-mix(in srgb, var(--series-1) 8%, transparent); outline: none; }
   .ts-matrix-name { font-weight: 600; }
@@ -172,7 +171,6 @@
   /* The show's strongest year in the selected span, so the peak is findable
      without reading every number. */
   .ts-matrix-best { font-weight: 700; color: var(--brand-blue); }
-  .ts-matrix-spark { display: block; width: 62px; height: 18px; margin-left: auto; }
   .ts-matrix tfoot td, .ts-matrix tfoot th { border-top: 2px solid var(--gridline); border-bottom: none; padding-top: 9px; padding-bottom: 9px; background: var(--surface-1); }
   .ts-matrix tfoot tr:first-child td, .ts-matrix tfoot tr:first-child th { padding-top: 11px; }
   .ts-matrix-footlabel { text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 0.66rem; white-space: nowrap; }
@@ -462,10 +460,20 @@
       invoice on file &mdash; and those years are left out of cost-per-lead so the comparison stays like-for-like.
       Cost coverage is thinnest for the European shows (Hannover, Analytica, Compamed), whose invoices were
       largely handled outside these folders.</p>
+      <p><strong>Where a show folder holds no lead export, the reference workbook is used instead.</strong>
+      <code>Tradeshow report data.xlsx</code> is the marketing team's own Hot + Warm summary for 2020&ndash;2025.
+      Eight show-years are counted from it because their folders hold a lead-retrieval order but no exported
+      lead list: MD&amp;M West, MD&amp;M Minneapolis, Hannover, Analytica, BIOMEDevice Silicon Valley and Compamed
+      for 2024, and A&amp;D Turin and FEINDEF for 2025. Those rows name the workbook under "Source" and give a
+      combined Hot + Warm figure with no Hot/Warm split, because that is all the workbook records. Wherever a
+      show folder <em>does</em> hold a lead file, that file is counted and the workbook is not used &mdash;
+      each such year's note states whether the workbook agrees.</p>
       <p><strong>Gaps are shown as gaps.</strong> Years with no leads carry a status &mdash; cancelled, declined,
       walked (attended without a booth), or no-data &mdash; and a note saying what the archive does and does not
-      hold for that year. Nothing on this page is estimated or interpolated: every lead count and every cost
-      line traces back to a named file in the show folder.</p>
+      hold for that year. A cancelled show whose charges were refunded carries a documented cost of $0 with the
+      refund correspondence cited, which is different from a blank. Nothing on this page is estimated or
+      interpolated: every lead count and every cost line traces back to a named file &mdash; the show folder's
+      own documents, or the reference workbook where it is the only record.</p>
     </div>
 
     </div>
@@ -604,7 +612,7 @@
       Y(2018,14,{raw:41,hot:9,warm:5,cold:27,unrated:0,ratingBasis:'source classification',src:'MD&M West 2018 leads.xlsx',cost:9670,costBasis:'invoices',costItems:[['Booth space',5650],['Furniture/decor',3217],['Lead retrieval',803]],costDocs:6}),
       Y(2019,12,{raw:40,hot:4,warm:8,cold:28,unrated:0,ratingBasis:'source classification',src:'Export-MDMAnaheim2019-2019-02-08.xlsx',cost:7868,costBasis:'invoices',costItems:[['Booth space',5850],['Lead retrieval',1220],['Electrical',798]],costDocs:4}),
       Y(2020,8,{raw:16,hot:4,warm:4,cold:8,unrated:0,ratingBasis:'source classification',src:'Export-MDMWest2020-2020-02-14.xlsx',cost:6475,costBasis:'partial',costItems:[['Booth space',6475]],costDocs:3,costOcr:1}),
-      Y(2021,14,{raw:14,qualifiedUnsplit:14,cold:0,unrated:0,ratingBasis:'2021 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:3546.18,costBasis:'partial',costItems:[['Booth space',3546.18]],costDocs:4,note:'Hot + Warm count from the reference workbook (14), replacing an earlier 8 Hot / 5 Warm split. Raw count of 14 retained from "All Leads for IMEW2021 Consolidated (2).xlsx"; note the workbook figure equals the total, so every lead is treated as qualified.'}),
+      Y(2021,14,{raw:14,qualifiedUnsplit:14,cold:0,unrated:0,ratingBasis:'all source rows carry an application note; file has no Hot/Warm column',src:'All Leads for IMEW2021 Consolidated (2).xlsx',cost:3546.18,costBasis:'partial',costItems:[['Booth space',3546.18]],costDocs:4,note:'Counted from the consolidated show-folder lead file, which holds 14 rows, none of them internal or test scans, and every row carries a written application note. The file has no Hot/Warm/Cold column, so all 14 count as qualified. The reference workbook independently records 14 Hot + Warm for MD&M West 2021, matching the file exactly.'}),
       Y(2022,4,{raw:28,hot:0,warm:4,cold:24,unrated:0,ratingBasis:'source Opportunity tag',src:'imengineeringwest-leads-2022-04-14.xlsx',cost:5150,costBasis:'partial',costItems:[['Booth space',5150]],costDocs:4}),
       Y(2023,10,{raw:16,hot:1,warm:9,cold:6,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - MD&M WEST.xlsx',cost:10042,costBasis:'invoices',costItems:[['Booth space',6700],['Electrical',2418],['Lead retrieval',600],['AV/internet',219],['Freight/drayage',72],['Furniture/decor',32]],costDocs:6}),
       Y(2024,8,{qualifiedUnsplit:8,unrated:0,ratingBasis:'2024 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:6800,costBasis:'invoices',costItems:[['Booth space',6800]],costDocs:2,note:'Reclassified from cancelled to attended: the reference workbook records 8 Hot + Warm leads and the show folder holds on-site booth photos ("mdm west 2024 booth traffic.jpg"). A "cancelation proof.msg" is also on file and appears to relate to a service order rather than the booth. The workbook gives no total, so the raw lead count and cold count are unknown.'}),
@@ -691,11 +699,11 @@
       Y(2017,40,{raw:80,hot:17,warm:23,cold:40,unrated:0,ratingBasis:'source classification',src:'OTC 2017 leads.xls',cost:11375,costBasis:'invoices',costItems:[['Booth space',7200],['Furniture/decor',2609],['Lead retrieval',594],['Other',463],['Registration',309],['Electrical',199]],costDocs:8,costOcr:1}),
       Y(2018,44,{raw:118,hot:12,warm:32,cold:74,unrated:0,ratingBasis:'source classification',src:'OTC 2018 leads-export-1525724604217.xls',cost:13106,costBasis:'invoices',costItems:[['Booth space',7200],['Registration',1749],['Other',1743],['Furniture/decor',1610],['Electrical',661],['Labor/cleaning',142]],costDocs:12}),
       Y(2019,64,{raw:119,hot:34,warm:30,cold:55,unrated:0,ratingBasis:'source classification',src:'OTC2019LeadCapture-2019-05-14.xlsx',cost:11821,costBasis:'invoices',costItems:[['Booth space',7500],['Registration',1749],['Furniture/decor',1748],['Lead retrieval',704],['Other',120]],costDocs:9,costOcr:3}),
-      Y(2020,34,{status:'cancelled',qualifiedUnsplit:34,unrated:0,ratingBasis:'2020 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:8896,costBasis:'invoices',costItems:[['Booth space',7500],['Other',1036],['Electrical',360]],costDocs:4,costOcr:1,flag:true,note:'Booth cost recategorised to match the reference workbook, which lists 7500 as the booth price. CONFLICT: the workbook also records 34 Hot + Warm leads, but the show folder contains the cancellation notice and a lead-retrieval refund confirmation, so the show was not held. The 34 is carried per the workbook-is-source-of-truth rule but is almost certainly a pre-show projection.'}),
+      Y(2020,null,{status:'cancelled',cost:0,costBasis:'refunded',costItems:[['Booth space (invoice 3140-160-22579_3)',7500],['NRG Park services order #52979',1036],['Electrical',360],['Refunded — show cancelled',-8896]],costDocs:8,costOcr:1,note:'OTC cancelled the 2020 conference on 2 April (COVID-19) after postponing it on 13 March; the show was never held and the Leads folder holds no lead file, only the retrieval refund. Every charge on file was refunded: NRG Park offered a full refund or deferral and Bal Seal took the full refund (21 April), Experient confirmed the lead-retrieval order would be refunded (17 April), and the booth refund was requested through OTC\'s cancellation form with SPE confirming a credit memo would follow (7 May). Net documented cost is therefore zero. The reference workbook lists 34 Hot + Warm leads and a 7500 booth price for OTC 2020; the 7500 matches the paid-in-full invoice, but the 34 cannot be actual leads for a show that did not take place and is not counted.'}),
       Y(2021,null,{note:'Booth confirmed/paid but no leads export was filed.'}),
       Y(2022,16,{raw:47,hot:1,warm:15,cold:31,unrated:0,ratingBasis:'source show-close rating',src:'otc leads - raw at show close - 05-05-22.xlsx',cost:7242,costBasis:'invoices',costItems:[['Booth space',4000],['Freight/drayage',1470],['Electrical',896],['Lead retrieval',629],['Other',192],['AV/internet',55]],costDocs:12,costOcr:4}),
       Y(2023,44,{raw:84,hot:13,warm:31,cold:40,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - OTC.xlsx',cost:9336,costBasis:'invoices',costItems:[['Booth space',4000],['Furniture/decor',3468],['Freight/drayage',1347],['Lead retrieval',410],['Electrical',110]],costDocs:9}),
-      Y(2024,24,{raw:49,qualifiedUnsplit:24,cold:25,unrated:0,ratingBasis:'2024 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:4737,costBasis:'invoices',costItems:[['Freight/drayage',1667],['Booth space',1647],['Furniture/decor',1423]],costDocs:5,flag:true,note:'Lead figures taken from the reference workbook (24 Hot + Warm of 49 total) per the workbook-is-source-of-truth rule. CONFLICT: the saved export "Eloqua ready template - OTC 2024.xlsx" has 48 rows graded HOT 7 / WARM 25 / COLD 16 (32 Hot + Warm), and the raw scanner file "leads-OTC241-2024-05-10.xls" has 49 rows.'}),
+      Y(2024,32,{raw:48,hot:7,warm:25,cold:16,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - OTC 2024.xlsx',cost:4737,costBasis:'invoices',costItems:[['Freight/drayage',1667],['Booth space',1647],['Furniture/decor',1423]],costDocs:5,note:'Counted from the show-folder export, which grades all 48 rows HOT 7 / WARM 25 / COLD 16. The raw scanner file "leads-OTC241-2024-05-10.xls" holds 49 rows; the extra row is an internal Bal Seal staff scan, removed under the standard test/internal cleanup. The reference workbook lists 24 Hot + Warm for OTC 2024, which matches neither file and is not used.'}),
       Y(2025,19,{raw:31,hot:12,warm:7,cold:12,unrated:0,ratingBasis:'AI note review',src:'leads-OTC251-2025-05-14.csv',cost:8330.88,costBasis:'invoices',costItems:[['Booth space',4400],['Freight/drayage',1727],['Furniture/decor',1458.34],['Lead retrieval',457.31],['Electrical',154],['AV/internet',134.23]],costDocs:7,note:'Booth invoice is the full 100 sq. ft. charge at $44/sq. ft.; total also includes the electrical order and booth TV receipt.'}),
       Y(2026,27,{raw:64,hot:8,warm:19,cold:37,unrated:0,ratingBasis:'source classification',src:'Raw Lead Export - OTC 2026 - 05-07-26.xlsx',cost:15818,costBasis:'invoices',costItems:[['Booth space',8400],['Furniture/decor',3335],['Freight/drayage',2481],['Lead retrieval',765],['Other',569],['AV/internet',150],['Electrical',118]],costDocs:13})
     ]},
@@ -777,7 +785,7 @@
       Y(2018,16,{raw:48,hot:6,warm:10,cold:32,unrated:0,ratingBasis:'source classification',src:'Export-BIOMEDeviceSanJose2018-2018-12-07.xlsx',cost:7054,costBasis:'invoices',costItems:[['Booth space',5175],['Lead retrieval',1220],['Other',614],['Registration',45]],costDocs:6}),
       Y(2019,18,{raw:24,hot:9,warm:9,cold:6,unrated:0,ratingBasis:'source classification',src:'Spread Sheet from Icapture.xlsx',cost:8791,costBasis:'invoices',costItems:[['Booth space',5375],['Furniture/decor',2191],['Lead retrieval',1225]],costDocs:3}),
       Y(2020,null,{cost:5650,costBasis:'invoices',costItems:[['Booth space',5650]],costDocs:1,note:'Show folder on file but no leads export saved.'}),
-      Y(2021,22,{raw:26,qualifiedUnsplit:22,cold:4,unrated:0,ratingBasis:'2021 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:5225,costBasis:'partial',costItems:[['Booth space',5225]],costDocs:5,note:'Hot + Warm count from the reference workbook (22), replacing an earlier 5 Hot / 7 Warm split. The workbook gives no total, so the raw count of 26 is retained from "BioMed Leads final draft.xlsx"; that file has no rating column, so the cold count is derived (26 - 22).'}),
+      Y(2021,22,{raw:26,qualifiedUnsplit:22,cold:4,unrated:0,ratingBasis:'application note present in the source file',src:'BioMed Leads final draft 12.15..xlsx',cost:5225,costBasis:'partial',costItems:[['Booth space',5225]],costDocs:5,note:'Counted from the show-folder lead file, whose Contacts sheet holds 26 rows. The file has no rating column, so the rows were reviewed individually: 22 carry a written application note and count as qualified, and the 4 with a blank note are excluded as Cold. The reference workbook independently records 22 Hot + Warm for BIOMEDevice 2021, matching that review exactly.'}),
       Y(2022,21,{raw:32,hot:9,warm:12,cold:11,unrated:0,ratingBasis:'source classification',src:'Eloqua ready template - BIOMED Silicon Valley.xlsx',cost:8642,costBasis:'invoices',costItems:[['Booth space',5150],['Furniture/decor',2439],['Lead retrieval',550],['Electrical',309],['AV/internet',194]],costDocs:7,costOcr:1}),
       Y(2023,null,{cost:7692,costBasis:'invoices',costItems:[['Booth space',6700],['Freight/drayage',992]],costDocs:3,note:'Exhibited (post-show report on file) but no leads export was saved.'}),
       Y(2024,11,{qualifiedUnsplit:11,unrated:0,ratingBasis:'2024 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:7435,costBasis:'partial',costItems:[['Booth space',7435]],costDocs:1,costSrc:'Tradeshow report data.xlsx',note:'Booth cost and Hot + Warm count from the reference workbook; it records 11 Hot + Warm but no total, so the raw lead count and cold count are unknown.'}),
@@ -847,7 +855,7 @@
     ]},
     { id:'ieee', name:'IEEE', category:'Electrical', region:'Americas', data: [
       Y(2020,null,{cost:3200,costBasis:'partial',costItems:[['Booth space',3200]],costDocs:1,note:'Booth cost from the workbook; no leads export saved.'}),
-      Y(2024,9,{raw:22,hot:0,warm:9,cold:13,unrated:0,ratingBasis:'reference workbook combined Hot + Warm; no split supplied',src:'Tradeshow report data.xlsx',note:'Lead count and booth participation from 2024 tradeshow report workbook. No cost data available.'})
+      Y(2024,21,{raw:32,hot:3,warm:18,cold:11,unrated:0,ratingBasis:'source classification',src:'Eloqua Ready Template- IEEE 2024.xlsx',note:'Counted from the show-folder export, which grades 32 rows HOT 3 / WARM 18 / COLD 11 (a 33rd row is an empty placeholder with no name or rank). The raw scanner file "XPressLeads_IEEE0524_2453813.xls" holds 35 rows; the 3 extra are internal Bal Seal staff scans, removed under the standard test/internal cleanup. The reference workbook lists 9 Hot + Warm of 22 total for IEEE 2024, which matches neither file and is not used. No cost document is on file for this show.'})
     ]},
     { id:'slas', name:'SLAS (formerly Lab Automation)', category:'Analytical', region:'Americas', data: [
       Y(2004,63,{raw:63,src:'Lab Tradeshow Tracking.xls'}),
@@ -940,7 +948,7 @@
       Y(2025,11,{raw:22,qualifiedUnsplit:11,cold:11,unrated:0,ratingBasis:'2025 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:4380,costBasis:'partial',costItems:[['Booth space',4380]],costDocs:1,costSrc:'Tradeshow report data.xlsx',note:'Booth cost only. The reference workbook records 11 Hot + Warm leads out of 22 total; it does not provide a separate Hot/Warm split.'})
     ]},
     { id:'automatica', name:'Automatica', category:'Robotics', region:'EMEA', data: [
-      Y(2025,11,{raw:50,qualifiedUnsplit:11,cold:39,unrated:0,ratingBasis:'2025 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:6990,costBasis:'partial',costItems:[['Booth space',6990]],costDocs:1,costSrc:'Tradeshow report data.xlsx',note:'Booth cost only. The reference workbook records 11 Hot + Warm leads out of 50 total; it does not provide a separate Hot/Warm split.'})
+      Y(2025,15,{raw:49,hot:8,warm:7,cold:34,unrated:0,ratingBasis:'source classification',src:'Automatica Show Leads - Download - 06-30-25.xlsx',cost:6990,costBasis:'partial',costItems:[['Booth space',6990]],costDocs:1,costSrc:'Tradeshow report data.xlsx',note:'Booth cost only &mdash; no other invoice for this show is on file. Leads counted from the show-folder download, which carries the staff-entered "How interested are you in our products?" Hot/Warm/Cold fields: 8 Hot and 7 Warm across 49 valid rows (50 rows less one internal Bal Seal Europe scan). Three of the Warm rows are ticked and four carry a written follow-up note in the Warm field; both are staff Warm markings. The reference workbook records 11 Hot + Warm, which is the 8 Hot plus only the three ticked Warm rows.'})
     ]},
     { id:'feindef', name:'FEINDEF', category:'Aerospace', region:'EMEA', data: [
       Y(2025,7,{raw:15,qualifiedUnsplit:7,cold:8,unrated:0,ratingBasis:'2025 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:6875,costBasis:'partial',costItems:[['Booth space',6875]],costDocs:1,costSrc:'Tradeshow report data.xlsx',note:'Booth cost only. The reference workbook records 7 Hot + Warm leads out of 15 total; it does not provide a separate Hot/Warm split.'})
@@ -1078,11 +1086,16 @@
   }
 
   function fmt(n) { return n == null ? '&mdash;' : n.toLocaleString('en-US'); }
-  function fmtMoney(n) { return n == null ? '&mdash;' : ('$' + Math.round(n).toLocaleString('en-US')); }
+  function fmtMoney(n) {
+    if (n == null) return '&mdash;';
+    var r = Math.round(n);
+    return (r < 0 ? '&minus;$' : '$') + Math.abs(r).toLocaleString('en-US');
+  }
   function costCell(d) {
     if (d.cost == null) return '&mdash;';
     var prefix = d.costBasis === 'partial' ? '~' : '';
-    var title = d.costBasis === 'partial' ? ' title="Partial cost — see notes for what\'s excluded"' : '';
+    var title = d.costBasis === 'partial' ? ' title="Partial cost — see notes for what\'s excluded"'
+      : (d.costBasis === 'refunded' ? ' title="Charges were documented but refunded in full — see notes"' : '');
     return '<span' + title + '>' + prefix + fmtMoney(d.cost) + '</span>';
   }
 
@@ -1529,33 +1542,6 @@
     return { value: typeof projected.leads === 'number' ? projected.leads : null, html: fmt(projected.leads) };
   }
 
-  // Tiny inline sparkline across the selected years. Absent years break the line
-  // rather than being drawn as zero, so a gap reads as a gap.
-  function compareSparkline(values) {
-    var known = values.filter(function (v) { return typeof v === 'number'; });
-    if (known.length < 2) return '';
-    var min = Math.min.apply(null, known), max = Math.max.apply(null, known);
-    var span = max - min || 1;
-    var w = 62, h = 18, pad = 2;
-    var step = values.length > 1 ? (w - pad * 2) / (values.length - 1) : 0;
-    var segments = [], current = [];
-    values.forEach(function (v, i) {
-      if (typeof v !== 'number') { if (current.length) { segments.push(current); current = []; } return; }
-      var x = pad + i * step;
-      var y = h - pad - ((v - min) / span) * (h - pad * 2);
-      current.push(x.toFixed(1) + ',' + y.toFixed(1));
-    });
-    if (current.length) segments.push(current);
-    var paths = segments.filter(function (s) { return s.length > 1; }).map(function (s) {
-      return '<polyline points="' + s.join(' ') + '" fill="none" stroke="var(--series-1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>';
-    }).join('');
-    var dots = segments.filter(function (s) { return s.length === 1; }).map(function (s) {
-      var p = s[0].split(',');
-      return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.6" fill="var(--series-1)"/>';
-    }).join('');
-    return '<svg class="ts-matrix-spark" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">' + paths + dots + '</svg>';
-  }
-
   function renderYearComparison() {
     var grid = document.getElementById('ts-compare-grid');
     if (!grid || !state.comparisonOpen) return;
@@ -1606,12 +1592,11 @@
           if (!c) return '<td class="ts-matrix-num ts-matrix-absent" title="Not exhibited in ' + years[i] + '">&middot;</td>';
           var isBest = best !== null && c.value === best;
           return '<td class="ts-matrix-num' + (isBest ? ' ts-matrix-best' : '') + '">' + c.html + '</td>';
-        }).join('') +
-        '<td class="ts-matrix-num">' + compareSparkline(values) + '</td></tr>';
+        }).join('') + '</tr>';
     }).join('');
 
     var footRow = function (label, cellsHtml) {
-      return '<tr><th scope="row" class="ts-matrix-footlabel">' + label + '</th>' + cellsHtml + '<td></td></tr>';
+      return '<tr><th scope="row" class="ts-matrix-footlabel">' + label + '</th>' + cellsHtml + '</tr>';
     };
     var foot =
       footRow('Shows exhibited', totals.map(function (t) {
@@ -1630,7 +1615,7 @@
     grid.innerHTML = '<table class="ts-matrix"><thead><tr>' +
       '<th class="ts-matrix-showhead">Show</th>' +
       years.map(function (y) { return '<th class="ts-matrix-yearcol">' + y + '</th>'; }).join('') +
-      '<th class="ts-matrix-trendcol">Trend</th></tr></thead>' +
+      '</tr></thead>' +
       '<tbody>' + bodyRows + '</tbody><tfoot>' + foot + '</tfoot></table>';
 
     if (scopeEl) {
@@ -2074,7 +2059,8 @@
     'actual-rollup':   'Final expense report',
     'estimate-rollup': 'Estimated expense report',
     'invoices':        'Sum of invoices on file',
-    'partial':         'Partial &mdash; see note'
+    'partial':         'Partial &mdash; see note',
+    'refunded':        'Charges refunded &mdash; net zero'
   };
 
   function contextCardHTML(show, d, title) {
