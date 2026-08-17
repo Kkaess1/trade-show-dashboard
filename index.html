@@ -147,47 +147,39 @@
   .ts-compare-years { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px 12px; }
   .ts-compare-help { margin: 8px 0 0; font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; }
   .ts-compare-error { min-height: 1em; margin: 4px 0 0; font-size: 0.65rem; color: var(--critical); }
-  /* One column per selected year, so every card shares a grid row and the
-     aligned show rows actually read straight across. */
-  .ts-compare-grid { display: grid; grid-template-columns: repeat(var(--ts-compare-cols, 2), minmax(0, 1fr)); gap: 16px; align-items: start; }
-  /* Subgrid lets the head/KPI/mix bands line up across cards, so every table
-     body starts at the same y even when the mix line wraps in only one card. */
-  @supports (grid-template-rows: subgrid) {
-    .ts-compare-grid { align-items: stretch; grid-template-rows: auto auto auto auto; }
-    .ts-compare-card { display: grid; grid-row: span 4; grid-template-rows: subgrid; }
-  }
-  .ts-compare-card { min-width: 0; background: var(--card-surface); border: 1px solid var(--border); border-top: 4px solid var(--brand-blue); border-radius: 5px; overflow: hidden; box-shadow: 0 3px 12px rgba(40,73,90,0.05); }
-  .ts-compare-card-head { padding: 14px 15px 12px; border-bottom: 1px solid var(--gridline); }
-  .ts-compare-year { margin: 0; font-family: "franklin-gothic-urw", "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif; font-size: 1.3rem; color: var(--heading-color); }
-  .ts-compare-scope { margin-top: 2px; font-size: 0.68rem; color: var(--text-muted); }
-  .ts-compare-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--gridline); border-bottom: 1px solid var(--gridline); }
-  .ts-compare-kpi { min-width: 0; padding: 10px 11px; background: var(--surface-1); }
-  .ts-compare-k { font-size: 0.61rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.035em; }
-  .ts-compare-v { margin-top: 3px; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
-  .ts-compare-mix { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 9px 14px; border-bottom: 1px solid var(--gridline); font-size: 0.69rem; color: var(--text-secondary); }
-  .ts-compare-mix strong { color: var(--text-primary); }
-  .ts-compare-table-wrap { overflow-x: auto; }
-  /* Fixed layout + explicit column widths keep the geometry identical in every
-     card, which is what stops the rows drifting out of alignment. */
-  .ts-compare-table { width: 100%; min-width: 340px; border-collapse: collapse; font-size: 0.7rem; table-layout: fixed; }
-  .ts-c-show { width: 36%; } .ts-c-leads { width: 13%; } .ts-c-mix { width: 21%; } .ts-c-cost { width: 16%; } .ts-c-cpl { width: 14%; }
-  .ts-compare-table th { padding: 7px 8px; text-align: left; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.59rem; border-bottom: 1px solid var(--gridline); white-space: nowrap; }
-  .ts-compare-table td { padding: 7px 8px; border-bottom: 1px solid var(--gridline); vertical-align: middle; }
-  .ts-compare-table tr:last-child td { border-bottom: none; }
-  .ts-compare-table tr { cursor: pointer; }
-  .ts-compare-table tr:hover, .ts-compare-table tr:focus-visible { background: color-mix(in srgb, var(--series-1) 8%, transparent); outline: none; }
-  /* Both lines stay on one line each so every row is exactly the same height. */
-  .ts-compare-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ts-compare-name small { display: block; margin-top: 1px; color: var(--text-muted); font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* A show that did not run in this year still holds its row, so the shows on
-     either side stay opposite their counterparts. */
-  .ts-compare-absent { cursor: default; }
-  .ts-compare-absent .ts-compare-name, .ts-compare-absent .ts-compare-num { color: var(--text-muted); font-weight: 500; }
-  .ts-compare-table tr.ts-compare-absent:hover { background: none; }
-  .ts-compare-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ts-compare-metric { flex: 0 0 auto; }
+  .ts-compare-metric select { min-width: 150px; }
+  /* Shows down the side, years across the top: the show name is written once
+     and each extra year costs one column, so this holds up at 4+ years where
+     a card per year does not. */
+  .ts-compare-grid { background: var(--card-surface); border: 1px solid var(--border); border-top: 4px solid var(--brand-blue); border-radius: 5px; overflow-x: auto; box-shadow: 0 3px 12px rgba(40,73,90,0.05); }
+  .ts-matrix { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+  .ts-matrix th, .ts-matrix td { padding: 8px 10px; border-bottom: 1px solid var(--gridline); vertical-align: middle; }
+  .ts-matrix thead th { text-align: right; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.6rem; white-space: nowrap; }
+  .ts-matrix thead th.ts-matrix-showhead { text-align: left; }
+  /* The name column absorbs the slack so the year figures stay packed together
+     on the right, which is where they have to be to compare across. */
+  .ts-matrix-showhead { width: auto; min-width: 190px; }
+  .ts-matrix-yearcol { width: 104px; }
+  .ts-matrix-trendcol { width: 78px; }
+  .ts-matrix tbody tr { cursor: pointer; }
+  .ts-matrix tbody tr:hover, .ts-matrix tbody tr:focus-visible { background: color-mix(in srgb, var(--series-1) 8%, transparent); outline: none; }
+  .ts-matrix-name { font-weight: 600; }
+  .ts-matrix-name small { display: block; margin-top: 1px; color: var(--text-muted); font-weight: 400; }
+  .ts-matrix-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  /* A year the show did not run is one muted dash, not a whole repeated row. */
+  .ts-matrix-absent { color: var(--border); }
+  /* The show's strongest year in the selected span, so the peak is findable
+     without reading every number. */
+  .ts-matrix-best { font-weight: 700; color: var(--brand-blue); }
+  .ts-matrix-spark { display: block; width: 62px; height: 18px; margin-left: auto; }
+  .ts-matrix tfoot td, .ts-matrix tfoot th { border-top: 2px solid var(--gridline); border-bottom: none; padding-top: 9px; padding-bottom: 9px; background: var(--surface-1); }
+  .ts-matrix tfoot tr:first-child td, .ts-matrix tfoot tr:first-child th { padding-top: 11px; }
+  .ts-matrix-footlabel { text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 0.66rem; white-space: nowrap; }
+  .ts-matrix-footnum { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 700; color: var(--text-primary); }
+  .ts-compare-scope { margin: 9px 0 0; font-size: 0.66rem; color: var(--text-muted); }
   .ts-compare-empty { padding: 22px 16px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
-  @media (max-width: 980px) { .ts-compare-grid { grid-template-columns: 1fr; } }
-  @media (max-width: 680px) { .ts-compare-head { align-items: stretch; flex-direction: column; } .ts-compare-picker, .ts-compare-dropdown { width: 100%; } .ts-compare-menu { left: 0; right: auto; } .ts-compare-kpis { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 680px) { .ts-compare-head { align-items: stretch; flex-direction: column; } .ts-compare-picker, .ts-compare-dropdown, .ts-compare-metric, .ts-compare-metric select { width: 100%; } .ts-compare-menu { left: 0; right: auto; } .ts-matrix-showhead { min-width: 150px; } }
 
   .ts-section { margin: 34px 0; }
   .ts-section-title { display: flex; align-items: center; gap: 8px; font-size: 1.08rem; font-weight: 500; margin: 0 0 4px; color: var(--heading-color); }
@@ -377,6 +369,15 @@
         <div>
           <h2 class="ts-section-title">Compare years</h2>
         </div>
+        <div class="ts-compare-metric">
+          <label for="ts-compare-metric">Compare</label>
+          <select class="ts-select" id="ts-compare-metric">
+            <option value="leads">Leads</option>
+            <option value="cost">Documented cost</option>
+            <option value="cpl">Cost per lead</option>
+            <option value="mix">Lead mix (H / W / C)</option>
+          </select>
+        </div>
         <div class="ts-compare-picker">
           <label id="ts-compare-label">Years</label>
           <details class="ts-grade-dropdown ts-compare-dropdown" id="ts-compare-dropdown">
@@ -390,6 +391,7 @@
         </div>
       </div>
       <div class="ts-compare-grid" id="ts-compare-grid"></div>
+      <p class="ts-compare-scope" id="ts-compare-scope"></p>
     </div>
 
     <div class="ts-section">
@@ -1230,7 +1232,7 @@
   var state = {
     yearStart: 'All', yearEnd: 'All', category: 'All', region: 'All', channel: 'Direct',
     grades: { hot: true, warm: true, cold: false },
-    compareYears: [2025, 2026], comparisonOpen: false
+    compareYears: [2025, 2026], comparisonOpen: false, compareMetric: 'leads'
   };
 
   function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
@@ -1420,6 +1422,14 @@
         dropdown.querySelector('summary').focus();
       }
     });
+    var metric = document.getElementById('ts-compare-metric');
+    if (metric) {
+      metric.value = state.compareMetric;
+      metric.addEventListener('change', function () {
+        state.compareMetric = metric.value;
+        renderYearComparison();
+      });
+    }
   }
 
   function filteredShows() {
@@ -1490,79 +1500,145 @@
     return entries.map(function (entry) { return entry.pair; });
   }
 
-  function yearComparisonCard(year, orderedPairs) {
-    var rows = [];   // only shows exhibited this year - drives the KPIs
-    var cells = [];  // one per ordered show, absent ones included - drives the table
-    orderedPairs.forEach(function (pair) {
-      var original = pair.original.data.find(function (d) { return d.year === year; });
-      if (!original || !isExhibitedPoint(original)) {
-        cells.push({ show: pair.original, original: null, projected: null });
-        return;
-      }
-      var projected = pair.projected.data.find(function (d) { return d.year === year; }) || original;
-      var row = { show: pair.original, original: original, projected: projected };
-      rows.push(row);
-      cells.push(row);
-    });
+  var COMPARE_METRICS = {
+    leads: { label: 'Leads', higherIsBetter: true },
+    cost: { label: 'Documented cost', higherIsBetter: false },
+    cpl: { label: 'Cost per lead', higherIsBetter: false },
+    mix: { label: 'Lead mix (H / W / C)', higherIsBetter: true }
+  };
 
-    var totalLeads = 0, totalCost = 0, hot = 0, warm = 0, combined = 0, cold = 0, ratedShows = 0, hasPartial = false;
-    var cpls = [];
-    rows.forEach(function (row) {
-      var d = row.original, projected = row.projected;
-      if (typeof projected.leads === 'number') totalLeads += projected.leads;
-      if (typeof d.cost === 'number') totalCost += d.cost;
-      if (d.costBasis === 'partial') hasPartial = true;
-      if (hasRating(d)) { hot += d.hot || 0; warm += d.warm || 0; combined += d.qualifiedUnsplit || 0; cold += d.cold || 0; ratedShows++; }
+  // The point a show-year contributes for the chosen metric. `value` drives the
+  // sparkline and the best-year highlight; `html` is what the cell shows. A null
+  // value means the show ran but this metric is unknown, which is different from
+  // not having exhibited at all.
+  function compareCell(metric, d, projected) {
+    if (metric === 'cost') {
+      return { value: typeof d.cost === 'number' ? d.cost : null, html: costCell(d) };
+    }
+    if (metric === 'cpl') {
       var cpl = costPerLead(projected);
-      if (cpl != null) cpls.push(cpl);
-    });
-    var medianCpl = cpls.length ? median(cpls) : null;
-    var scope = activeQuality().label + ' · ' + (state.channel === 'All' ? 'all channels' : state.channel.toLowerCase());
-    var body = cells.length ? '<div class="ts-compare-table-wrap"><table class="ts-compare-table">' +
-      '<colgroup><col class="ts-c-show"><col class="ts-c-leads"><col class="ts-c-mix"><col class="ts-c-cost"><col class="ts-c-cpl"></colgroup>' +
-      '<thead><tr>' +
-      '<th>Show</th><th class="ts-compare-num">Leads</th><th class="ts-compare-num">H / W / C</th>' +
-      '<th class="ts-compare-num">Cost</th><th class="ts-compare-num">$/lead</th></tr></thead><tbody>' +
-      cells.map(function (row) {
-        if (!row.original) {
-          return '<tr class="ts-compare-absent"><td class="ts-compare-name" title="' + row.show.name + ' - not exhibited in ' + year + '">' +
-            row.show.name + '<small>not exhibited</small></td>' +
-            '<td class="ts-compare-num">&mdash;</td><td class="ts-compare-num">&mdash;</td>' +
-            '<td class="ts-compare-num">&mdash;</td><td class="ts-compare-num">&mdash;</td></tr>';
-        }
-        var d = row.original, projected = row.projected;
-        var mix = typeof d.qualifiedUnsplit === 'number' ? (d.qualifiedUnsplit + ' H+W / ' + d.cold + ' C') : (hasRating(d) ? (d.hot + ' / ' + d.warm + ' / ' + d.cold) : '—');
-        var note = typeof projected.leads === 'number' ? row.show.category : row.show.category + ' · no lead export';
-        return '<tr data-show-id="' + row.show.id + '" tabindex="0" role="button" aria-label="View full history for ' + row.show.name + '">' +
-          '<td class="ts-compare-name" title="' + row.show.name + '">' + row.show.name + '<small>' + note + '</small></td>' +
-          '<td class="ts-compare-num">' + fmt(projected.leads) + '</td><td class="ts-compare-num">' + mix + '</td>' +
-          '<td class="ts-compare-num">' + costCell(d) + '</td><td class="ts-compare-num">' + fmtMoney(costPerLead(projected)) + '</td></tr>';
-      }).join('') + '</tbody></table></div>' :
-      '<div class="ts-compare-empty">No exhibited shows match the current filters for this year.</div>';
+      return { value: cpl, html: fmtMoney(cpl) };
+    }
+    if (metric === 'mix') {
+      var mix = typeof d.qualifiedUnsplit === 'number'
+        ? (d.qualifiedUnsplit + ' H+W / ' + d.cold + ' C')
+        : (hasRating(d) ? (d.hot + ' / ' + d.warm + ' / ' + d.cold) : '—');
+      var qualified = typeof d.qualifiedUnsplit === 'number' ? d.qualifiedUnsplit : ((d.hot || 0) + (d.warm || 0));
+      return { value: hasRating(d) ? qualified : null, html: mix };
+    }
+    return { value: typeof projected.leads === 'number' ? projected.leads : null, html: fmt(projected.leads) };
+  }
 
-    return '<article class="ts-compare-card" data-compare-year="' + year + '">' +
-      '<div class="ts-compare-card-head"><h3 class="ts-compare-year">' + year + '</h3><div class="ts-compare-scope">' + scope + '</div></div>' +
-      '<div class="ts-compare-kpis">' +
-        '<div class="ts-compare-kpi"><div class="ts-compare-k">Shows exhibited</div><div class="ts-compare-v">' + rows.length + '</div></div>' +
-        '<div class="ts-compare-kpi"><div class="ts-compare-k">Selected leads</div><div class="ts-compare-v">' + fmt(totalLeads) + '</div></div>' +
-        '<div class="ts-compare-kpi"><div class="ts-compare-k">Documented cost</div><div class="ts-compare-v">' + (hasPartial ? '~' : '') + fmtMoney(totalCost || null) + '</div></div>' +
-        '<div class="ts-compare-kpi"><div class="ts-compare-k">Median $ / lead</div><div class="ts-compare-v">' + fmtMoney(medianCpl) + '</div></div>' +
-      '</div>' +
-      '<div class="ts-compare-mix"><span><strong>' + hot + '</strong> Hot</span><span><strong>' + warm + '</strong> Warm</span><span><strong>' + cold + '</strong> Cold</span>' +
-        (combined ? '<span><strong>' + combined + '</strong> Hot/Warm combined</span>' : '') +
-        '<span>' + ratedShows + ' show' + (ratedShows === 1 ? '' : 's') + ' with lead ratings' + (rows.length > ratedShows ? ' · ' + (rows.length - ratedShows) + ' exhibited without a lead file' : '') + '</span></div>' + body + '</article>';
+  // Tiny inline sparkline across the selected years. Absent years break the line
+  // rather than being drawn as zero, so a gap reads as a gap.
+  function compareSparkline(values) {
+    var known = values.filter(function (v) { return typeof v === 'number'; });
+    if (known.length < 2) return '';
+    var min = Math.min.apply(null, known), max = Math.max.apply(null, known);
+    var span = max - min || 1;
+    var w = 62, h = 18, pad = 2;
+    var step = values.length > 1 ? (w - pad * 2) / (values.length - 1) : 0;
+    var segments = [], current = [];
+    values.forEach(function (v, i) {
+      if (typeof v !== 'number') { if (current.length) { segments.push(current); current = []; } return; }
+      var x = pad + i * step;
+      var y = h - pad - ((v - min) / span) * (h - pad * 2);
+      current.push(x.toFixed(1) + ',' + y.toFixed(1));
+    });
+    if (current.length) segments.push(current);
+    var paths = segments.filter(function (s) { return s.length > 1; }).map(function (s) {
+      return '<polyline points="' + s.join(' ') + '" fill="none" stroke="var(--series-1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>';
+    }).join('');
+    var dots = segments.filter(function (s) { return s.length === 1; }).map(function (s) {
+      var p = s[0].split(',');
+      return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.6" fill="var(--series-1)"/>';
+    }).join('');
+    return '<svg class="ts-matrix-spark" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">' + paths + dots + '</svg>';
   }
 
   function renderYearComparison() {
     var grid = document.getElementById('ts-compare-grid');
     if (!grid || !state.comparisonOpen) return;
+    var scopeEl = document.getElementById('ts-compare-scope');
     var pairs = comparisonShowPairs();
     var years = state.compareYears.slice().sort(function (a, b) { return a - b; });
     var ordered = comparisonRowOrder(years, pairs);
-    grid.style.setProperty('--ts-compare-cols', years.length);
-    grid.innerHTML = years.map(function (year) {
-      return yearComparisonCard(year, ordered);
+    var metric = COMPARE_METRICS[state.compareMetric] ? state.compareMetric : 'leads';
+
+    if (!ordered.length) {
+      grid.innerHTML = '<div class="ts-compare-empty">No exhibited shows match the current filters for these years.</div>';
+      if (scopeEl) scopeEl.textContent = '';
+      return;
+    }
+
+    // Per-year totals for the footer, gathered as we walk the same grid.
+    var totals = years.map(function () {
+      return { shows: 0, leads: 0, cost: 0, partial: false, cpls: [] };
+    });
+
+    var bodyRows = ordered.map(function (pair) {
+      var cells = years.map(function (year, i) {
+        var d = pair.original.data.find(function (p) { return p.year === year; });
+        if (!d || !isExhibitedPoint(d)) return null;
+        var projected = pair.projected.data.find(function (p) { return p.year === year; }) || d;
+        var t = totals[i];
+        t.shows++;
+        if (typeof projected.leads === 'number') t.leads += projected.leads;
+        if (typeof d.cost === 'number') t.cost += d.cost;
+        if (d.costBasis === 'partial') t.partial = true;
+        var cpl = costPerLead(projected);
+        if (cpl != null) t.cpls.push(cpl);
+        return compareCell(metric, d, projected);
+      });
+
+      var values = cells.map(function (c) { return c ? c.value : null; });
+      var known = values.filter(function (v) { return typeof v === 'number'; });
+      var best = known.length > 1
+        ? (COMPARE_METRICS[metric].higherIsBetter ? Math.max.apply(null, known) : Math.min.apply(null, known))
+        : null;
+
+      return '<tr data-show-id="' + pair.original.id + '" tabindex="0" role="button" aria-label="View full history for ' + pair.original.name + '">' +
+        '<td class="ts-matrix-name">' + pair.original.name +
+          '<small>' + pair.original.category + ' · ' + pair.original.region + '</small></td>' +
+        cells.map(function (c, i) {
+          // A faint dot means the show did not run; an em dash (from the
+          // formatters) means it ran but this figure is not on file.
+          if (!c) return '<td class="ts-matrix-num ts-matrix-absent" title="Not exhibited in ' + years[i] + '">&middot;</td>';
+          var isBest = best !== null && c.value === best;
+          return '<td class="ts-matrix-num' + (isBest ? ' ts-matrix-best' : '') + '">' + c.html + '</td>';
+        }).join('') +
+        '<td class="ts-matrix-num">' + compareSparkline(values) + '</td></tr>';
     }).join('');
+
+    var footRow = function (label, cellsHtml) {
+      return '<tr><th scope="row" class="ts-matrix-footlabel">' + label + '</th>' + cellsHtml + '<td></td></tr>';
+    };
+    var foot =
+      footRow('Shows exhibited', totals.map(function (t) {
+        return '<td class="ts-matrix-footnum">' + t.shows + '</td>';
+      }).join('')) +
+      footRow('Selected leads', totals.map(function (t) {
+        return '<td class="ts-matrix-footnum">' + fmt(t.leads) + '</td>';
+      }).join('')) +
+      footRow('Documented cost', totals.map(function (t) {
+        return '<td class="ts-matrix-footnum">' + (t.partial ? '~' : '') + fmtMoney(t.cost || null) + '</td>';
+      }).join('')) +
+      footRow('Median $ / lead', totals.map(function (t) {
+        return '<td class="ts-matrix-footnum">' + fmtMoney(t.cpls.length ? median(t.cpls) : null) + '</td>';
+      }).join(''));
+
+    grid.innerHTML = '<table class="ts-matrix"><thead><tr>' +
+      '<th class="ts-matrix-showhead">Show</th>' +
+      years.map(function (y) { return '<th class="ts-matrix-yearcol">' + y + '</th>'; }).join('') +
+      '<th class="ts-matrix-trendcol">Trend</th></tr></thead>' +
+      '<tbody>' + bodyRows + '</tbody><tfoot>' + foot + '</tfoot></table>';
+
+    if (scopeEl) {
+      scopeEl.textContent = COMPARE_METRICS[metric].label + ' · ' + activeQuality().label + ' · ' +
+        (state.channel === 'All' ? 'all channels' : state.channel.toLowerCase()) +
+        ' — bold marks each show’s ' + (COMPARE_METRICS[metric].higherIsBetter ? 'highest' : 'lowest') +
+        ' year; “—” exhibited with no figure on file, “·” not exhibited';
+    }
   }
 
   // ---------- Ranking bar chart ----------
