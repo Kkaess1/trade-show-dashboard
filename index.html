@@ -311,6 +311,30 @@
   .ts-preview-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 12px; }
   .ts-preview-title { font-size: 0.74rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px; }
   .ts-preview-badge { display: inline-block; font-size: 0.74rem; font-weight: 700; color: var(--good); background: rgba(12,163,12,0.12); padding: 2px 8px; border-radius: 6px; }
+  /* .ts-up-grid sets display:grid, which would otherwise beat the UA rule for
+     [hidden] and leave toggled-off blocks visible. */
+  .ts-root [hidden] { display: none !important; }
+  .ts-up-section { margin-top: 16px; }
+  .ts-up-section > h3 { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 2px; }
+  .ts-up-section > p.ts-up-hint { font-size: 0.72rem; color: var(--text-muted); margin: 0 0 8px; }
+  .ts-up-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ts-up-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .ts-up-span2 { grid-column: 1 / -1; }
+  .ts-up-tally { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 0.75rem; margin-top: 8px; padding: 8px 10px; border-radius: 7px; background: var(--surface-1); border: 1px solid var(--border); }
+  .ts-up-tally strong { font-size: 0.86rem; }
+  .ts-up-tally.ts-up-bad { border-color: var(--serious); color: var(--serious); }
+  .ts-up-newshow { border: 1px solid var(--border); border-left: 3px solid var(--series-1); border-radius: 8px; padding: 10px 12px; margin-top: 10px; background: var(--surface-1); }
+  .ts-up-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+  .ts-up-err { color: var(--serious); font-size: 0.76rem; font-weight: 600; margin-right: auto; align-self: center; }
+  .ts-up-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.7rem; line-height: 1.45; white-space: pre-wrap; word-break: break-word; background: var(--surface-1); border: 1px solid var(--border); border-radius: 7px; padding: 10px; max-height: 190px; overflow: auto; color: var(--text-primary); }
+  .ts-up-pending { font-size: 0.74rem; color: var(--text-muted); margin-top: 10px; }
+  .ts-up-pending b { color: var(--warning); }
+  .ts-up-steps { font-size: 0.76rem; color: var(--text-secondary); margin: 8px 0 0; padding-left: 18px; }
+  .ts-up-steps li { margin-bottom: 3px; }
+  .ts-unpub { display: inline-block; font-size: 0.68rem; font-weight: 700; color: var(--warning); border: 1px solid var(--warning); border-radius: 5px; padding: 0 5px; margin-left: 6px; vertical-align: 1px; }
+  @media (max-width: 620px) {
+    .ts-up-grid, .ts-up-grid-3 { grid-template-columns: 1fr; }
+  }
 </style>
 
 <div class="ts-root">
@@ -323,7 +347,7 @@
       </div>
       <button class="ts-btn ts-btn-primary" id="ts-open-upload-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px; margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Upload Lead Document
+        Add Tradeshow Data
       </button>
     </div>
 
@@ -349,6 +373,14 @@
       <div>
         <label for="ts-channel-filter">Channel</label>
         <select class="ts-select" id="ts-channel-filter"></select>
+      </div>
+      <div>
+        <label for="ts-type-filter">Event type</label>
+        <select class="ts-select" id="ts-type-filter">
+          <option value="All">All types</option>
+          <option value="exhibited">Exhibited (booth)</option>
+          <option value="walked">Walked (no booth)</option>
+        </select>
       </div>
       <div>
         <label id="ts-quality-label">Lead grade</label>
@@ -486,57 +518,228 @@
     <div class="ts-modal" role="dialog" aria-modal="true" aria-labelledby="ts-upload-modal-title" style="max-width:560px;">
       <div class="ts-modal-top">
         <div>
-          <h2 class="ts-modal-title" id="ts-upload-modal-title">Upload Lead Document</h2>
-          <div class="ts-modal-cat">Drag and drop an Excel (.xlsx, .xls) lead spreadsheet to auto-populate qualified lead metrics.</div>
+          <h2 class="ts-modal-title" id="ts-upload-modal-title">Add Tradeshow Data</h2>
+          <div class="ts-modal-cat" id="ts-upload-modal-sub">Drop an Excel lead export to read the Hot/Warm/Cold split automatically, then describe the show.</div>
         </div>
         <button class="ts-modal-close" id="ts-upload-modal-close" aria-label="Close">&#10005;</button>
       </div>
 
-      <div class="ts-dropzone" id="ts-dropzone">
-        <div class="ts-dropzone-icon">📊</div>
-        <div class="ts-dropzone-text">Click to choose or drag & drop Excel lead file here</div>
-        <div class="ts-dropzone-sub">Supports .xlsx & .xls lead spreadsheets</div>
-        <input type="file" id="ts-file-input" accept=".xlsx,.xls" hidden />
+      <div id="ts-upload-step1">
+        <div class="ts-dropzone" id="ts-dropzone">
+          <div class="ts-dropzone-icon">📊</div>
+          <div class="ts-dropzone-text">Click to choose or drag &amp; drop the lead export here</div>
+          <div class="ts-dropzone-sub">.xlsx, .xls or .csv &mdash; Hot / Warm / Cold ratings are detected automatically</div>
+          <input type="file" id="ts-file-input" accept=".xlsx,.xls,.csv" hidden />
+        </div>
+        <div style="text-align:center;">
+          <button class="ts-btn" id="ts-up-manual">Skip &mdash; enter a show without a lead file</button>
+        </div>
+        <div class="ts-up-pending" id="ts-up-pending-1" hidden></div>
       </div>
 
       <div id="ts-upload-preview" hidden>
-        <div class="ts-preview-card">
-          <div class="ts-preview-title">File Audit Preview</div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="ts-preview-card" id="ts-prev-card">
+          <div class="ts-preview-title">File audit preview</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
             <div>
               <div style="font-weight:700; font-size:0.86rem;" id="ts-prev-filename"></div>
               <div style="font-size:0.75rem; color:var(--text-muted);" id="ts-prev-sheet"></div>
             </div>
-            <div class="ts-preview-badge" id="ts-prev-badge">0 Lead Rows Detected</div>
+            <div class="ts-preview-badge" id="ts-prev-badge">0 lead rows detected</div>
           </div>
         </div>
 
-        <div class="ts-upload-form">
-          <div class="ts-form-group">
-            <label for="ts-up-show">Target Tradeshow</label>
-            <select class="ts-input" id="ts-up-show"></select>
+        <!-- ---------- which show ---------- -->
+        <div class="ts-up-section">
+          <h3>Tradeshow</h3>
+          <p class="ts-up-hint">Pick an existing show to add a year to it, or create a new one.</p>
+          <div class="ts-up-grid">
+            <div class="ts-form-group ts-up-span2">
+              <label for="ts-up-show">Which tradeshow</label>
+              <select class="ts-input" id="ts-up-show"></select>
+            </div>
           </div>
-          <div class="ts-form-group">
-            <label for="ts-up-year">Year</label>
-            <input type="number" class="ts-input" id="ts-up-year" min="2000" max="2030" value="2026" />
+          <div class="ts-up-newshow" id="ts-up-newshow" hidden>
+            <div class="ts-up-grid">
+              <div class="ts-form-group ts-up-span2">
+                <label for="ts-up-newname">New tradeshow name</label>
+                <input type="text" class="ts-input" id="ts-up-newname" placeholder="e.g. MD&amp;M South" />
+              </div>
+              <div class="ts-form-group">
+                <label for="ts-up-newcat">Category</label>
+                <input class="ts-input" id="ts-up-newcat" list="ts-up-catlist" placeholder="Medical" />
+                <datalist id="ts-up-catlist"></datalist>
+              </div>
+              <div class="ts-form-group">
+                <label for="ts-up-newregion">Region</label>
+                <select class="ts-input" id="ts-up-newregion">
+                  <option>Americas</option><option>EMEA</option><option>Asia</option>
+                </select>
+              </div>
+              <div class="ts-form-group">
+                <label for="ts-up-newchannel">Channel</label>
+                <select class="ts-input" id="ts-up-newchannel">
+                  <option value="Direct">Direct</option>
+                  <option value="Distributor">Distributor</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div class="ts-form-group">
-            <label for="ts-up-leads">Verified Leads Count</label>
-            <input type="number" class="ts-input" id="ts-up-leads" min="0" />
-          </div>
-          <div class="ts-form-group">
-            <label for="ts-up-cost">Booth space cost ($) <span style="font-weight:normal; color:var(--text-muted);">(optional)</span></label>
-            <input type="number" class="ts-input" id="ts-up-cost" placeholder="e.g. 5000" />
-          </div>
-          <div class="ts-form-group" style="grid-column: span 2;">
-            <label for="ts-up-note">Notes / Verification Comment</label>
-            <input type="text" class="ts-input" id="ts-up-note" placeholder="e.g. Uploaded lead retrieval export" />
+          <div class="ts-up-grid" style="margin-top:10px;">
+            <div class="ts-form-group">
+              <label for="ts-up-year">Year</label>
+              <input type="number" class="ts-input" id="ts-up-year" min="1990" max="2100" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-status">Status</label>
+              <select class="ts-input" id="ts-up-status">
+                <option value="attended">Attended</option>
+                <option value="walked">Walked (no booth)</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="declined">Declined</option>
+                <option value="no-data">No data</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div style="margin-top:18px; display:flex; justify-content:flex-end; gap:10px;">
+        <!-- ---------- lead grades ---------- -->
+        <div class="ts-up-section" id="ts-up-leadsec">
+          <h3>Lead grades</h3>
+          <p class="ts-up-hint">Read from the file where a rating column exists. Qualified leads = Hot + Warm; Cold is excluded from headline counts but kept for the grade filter.</p>
+          <div class="ts-up-grid-3">
+            <div class="ts-form-group">
+              <label for="ts-up-hot">Hot</label>
+              <input type="number" class="ts-input ts-up-tallyfield" id="ts-up-hot" min="0" value="0" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-warm">Warm</label>
+              <input type="number" class="ts-input ts-up-tallyfield" id="ts-up-warm" min="0" value="0" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-cold">Cold</label>
+              <input type="number" class="ts-input ts-up-tallyfield" id="ts-up-cold" min="0" value="0" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-unrated">Unrated / blank</label>
+              <input type="number" class="ts-input ts-up-tallyfield" id="ts-up-unrated" min="0" value="0" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-raw">Valid source rows</label>
+              <input type="number" class="ts-input ts-up-tallyfield" id="ts-up-raw" min="0" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-leads">Qualified leads</label>
+              <input type="number" class="ts-input" id="ts-up-leads" min="0" />
+            </div>
+          </div>
+          <div class="ts-up-tally" id="ts-up-tally"></div>
+        </div>
+
+        <!-- ---------- cost ---------- -->
+        <div class="ts-up-section">
+          <h3>Cost</h3>
+          <p class="ts-up-hint">Booth space only. Leave blank if no invoice is on file &mdash; the dashboard shows that as a gap, not as free.</p>
+          <div class="ts-up-grid">
+            <div class="ts-form-group">
+              <label for="ts-up-cost">Booth space cost ($)</label>
+              <input type="number" class="ts-input" id="ts-up-cost" min="0" step="0.01" placeholder="e.g. 5000" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-costdocs">Invoice / PO documents on file</label>
+              <input type="number" class="ts-input" id="ts-up-costdocs" min="0" placeholder="e.g. 3" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- CRM ---------- -->
+        <div class="ts-up-section">
+          <h3>CRM outcome <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--text-muted);">&mdash; optional</span></h3>
+          <p class="ts-up-hint">From the CRM pipeline report, once follow-up has been logged.</p>
+          <div class="ts-up-grid">
+            <div class="ts-form-group">
+              <label for="ts-up-opps">Opportunities created</label>
+              <input type="number" class="ts-input" id="ts-up-opps" min="0" placeholder="e.g. 6" />
+            </div>
+            <div class="ts-form-group">
+              <label for="ts-up-pipeline">Pipeline value ($)</label>
+              <input type="number" class="ts-input" id="ts-up-pipeline" min="0" step="0.01" placeholder="e.g. 250000" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- context ---------- -->
+        <div class="ts-up-section">
+          <h3>What was different this year <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--text-muted);">&mdash; optional</span></h3>
+          <p class="ts-up-hint">Shows as the context card on the year drill-down. Describes documented activity; it does not claim to explain the result.</p>
+          <div class="ts-up-grid">
+            <div class="ts-form-group ts-up-span2">
+              <label for="ts-up-ctxtags">Activity tags <span style="font-weight:normal; color:var(--text-muted);">(comma separated)</span></label>
+              <input type="text" class="ts-input" id="ts-up-ctxtags" placeholder="e.g. Demos, Scheduled meetings, New booth" />
+            </div>
+            <div class="ts-form-group ts-up-span2">
+              <label for="ts-up-ctxtext">What was done</label>
+              <textarea class="ts-input" id="ts-up-ctxtext" rows="2" placeholder="e.g. The team ran hands-on latching demos and pre-booked meetings with six target accounts."></textarea>
+            </div>
+            <div class="ts-form-group ts-up-span2">
+              <label for="ts-up-ctxsrc">Source document for that note</label>
+              <input type="text" class="ts-input" id="ts-up-ctxsrc" placeholder="e.g. Tradeshow Report MD&amp;M West 2027.docx" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- provenance ---------- -->
+        <div class="ts-up-section">
+          <h3>Provenance</h3>
+          <p class="ts-up-hint">Recorded against the year so the number stays traceable. Source file and rating basis are filled in from the upload.</p>
+          <div class="ts-up-grid">
+            <div class="ts-form-group ts-up-span2">
+              <label for="ts-up-note">Note</label>
+              <textarea class="ts-input" id="ts-up-note" rows="2" placeholder="e.g. Counted from the show-folder export."></textarea>
+            </div>
+            <div class="ts-form-group ts-up-span2">
+              <label for="ts-up-src">Source file</label>
+              <input type="text" class="ts-input" id="ts-up-src" placeholder="Filename of the lead export" />
+            </div>
+          </div>
+        </div>
+
+        <div class="ts-up-actions">
+          <span class="ts-up-err" id="ts-up-err" hidden></span>
+          <button class="ts-btn" id="ts-up-back">Back</button>
           <button class="ts-btn" id="ts-up-cancel">Cancel</button>
-          <button class="ts-btn ts-btn-primary" id="ts-up-submit">Import & Update Dashboard</button>
+          <button class="ts-btn ts-btn-primary" id="ts-up-submit">Add to dashboard</button>
+        </div>
+      </div>
+
+      <!-- ---------- publish step ---------- -->
+      <div id="ts-upload-done" hidden>
+        <div class="ts-preview-card">
+          <div class="ts-preview-title">Added</div>
+          <div style="font-weight:700; font-size:0.9rem;" id="ts-done-headline"></div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Live on this dashboard now and saved in this browser, so it survives a refresh.</div>
+        </div>
+
+        <div class="ts-up-section">
+          <h3>Publish to everyone</h3>
+          <p class="ts-up-hint">GitHub Pages serves a static copy of <code>index.html</code>, so a browser upload cannot write back to the repo. Commit the change to publish it &mdash; that also keeps git as the audit trail for the number.</p>
+          <ol class="ts-up-steps">
+            <li>Copy the data block below, or download a ready-made <code>index.html</code>.</li>
+            <li>Paste it into <code>index.html</code> at the marked spot (skip if you downloaded).</li>
+            <li>Commit and push to <code>main</code>.</li>
+          </ol>
+          <p class="ts-up-hint" style="margin-top:8px;" id="ts-done-where"></p>
+          <pre class="ts-up-code" id="ts-done-code"></pre>
+          <div class="ts-up-actions" style="justify-content:flex-start; margin-top:10px;">
+            <button class="ts-btn" id="ts-done-copy">Copy data block</button>
+            <button class="ts-btn" id="ts-done-download">Download updated index.html</button>
+          </div>
+          <div class="ts-up-pending" id="ts-up-pending-2"></div>
+        </div>
+
+        <div class="ts-up-actions">
+          <button class="ts-btn" id="ts-done-another">Add another</button>
+          <button class="ts-btn ts-btn-primary" id="ts-done-close">Done</button>
         </div>
       </div>
     </div>
@@ -957,6 +1160,50 @@
     { id:'feindef', name:'FEINDEF', category:'Aerospace', region:'EMEA', data: [
       Y(2025,7,{raw:15,qualifiedUnsplit:7,cold:8,unrated:0,ratingBasis:'2025 reference workbook combined Hot + Warm',src:'Tradeshow report data.xlsx',cost:6875,costBasis:'partial',costItems:[['Booth space',6875]],costDocs:1,costSrc:'Tradeshow report data.xlsx',note:'Booth cost only. The reference workbook records 7 Hot + Warm leads out of 15 total; it does not provide a separate Hot/Warm split.'})
     ]}
+    { id:'dmc', name:'Defense Manufacturing Conference (DMC)', category:'Aerospace', region:'Americas', data: [
+      Y(2021,null,{status:'walked',note:'Walked by John Lippke; detailed trip report on file.'})
+    ]},
+    { id:'eaa-airventure', name:'EAA AirVenture', category:'Aerospace', region:'Americas', data: [
+      Y(2021,null,{status:'walked',note:'Attended as walking show (KCS).'})
+    ]},
+    { id:'battery-show-eu', name:'The Battery Show Europe', category:'Energy', region:'EMEA', data: [
+      Y(2021,null,{status:'walked',note:'Walked by Wolfgang Wimmer.'})
+    ]},
+    { id:'subsea-expo', name:'Subsea Expo', category:'Energy', region:'EMEA', data: [
+      Y(2022,null,{status:'walked',note:'Walked show - evaluated for robotics/industrial potential.'})
+    ]},
+    { id:'automate', name:'Automate Show', category:'Robotics', region:'Americas', data: [
+      Y(2022,null,{status:'walked',note:'Walked show - canvassed/prospected target companies.'})
+    ]},
+    { id:'electronica', name:'Electronica', category:'Energy', region:'EMEA', data: [
+      Y(2020,null,{status:'walked',note:'Walked per management recommendation.'}),
+      Y(2022,null,{status:'walked',note:'Walked show.'})
+    ]},
+    { id:'solar-power-intl', name:'Solar Power International', category:'Energy', region:'Americas', data: [
+      Y(2020,null,{status:'walked',note:'Walked show (Lippke / Harty).'})
+    ]},
+    { id:'dtech', name:'DistribuTECH', category:'Energy', region:'Americas', data: [
+      Y(2026,null,{status:'walked',note:'On 2026 Walk Master schedule.'})
+    ]},
+    { id:'caclp', name:'CACLP (China Assn of In Vitro Diagnostics)', category:'Analytical', region:'Asia', channel:'Distributor', data: [
+      Y(2026,null,{status:'walked',note:'Walked by Lam, Tam.'})
+    ]},
+    { id:'ausa', name:'AUSA Annual Meeting', category:'Aerospace', region:'Americas', data: [
+      Y(2026,null,{status:'walked',note:'Walked by Copeland, Smoliga.'})
+    ]},
+    { id:'ehra-congress', name:'EHRA Congress', category:'Medical', region:'EMEA', data: [
+      Y(2026,null,{status:'walked',note:'Walked by Delcourt.'})
+    ]},
+    { id:'santexpo', name:'SantExpo', category:'Medical', region:'EMEA', data: [
+      Y(2026,null,{status:'walked',note:'Walked by Delcourt, James.'})
+    ]},
+    { id:'emc-europe', name:'EMC Europe', category:'Electrical', region:'EMEA', data: [
+      Y(2026,null,{status:'walked',note:'On 2026 Walk Master schedule.'})
+    ]},
+    { id:'farnborough', name:'Farnborough International Airshow', category:'Aerospace', region:'EMEA', data: [
+      Y(2026,null,{status:'walked',note:'Exhibit canceled; walked by Amato.'})
+    ]}
+    // NEW-SHOW-ANCHOR — the upload dialog pastes a brand-new show block above this line.
   ];
 
   var SNAPSHOT_2014 = [
@@ -1063,6 +1310,7 @@
     'mtech-tokyo-2023': {tags:['Distributor booth','Location lesson'], text:'BSE exhibited through Moritex. The local TM called the event fruitful but recommended a larger booth to secure a better location next time.', source:'Nozomi wraps show - 07-03-23.msg'},
     'mtech-osaka-2022': {tags:['Distributor booth','Co-branding'], text:'Moritex operated the exhibit; BSE reviewed the wall design and recommended making the distributor relationship clearer in the co-branded display.', source:'Nozomi and Mark.msg'},
     'compamed-2025': {tags:['Design sessions','Customer dinner','Enhanced booth'], text:'The booth added shelving to show more items. TMs held deep OEM design discussions, planned DesignLive sessions/workshops and used an Osypka Medical dinner for technical alignment.', source:'Compamed Preshow Info.docx; Compamed_2025_TradeShow_Report_FULL_O1590.docx'}
+    // NEW-CONTEXT-ANCHOR — the upload dialog pastes a new context entry above this line.
   };
 
   var CURRENT_YEAR = 2026;
@@ -1122,12 +1370,12 @@
       // A cost total exists but no booth-space line, so there is no comparable
       // figure for this year.
       return d.cost != null
-        ? '<span title="No booth-space line in this year&apos;s documents — other charges are on file but are not counted">&mdash;</span>'
+        ? '<span title="No booth-space line in this year&apos;s documents">&mdash;</span>'
         : '&mdash;';
     }
     var title = d.costBasis === 'refunded'
       ? ' title="Booth space was invoiced but refunded in full — see notes"'
-      : ' title="Booth space only — other charges are listed in the year detail but not counted"';
+      : ' title="Booth space cost"';
     return '<span' + title + '>' + fmtMoney(booth) + '</span>';
   }
 
@@ -1275,7 +1523,7 @@
 
   // ---------- Filters ----------
   var state = {
-    yearStart: 'All', yearEnd: 'All', category: 'All', region: 'All', channel: 'Direct',
+    yearStart: 'All', yearEnd: 'All', category: 'All', region: 'All', channel: 'Direct', eventType: 'All',
     grades: { hot: true, warm: true, cold: false },
     compareYears: [2025, 2026], comparisonOpen: false, compareMetric: 'leads'
   };
@@ -1339,6 +1587,9 @@
     chanSel.innerHTML = channelOpts.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('');
     chanSel.value = state.channel;
 
+    var typeSel = document.getElementById('ts-type-filter');
+    if (typeSel) typeSel.value = state.eventType;
+
     var qualityFilter = document.getElementById('ts-quality-filter');
     var qualityDropdown = document.getElementById('ts-quality-dropdown');
     var qualitySummary = document.getElementById('ts-quality-summary');
@@ -1371,6 +1622,8 @@
     catSel.addEventListener('change', function () { state.category = catSel.value; renderAll(); });
     regSel.addEventListener('change', function () { state.region = regSel.value; renderAll(); });
     chanSel.addEventListener('change', function () { state.channel = chanSel.value; renderAll(); });
+    var typeSel = document.getElementById('ts-type-filter');
+    if (typeSel) typeSel.addEventListener('change', function () { state.eventType = typeSel.value; renderAll(); });
     qualityFilter.addEventListener('change', function (event) {
       var box = event.target;
       if (!box.matches('input[type="checkbox"]')) return;
@@ -1490,7 +1743,12 @@
     shows = shows.map(function (s) {
       var copy = {};
       for (var k in s) { if (Object.prototype.hasOwnProperty.call(s, k)) copy[k] = s[k]; }
-      copy.data = s.data.filter(function (d) { return inSelectedYearRange(d.year); });
+      copy.data = s.data.filter(function (d) {
+        if (!inSelectedYearRange(d.year)) return false;
+        if (state.eventType === 'exhibited' && d.status === 'walked') return false;
+        if (state.eventType === 'walked' && d.status !== 'walked') return false;
+        return true;
+      });
       return copy;
     }).filter(function (s) { return s.data.length > 0; });
 
@@ -2058,7 +2316,8 @@
       var isOpen = (d.year === year);
       var tr = '<tr class="ts-yr-row" data-year="' + d.year + '" tabindex="0" role="button" aria-expanded="' + (isOpen ? 'true' : 'false') +
         '" aria-label="' + (isOpen ? 'Hide' : 'Show') + ' details for ' + d.year + '">' +
-        '<td><span class="ts-yr-caret">&#9656;</span> ' + d.year + '</td>' +
+        '<td><span class="ts-yr-caret">&#9656;</span> ' + d.year +
+          (d.unpublished ? '<span class="ts-unpub" title="Imported in this browser and not yet committed — nobody else can see it">Unpublished</span>' : '') + '</td>' +
         '<td class="ts-num">' + (d.flag ? '<span class="ts-flag">▲</span> ' : '') + fmt(d.leads) + '</td>' +
         '<td class="ts-num">' + costCell(d) + '</td>' +
         '<td class="ts-num">' + fmtMoney(costPerLead(d)) + '</td>' +
@@ -2167,18 +2426,23 @@
 
     // ---- cost column
     out += '<div><p class="ts-yr-sub">Cost breakdown</p>';
-    if (d.costItems && d.costItems.length) {
-      // Booth space is the counted figure; everything else stays visible as
-      // documentation but is dimmed and struck from the total.
-      out += '<ul class="ts-yr-list">' + d.costItems.map(function (it) {
-        var counts = String(it[0] || '').indexOf('Booth space') === 0;
-        return '<li' + (counts ? '' : ' class="ts-yr-uncounted"') + '><span>' + it[0] +
-          (counts ? '' : ' <em>not counted</em>') + '</span><span>' + fmtMoney(it[1]) + '</span></li>';
-      }).join('') +
-      '<li><span><strong>Counted cost</strong></span><span><strong>' +
-        (booth == null ? '&mdash;' : fmtMoney(booth)) + '</strong></span></li></ul>' +
-      '<p class="ts-yr-src">Only booth space is counted, so cost compares like for like across years. ' +
-        'The other lines are what the show folder documents for this year.</p>';
+    var boothItems = (d.costItems || []).filter(function (it) {
+      return String(it[0] || '').indexOf('Booth space') === 0;
+    });
+
+    if (boothItems.length > 0) {
+      out += '<ul class="ts-yr-list">' + boothItems.map(function (it) {
+        return '<li><span>' + it[0] + '</span><span>' + fmtMoney(it[1]) + '</span></li>';
+      }).join('') + '</ul>' +
+      '<p class="ts-yr-src">Only booth space cost is shown to compare like for like across years.</p>';
+      if (d.costSrc) out += '<p class="ts-yr-src">Source: <code>' + d.costSrc + '</code></p>';
+      else if (d.costDocs) {
+        out += '<p class="ts-yr-src">From ' + d.costDocs + ' invoice/PO document' + (d.costDocs === 1 ? '' : 's') + ' in the show folder' +
+               (d.costOcr ? ', of which ' + d.costOcr + ' ' + (d.costOcr === 1 ? 'was a scanned page read by OCR and confirmed by a second OCR engine' : 'were scanned pages read by OCR and confirmed by a second OCR engine') : '') +
+               '.</p>';
+      }
+    } else if (d.costItems && d.costItems.length) {
+      out += '<p class="ts-yr-empty">No booth-space cost line on file for this year.</p>';
       if (d.costSrc) out += '<p class="ts-yr-src">Source: <code>' + d.costSrc + '</code></p>';
       else if (d.costDocs) {
         out += '<p class="ts-yr-src">From ' + d.costDocs + ' invoice/PO document' + (d.costDocs === 1 ? '' : 's') + ' in the show folder' +
@@ -2186,8 +2450,7 @@
                '.</p>';
       }
     } else if (d.cost != null) {
-      out += '<ul class="ts-yr-list"><li class="ts-yr-uncounted"><span>Documented total <em>not counted</em></span><span>' + fmtMoney(d.cost) + '</span></li></ul>' +
-             '<p class="ts-yr-src">No line-item breakdown on file, so no booth-space figure can be separated out for this year.</p>';
+      out += '<p class="ts-yr-empty">No line-item breakdown on file, so no booth-space figure is available for this year.</p>';
       if (d.costSrc) out += '<p class="ts-yr-src">Source: <code>' + d.costSrc + '</code></p>';
     } else {
       out += '<p class="ts-yr-empty">No invoice, PO or expense report for this year was found in the archive.</p>';
@@ -2207,203 +2470,652 @@
     } catch (e) {}
   }
 
-  // ---------- Upload Lead Document Logic ----------
+  // ---------- Imported show data (browser-persisted) ----------
+  // GitHub Pages serves a static index.html, so an upload cannot write back to
+  // the repo. Imports are kept in localStorage so they survive a refresh, and
+  // the dialog hands back a code block to commit when they should go live for
+  // everyone. Anything still only in localStorage is flagged "unpublished".
+  var IMPORT_KEY = 'bse-tradeshow-imports-v1';
+
+  function loadImports() {
+    try {
+      var raw = window.localStorage.getItem(IMPORT_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      return Object.prototype.toString.call(arr) === '[object Array]' ? arr : [];
+    } catch (e) { return []; }
+  }
+
+  function saveImports(list) {
+    try { window.localStorage.setItem(IMPORT_KEY, JSON.stringify(list)); return true; }
+    catch (e) { return false; }
+  }
+
+  // Fold one stored import into SHOWS / SHOW_CONTEXT. Used both right after an
+  // upload and on page load for everything already in localStorage.
+  function applyImport(rec) {
+    var show = null;
+    for (var i = 0; i < SHOWS.length; i++) { if (SHOWS[i].id === rec.show.id) { show = SHOWS[i]; break; } }
+    if (!show) {
+      show = { id: rec.show.id, name: rec.show.name, category: rec.show.category, region: rec.show.region, data: [] };
+      if (rec.show.channel && rec.show.channel !== 'Direct') show.channel = rec.show.channel;
+      SHOWS.push(show);
+    }
+
+    var pt = null;
+    for (var j = 0; j < show.data.length; j++) { if (show.data[j].year === rec.year) { pt = show.data[j]; break; } }
+    var built = Y(rec.year, rec.fields.leads, rec.fields);
+    if (pt) {
+      // Merge rather than replace: a leads-only import must not blank out cost,
+      // CRM or note data already documented for that year. Grade and status
+      // fields always come from the form, so those overwrite unconditionally.
+      var ALWAYS = { leads: 1, status: 1, hot: 1, warm: 1, cold: 1, unrated: 1 };
+      for (var k in built) {
+        if (!Object.prototype.hasOwnProperty.call(built, k)) continue;
+        if (ALWAYS[k] || built[k] != null) pt[k] = built[k];
+      }
+    } else {
+      show.data.push(built);
+      pt = built;
+    }
+    pt.imported = true;
+    pt.unpublished = !rec.published;
+    show.data.sort(function (a, b) { return a.year - b.year; });
+
+    if (rec.context && rec.context.text) {
+      SHOW_CONTEXT[rec.show.id + '-' + rec.year] = {
+        tags: rec.context.tags && rec.context.tags.length ? rec.context.tags : ['Imported'],
+        text: rec.context.text,
+        source: rec.context.source || (rec.fields.src || 'Uploaded document')
+      };
+    }
+    return show;
+  }
+
+  function applyStoredImports() {
+    var list = loadImports();
+    for (var i = 0; i < list.length; i++) {
+      try { applyImport(list[i]); } catch (e) {}
+    }
+    return list.length;
+  }
+
+  function unpublishedCount() {
+    return loadImports().filter(function (r) { return !r.published; }).length;
+  }
+
+  // ---------- Source-code generation for the publish step ----------
+  function jsStr(s) {
+    return "'" + String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ') + "'";
+  }
+
+  function yLineFor(rec) {
+    var f = rec.fields;
+    var bits = [];
+    function put(k, v) { bits.push(k + ':' + v); }
+    if (f.status && f.status !== 'attended') put('status', jsStr(f.status));
+    if (typeof f.raw === 'number') put('raw', f.raw);
+    if (f.hot) put('hot', f.hot);
+    if (f.warm) put('warm', f.warm);
+    if (typeof f.qualifiedUnsplit === 'number') put('qualifiedUnsplit', f.qualifiedUnsplit);
+    if (f.cold) put('cold', f.cold);
+    put('unrated', f.unrated || 0);
+    if (f.ratingBasis) put('ratingBasis', jsStr(f.ratingBasis));
+    if (f.src) put('src', jsStr(f.src));
+    if (typeof f.cost === 'number') {
+      put('cost', f.cost);
+      put('costBasis', jsStr(f.costBasis || 'partial'));
+      put('costItems', '[[' + jsStr('Booth space') + ',' + f.cost + ']]');
+      if (f.costDocs) put('costDocs', f.costDocs);
+    }
+    if (typeof f.opportunities === 'number') put('opportunities', f.opportunities);
+    if (typeof f.pipeline === 'number') put('pipeline', f.pipeline);
+    if (f.note) put('note', jsStr(f.note));
+    return 'Y(' + rec.year + ',' + (f.leads == null ? 'null' : f.leads) + ',{' + bits.join(',') + '})';
+  }
+
+  function contextLineFor(rec) {
+    if (!rec.context || !rec.context.text) return '';
+    var tags = (rec.context.tags && rec.context.tags.length ? rec.context.tags : ['Imported'])
+      .map(jsStr).join(',');
+    return jsStr(rec.show.id + '-' + rec.year) +
+      ': {tags:[' + tags + '], text:' + jsStr(rec.context.text) +
+      ', source:' + jsStr(rec.context.source || rec.fields.src || 'Uploaded document') + '},';
+  }
+
+  function showBlockFor(rec) {
+    var head = '{ id:' + jsStr(rec.show.id) + ', name:' + jsStr(rec.show.name) +
+      ', category:' + jsStr(rec.show.category) + ', region:' + jsStr(rec.show.region) +
+      (rec.show.channel && rec.show.channel !== 'Direct' ? ', channel:' + jsStr(rec.show.channel) : '') +
+      ', data: [';
+    return '    ' + head + '\n      ' + yLineFor(rec) + '\n    ]}';
+  }
+
+  // Human-readable block for the publish panel.
+  function publishSnippet(rec) {
+    var parts = [];
+    if (rec.show.isNew) {
+      parts.push('// 1. Paste into the SHOWS array, just above the NEW-SHOW-ANCHOR comment,\n' +
+                 '//    and add a comma to the "]}" line above it:\n' + showBlockFor(rec));
+    } else {
+      parts.push('// 1. Paste as the last entry inside the data: [ ... ] array for\n' +
+                 '//    { id: ' + jsStr(rec.show.id) + ' ... }  (add a comma to the line above it):\n' +
+                 '      ' + yLineFor(rec));
+    }
+    var ctx = contextLineFor(rec);
+    if (ctx) {
+      parts.push('// 2. Paste into SHOW_CONTEXT, just above the NEW-CONTEXT-ANCHOR comment,\n' +
+                 '//    and add a comma to the entry above it:\n    ' + ctx);
+    }
+    return parts.join('\n\n');
+  }
+
+  // ---------- Splice the generated code into a copy of this page's source ----------
+  // Scans past single-quoted strings so brackets inside note text never confuse
+  // the matcher. Returns null when the shape is not what we expect, in which
+  // case the dialog falls back to copy-and-paste only.
+  function matchBracket(src, openIdx) {
+    var open = src.charAt(openIdx), close = open === '[' ? ']' : '}';
+    var depth = 0, q = null;
+    for (var i = openIdx; i < src.length; i++) {
+      var c = src.charAt(i);
+      if (q) {
+        if (c === '\\') { i++; continue; }
+        if (c === q) q = null;
+        continue;
+      }
+      if (c === "'" || c === '"') { q = c; continue; }
+      if (c === open) depth++;
+      else if (c === close) { depth--; if (!depth) return i; }
+    }
+    return -1;
+  }
+
+  function spliceSource(src, rec) {
+    var out = src;
+
+    if (rec.show.isNew) {
+      var anchor = out.indexOf('// NEW-SHOW-ANCHOR');
+      if (anchor === -1) return null;
+      var lineStart = out.lastIndexOf('\n', anchor) + 1;
+      // The array's last entry ends "]}" with no trailing comma, so give it one
+      // before appending a sibling — otherwise the file is a syntax error.
+      var before = out.slice(0, lineStart);
+      var lastClose = before.lastIndexOf(']}');
+      if (lastClose === -1) return null;
+      before = before.slice(0, lastClose + 2) + ',' + before.slice(lastClose + 2);
+      out = before + showBlockFor(rec) + '\n' + out.slice(lineStart);
+    } else {
+      var idMarker = "{ id:'" + rec.show.id + "',";
+      var at = out.indexOf(idMarker);
+      if (at === -1) return null;
+      var dataAt = out.indexOf('data: [', at);
+      if (dataAt === -1) return null;
+      var openIdx = out.indexOf('[', dataAt);
+      var closeIdx = matchBracket(out, openIdx);
+      if (closeIdx === -1) return null;
+      var inner = out.slice(openIdx + 1, closeIdx).replace(/\s+$/, '');
+      var joined = inner + ',\n      ' + yLineFor(rec) + '\n    ';
+      out = out.slice(0, openIdx + 1) + joined + out.slice(closeIdx);
+    }
+
+    var ctxLine = contextLineFor(rec);
+    if (ctxLine) {
+      var cAnchor = out.indexOf('// NEW-CONTEXT-ANCHOR');
+      if (cAnchor !== -1) {
+        var cLineStart = out.lastIndexOf('\n', cAnchor) + 1;
+        // Same story as the SHOWS array: the final entry carries no trailing
+        // comma, so add one before appending a sibling.
+        var beforeCtx = out.slice(0, cLineStart);
+        var tail = /\}\s*$/.exec(beforeCtx);
+        if (tail) beforeCtx = beforeCtx.slice(0, tail.index + 1) + ',' + beforeCtx.slice(tail.index + 1);
+        out = beforeCtx + '    ' + ctxLine + '\n' + out.slice(cLineStart);
+      }
+    }
+    return out;
+  }
+
+  // ---------- Add / upload dialog ----------
   function wireUploadEvents() {
     var openBtn = document.getElementById('ts-open-upload-btn');
     var backdrop = document.getElementById('ts-upload-modal-backdrop');
-    var closeBtn = document.getElementById('ts-upload-modal-close');
-    var dropzone = document.getElementById('ts-dropzone');
-    var fileInput = document.getElementById('ts-file-input');
-    var cancelBtn = document.getElementById('ts-up-cancel');
-    var submitBtn = document.getElementById('ts-up-submit');
-    var showSelect = document.getElementById('ts-up-show');
-    
     if (!openBtn || !backdrop) return;
 
-    // Populate show dropdown
-    showSelect.innerHTML = SHOWS.map(function (s) {
-      return '<option value="' + s.id + '">' + s.name + ' (' + s.category + ')</option>';
+    var el = function (id) { return document.getElementById(id); };
+    var step1 = el('ts-upload-step1');
+    var stepForm = el('ts-upload-preview');
+    var stepDone = el('ts-upload-done');
+    var dropzone = el('ts-dropzone');
+    var fileInput = el('ts-file-input');
+    var showSelect = el('ts-up-show');
+    var newShowBox = el('ts-up-newshow');
+    var errEl = el('ts-up-err');
+    var lastRec = null;
+    var parsed = null;
+
+    var CATEGORIES = uniq(SHOWS.map(function (s) { return s.category; })).sort();
+    el('ts-up-catlist').innerHTML = CATEGORIES.map(function (c) {
+      return '<option value="' + c + '"></option>';
     }).join('');
 
-    function openUploadModal() { backdrop.hidden = false; }
-    function closeUploadModal() {
-      backdrop.hidden = true;
-      document.getElementById('ts-upload-preview').hidden = true;
-      dropzone.hidden = false;
-      fileInput.value = '';
+    function refreshShowSelect(keep) {
+      var opts = SHOWS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); })
+        .map(function (s) {
+          return '<option value="' + s.id + '">' + s.name + ' &middot; ' + s.category + '</option>';
+        }).join('');
+      showSelect.innerHTML = '<option value="__new__">+ New tradeshow&hellip;</option>' + opts;
+      if (keep) showSelect.value = keep;
     }
 
-    openBtn.addEventListener('click', openUploadModal);
-    closeBtn.addEventListener('click', closeUploadModal);
-    cancelBtn.addEventListener('click', closeUploadModal);
-    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeUploadModal(); });
+    function showPendingBanner() {
+      var n = unpublishedCount();
+      [el('ts-up-pending-1'), el('ts-up-pending-2')].forEach(function (node) {
+        if (!node) return;
+        if (!n) { node.hidden = true; node.innerHTML = ''; return; }
+        node.hidden = false;
+        node.innerHTML = '<b>' + n + '</b> imported ' + (n === 1 ? 'entry is' : 'entries are') +
+          ' saved in this browser but not yet committed, so nobody else can see ' + (n === 1 ? 'it' : 'them') + ' yet.';
+      });
+    }
 
-    // Drag and drop handlers
-    dropzone.addEventListener('click', function () { fileInput.click(); });
-    ['dragenter', 'dragover'].forEach(function (evtName) {
-      dropzone.addEventListener(evtName, function (e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); });
+    function setStep(which) {
+      step1.hidden = which !== 1;
+      stepForm.hidden = which !== 2;
+      stepDone.hidden = which !== 3;
+      el('ts-upload-modal-sub').textContent = which === 3
+        ? 'Saved in this browser. Commit the data block to publish it for everyone.'
+        : which === 2
+          ? 'Check what was read from the file, then fill in the descriptive fields.'
+          : 'Drop an Excel lead export to read the Hot/Warm/Cold split automatically, then describe the show.';
+    }
+
+    function openModal() { refreshShowSelect(); showPendingBanner(); setStep(1); backdrop.hidden = false; }
+    function closeModal() {
+      backdrop.hidden = true;
+      setStep(1);
+      fileInput.value = '';
+      parsed = null;
+      errEl.hidden = true;
+    }
+
+    openBtn.addEventListener('click', openModal);
+    el('ts-upload-modal-close').addEventListener('click', closeModal);
+    el('ts-up-cancel').addEventListener('click', closeModal);
+    el('ts-done-close').addEventListener('click', closeModal);
+    el('ts-up-back').addEventListener('click', function () { setStep(1); });
+    el('ts-done-another').addEventListener('click', function () { fileInput.value = ''; parsed = null; setStep(1); showPendingBanner(); });
+    backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeModal(); });
+
+    // ---- show picker toggles the new-show fields
+    showSelect.addEventListener('change', function () {
+      var isNew = showSelect.value === '__new__';
+      newShowBox.hidden = !isNew;
     });
-    ['dragleave', 'drop'].forEach(function (evtName) {
-      dropzone.addEventListener(evtName, function (e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); });
+
+    // ---- drag & drop
+    dropzone.addEventListener('click', function () { fileInput.click(); });
+    ['dragenter', 'dragover'].forEach(function (n) {
+      dropzone.addEventListener(n, function (e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(function (n) {
+      dropzone.addEventListener(n, function (e) { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); });
     });
     dropzone.addEventListener('drop', function (e) {
-      if (e.dataTransfer.files && e.dataTransfer.files.length) {
-        processUploadedFile(e.dataTransfer.files[0]);
-      }
+      if (e.dataTransfer.files && e.dataTransfer.files.length) processUploadedFile(e.dataTransfer.files[0]);
     });
     fileInput.addEventListener('change', function () {
-      if (fileInput.files && fileInput.files.length) {
-        processUploadedFile(fileInput.files[0]);
-      }
+      if (fileInput.files && fileInput.files.length) processUploadedFile(fileInput.files[0]);
     });
+
+    el('ts-up-manual').addEventListener('click', function () {
+      parsed = null;
+      el('ts-prev-card').hidden = true;
+      resetForm(null);
+      setStep(2);
+    });
+
+    // ---- tally
+    ['ts-up-hot', 'ts-up-warm', 'ts-up-cold', 'ts-up-unrated', 'ts-up-raw'].forEach(function (id) {
+      el(id).addEventListener('input', syncTally);
+    });
+    el('ts-up-leads').addEventListener('input', syncTally);
+
+    function num(id) { var v = parseInt(el(id).value, 10); return isNaN(v) ? 0 : v; }
+
+    function syncTally(e) {
+      var hot = num('ts-up-hot'), warm = num('ts-up-warm'), cold = num('ts-up-cold'), unrated = num('ts-up-unrated');
+      var raw = num('ts-up-raw');
+      // Editing a grade re-derives qualified leads; editing leads directly wins.
+      if (!e || e.target.id !== 'ts-up-leads') el('ts-up-leads').value = hot + warm;
+      var leads = num('ts-up-leads');
+      var sum = hot + warm + cold + unrated;
+      var t = el('ts-up-tally');
+      var mismatch = raw && sum && sum !== raw;
+      t.className = 'ts-up-tally' + (mismatch ? ' ts-up-bad' : '');
+      t.innerHTML =
+        '<span>Qualified (Hot + Warm): <strong>' + leads + '</strong></span>' +
+        '<span>Grades total: <strong>' + sum + '</strong></span>' +
+        '<span>Source rows: <strong>' + (raw || '—') + '</strong></span>' +
+        (mismatch ? '<span>&#9650; grades total ' + sum + ' does not match ' + raw + ' source rows</span>' : '');
+    }
+
+    function resetForm(p) {
+      refreshShowSelect(p && p.guessShowId ? p.guessShowId : undefined);
+      var isNew = showSelect.value === '__new__';
+      newShowBox.hidden = !isNew;
+
+      var yr = (p && p.year) || CURRENT_YEAR;
+      el('ts-up-year').value = yr;
+      el('ts-up-status').value = 'attended';
+      el('ts-up-hot').value = p ? p.hot : 0;
+      el('ts-up-warm').value = p ? p.warm : 0;
+      el('ts-up-cold').value = p ? p.cold : 0;
+      el('ts-up-unrated').value = p ? p.unrated : 0;
+      el('ts-up-raw').value = p ? p.raw : '';
+      el('ts-up-leads').value = p ? p.hot + p.warm : '';
+      el('ts-up-cost').value = '';
+      el('ts-up-costdocs').value = '';
+      el('ts-up-opps').value = '';
+      el('ts-up-pipeline').value = '';
+      el('ts-up-ctxtags').value = '';
+      el('ts-up-ctxtext').value = '';
+      el('ts-up-ctxsrc').value = '';
+      el('ts-up-src').value = p ? p.filename : '';
+      el('ts-up-note').value = p ? p.autoNote : '';
+      el('ts-up-newname').value = '';
+      el('ts-up-newcat').value = '';
+      errEl.hidden = true;
+      syncTally();
+    }
+
+    // ---- file parsing
+    function ratingOf(cell) {
+      var parts = String(cell == null ? '' : cell).split(/[~;,\/|]+/);
+      for (var p = 0; p < parts.length; p++) {
+        var v = parts[p].trim().toLowerCase();
+        if (v === 'hot' || v === 'warm' || v === 'cold') return v;
+      }
+      return '';
+    }
 
     function processUploadedFile(file) {
       var ext = file.name.slice((file.name.lastIndexOf('.') - 1 >>> 0) + 2).toLowerCase();
-      if (ext !== 'xlsx' && ext !== 'xls') {
-        alert('Please upload an Excel lead spreadsheet (.xlsx or .xls).');
+      if (ext !== 'xlsx' && ext !== 'xls' && ext !== 'csv') {
+        alert('Please upload a lead export (.xlsx, .xls or .csv).');
         return;
       }
-
       var reader = new FileReader();
       reader.onload = function (e) {
-        var data = new Uint8Array(e.target.result);
-        var workbook = XLSX.read(data, { type: 'array' });
-        var firstSheetName = workbook.SheetNames[0];
-        var worksheet = workbook.Sheets[firstSheetName];
-        var jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-        if (!jsonRows || !jsonRows.length) {
-          alert('No data rows found in spreadsheet.');
+        var workbook;
+        try {
+          workbook = ext === 'csv'
+            ? XLSX.read(e.target.result, { type: 'string' })
+            : XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        } catch (err) {
+          alert('Could not read that file: ' + err.message);
           return;
         }
+        var sheetName = workbook.SheetNames[0];
+        var rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+        if (!rows || !rows.length) { alert('No data rows found in that file.'); return; }
 
-        var headerRow = jsonRows[0] || [];
-        var dataRows = jsonRows.slice(1);
+        var headerRow = rows[0] || [];
+        var dataRows = rows.slice(1).filter(function (r) {
+          return r && r.length && r.some(function (c) { return c != null && String(c).trim() !== ''; });
+        });
 
-        // Find the lead-rating column. Prefer a column whose *values* are
-        // Hot/Warm/Cold — that is what the show exports actually use — and
-        // only fall back to a rating-ish header.
-        function ratingOf(cell) {
-          var parts = String(cell == null ? '' : cell).split(/[~;,\/|]+/);
-          for (var p = 0; p < parts.length; p++) {
-            var v = parts[p].trim().toLowerCase();
-            if (v === 'hot' || v === 'warm' || v === 'cold') return v;
-          }
-          return '';
-        }
-        var ratingColIdx = -1, ncols = 0;
-        dataRows.forEach(function (r) { if (r && r.length > ncols) ncols = r.length; });
-        for (var c = 0; c < Math.max(ncols, headerRow.length); c++) {
+        // Locate the rating column by its values first (that is what the real
+        // exports use), then fall back to a rating-ish header.
+        var ncols = headerRow.length;
+        dataRows.forEach(function (r) { if (r.length > ncols) ncols = r.length; });
+        var ratingCol = -1;
+        for (var c = 0; c < ncols; c++) {
           var filled = 0, hwc = 0;
-          for (var ri = 0; ri < dataRows.length; ri++) {
-            var cell = dataRows[ri] ? dataRows[ri][c] : null;
+          for (var i = 0; i < dataRows.length; i++) {
+            var cell = dataRows[i][c];
             if (cell == null || String(cell).trim() === '') continue;
             filled++;
             if (ratingOf(cell)) hwc++;
           }
-          if (filled >= 2 && hwc >= 0.6 * filled) { ratingColIdx = c; break; }
+          if (filled >= 2 && hwc >= 0.6 * filled) { ratingCol = c; break; }
         }
-        if (ratingColIdx === -1) {
+        if (ratingCol === -1) {
           for (var c2 = 0; c2 < headerRow.length; c2++) {
-            var h = String(headerRow[c2] || '').toLowerCase();
-            if (/lead[\s_]*rank|lead[\s_]*rating|interest\s*level|lead\s*interest|^rating$|^rank$/.test(h)) {
-              ratingColIdx = c2;
-              break;
+            if (/lead[\s_]*rank|lead[\s_]*rating|interest\s*level|lead\s*interest|^\s*rating\s*$|^\s*rank\s*$/i.test(String(headerRow[c2] || ''))) {
+              ratingCol = c2; break;
             }
           }
         }
 
-        var qualifiedRows = [];
-        var coldCount = 0;
-
-        dataRows.forEach(function (r) {
-          if (!r || !r.length || !r.some(function (cell) { return cell != null && String(cell).trim() !== ''; })) {
-            return; // Skip empty row
-          }
-          
-          var isCold = false;
-          if (ratingColIdx !== -1) {
-            isCold = ratingOf(r[ratingColIdx]) === 'cold';
-          }
-
-          if (isCold) {
-            coldCount++;
-          } else {
-            qualifiedRows.push(r);
-          }
+        // Drop internal staff scans the same way the archive audit does.
+        var companyCol = -1;
+        for (var c3 = 0; c3 < headerRow.length; c3++) {
+          if (/^\s*company\s*$|company\s*name/i.test(String(headerRow[c3] || ''))) { companyCol = c3; break; }
+        }
+        var internal = 0;
+        var kept = dataRows.filter(function (r) {
+          if (companyCol !== -1 && /bal\s*seal/i.test(String(r[companyCol] || ''))) { internal++; return false; }
+          return true;
         });
 
-        var leadCount = qualifiedRows.length;
+        var hot = 0, warm = 0, cold = 0, unrated = 0;
+        kept.forEach(function (r) {
+          var g = ratingCol === -1 ? '' : ratingOf(r[ratingCol]);
+          if (g === 'hot') hot++;
+          else if (g === 'warm') warm++;
+          else if (g === 'cold') cold++;
+          else unrated++;
+        });
 
-        // Auto-detect year from filename
-        var yrMatch = file.name.match(/(20\d{2})/);
-        if (yrMatch) {
-          document.getElementById('ts-up-year').value = yrMatch[1];
-        }
-
-        // Auto-detect show from filename
+        var yrMatch = file.name.match(/(19|20)\d{2}/);
         var fnLower = file.name.toLowerCase();
-        for (var i = 0; i < SHOWS.length; i++) {
-          var s = SHOWS[i];
-          if (fnLower.indexOf(s.id.replace('-', ' ')) !== -1 || fnLower.indexOf(s.name.toLowerCase().split(' ')[0]) !== -1) {
-            showSelect.value = s.id;
-            break;
-          }
+        var guess = null;
+        for (var s = 0; s < SHOWS.length; s++) {
+          var first = SHOWS[s].name.toLowerCase().split(/[\s\/]+/)[0];
+          if (first.length > 2 && fnLower.indexOf(first) !== -1) { guess = SHOWS[s].id; break; }
+          if (fnLower.indexOf(SHOWS[s].id.replace(/-/g, ' ')) !== -1) { guess = SHOWS[s].id; break; }
         }
 
-        document.getElementById('ts-prev-filename').textContent = file.name;
-        document.getElementById('ts-prev-sheet').textContent = 'Sheet: ' + firstSheetName + ' · Size: ' + Math.round(file.size / 1024) + ' KB';
-        var badgeText = leadCount + ' Qualified Lead Rows';
-        if (coldCount > 0) {
-          badgeText += ' (' + coldCount + ' Cold leads filtered out)';
-        }
-        document.getElementById('ts-prev-badge').textContent = badgeText;
-        document.getElementById('ts-up-leads').value = leadCount;
-        document.getElementById('ts-up-note').value = 'AI-Verified: Auto-parsed from Excel lead list ' + file.name + (coldCount > 0 ? ' (' + coldCount + ' Cold leads excluded)' : '');
+        parsed = {
+          filename: file.name,
+          sheet: sheetName,
+          hot: hot, warm: warm, cold: cold, unrated: unrated,
+          raw: kept.length,
+          internal: internal,
+          hasRatings: ratingCol !== -1,
+          year: yrMatch ? parseInt(yrMatch[0], 10) : CURRENT_YEAR,
+          guessShowId: guess,
+          autoNote: 'Counted from the uploaded lead export "' + file.name + '"' +
+            (ratingCol !== -1
+              ? ', which grades ' + kept.length + ' rows HOT ' + hot + ' / WARM ' + warm + ' / COLD ' + cold + (unrated ? ' with ' + unrated + ' unrated' : '') + '.'
+              : '. The file carries no Hot/Warm/Cold column, so all rows count as leads pending review.') +
+            (internal ? ' ' + internal + ' internal Bal Seal row' + (internal === 1 ? ' was' : 's were') + ' removed.' : '')
+        };
 
-        dropzone.hidden = true;
-        document.getElementById('ts-upload-preview').hidden = false;
+        el('ts-prev-card').hidden = false;
+        el('ts-prev-filename').textContent = file.name;
+        el('ts-prev-sheet').textContent = 'Sheet: ' + sheetName + ' · ' + Math.round(file.size / 1024) + ' KB' +
+          (internal ? ' · ' + internal + ' internal row' + (internal === 1 ? '' : 's') + ' removed' : '');
+        el('ts-prev-badge').textContent = ratingCol !== -1
+          ? (hot + warm) + ' qualified of ' + kept.length + ' rows (H' + hot + ' / W' + warm + ' / C' + cold + ')'
+          : kept.length + ' rows, no rating column found';
+
+        resetForm(parsed);
+        setStep(2);
       };
-      reader.readAsArrayBuffer(file);
+      if (ext === 'csv') reader.readAsText(file); else reader.readAsArrayBuffer(file);
     }
 
-    submitBtn.addEventListener('click', function () {
-      var targetShowId = showSelect.value;
-      var yearVal = parseInt(document.getElementById('ts-up-year').value, 10);
-      var leadsVal = parseInt(document.getElementById('ts-up-leads').value, 10);
-      var costVal = document.getElementById('ts-up-cost').value ? parseFloat(document.getElementById('ts-up-cost').value) : null;
-      var noteVal = document.getElementById('ts-up-note').value.trim();
+    // ---- submit
+    el('ts-up-submit').addEventListener('click', function () {
+      errEl.hidden = true;
+      var isNew = showSelect.value === '__new__';
+      var year = parseInt(el('ts-up-year').value, 10);
+      var fail = function (m) { errEl.textContent = m; errEl.hidden = false; };
 
-      if (!targetShowId || isNaN(yearVal) || isNaN(leadsVal)) {
-        alert('Please provide a valid tradeshow, year, and lead count.');
-        return;
-      }
+      if (isNaN(year) || year < 1990 || year > 2100) return fail('Enter a valid year.');
 
-      var targetShow = SHOWS.find(function (s) { return s.id === targetShowId; });
-      if (!targetShow) return;
-
-      var existingPt = targetShow.data.find(function (d) { return d.year === yearVal; });
-      if (existingPt) {
-        existingPt.leads = leadsVal;
-        if (costVal != null) {
-          existingPt.cost = costVal;
-          existingPt.costItems = [['Booth space', costVal]];
-          existingPt.costBasis = existingPt.costBasis || 'partial';
+      var meta;
+      if (isNew) {
+        var nm = el('ts-up-newname').value.trim();
+        if (!nm) return fail('Name the new tradeshow.');
+        // Drop "&" rather than spelling it out, so "MD&M South" becomes
+        // mdm-south and matches the existing mdm-west / mdm-mn ids.
+        var id = nm.toLowerCase().replace(/&/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        if (!id) return fail('That name produces no usable id — use some letters or numbers.');
+        for (var i = 0; i < SHOWS.length; i++) {
+          if (SHOWS[i].id === id) return fail('"' + SHOWS[i].name + '" already uses that id — pick it from the list instead.');
         }
-        if (noteVal) existingPt.note = noteVal;
+        meta = {
+          id: id, name: nm,
+          category: el('ts-up-newcat').value.trim() || 'Other',
+          region: el('ts-up-newregion').value,
+          channel: el('ts-up-newchannel').value,
+          isNew: true
+        };
       } else {
-        targetShow.data.push(Y(yearVal, leadsVal, costVal != null
-          ? { cost: costVal, costItems: [['Booth space', costVal]], costBasis: 'partial', note: noteVal }
-          : { note: noteVal }));
-        targetShow.data.sort(function (a, b) { return a.year - b.year; });
+        var found = null;
+        for (var j = 0; j < SHOWS.length; j++) { if (SHOWS[j].id === showSelect.value) { found = SHOWS[j]; break; } }
+        if (!found) return fail('Pick a tradeshow.');
+        meta = { id: found.id, name: found.name, category: found.category, region: found.region, channel: getChannel(found), isNew: false };
       }
 
-      closeUploadModal();
+      var status = el('ts-up-status').value;
+      var hot = num('ts-up-hot'), warm = num('ts-up-warm'), cold = num('ts-up-cold'), unrated = num('ts-up-unrated');
+      var rawV = el('ts-up-raw').value === '' ? null : num('ts-up-raw');
+      var leadsV = el('ts-up-leads').value === '' ? null : num('ts-up-leads');
+      if (status === 'attended' && leadsV == null) return fail('Enter a qualified lead count, or set the status to something other than Attended.');
+      if (status !== 'attended' && status !== 'walked') { leadsV = null; }
+
+      var costV = el('ts-up-cost').value === '' ? null : parseFloat(el('ts-up-cost').value);
+      if (costV != null && (isNaN(costV) || costV < 0)) return fail('Booth cost must be a positive number, or blank.');
+      var oppsV = el('ts-up-opps').value === '' ? null : num('ts-up-opps');
+      var pipeV = el('ts-up-pipeline').value === '' ? null : parseFloat(el('ts-up-pipeline').value);
+
+      var fields = {
+        leads: leadsV,
+        status: status,
+        raw: rawV,
+        hot: hot, warm: warm, cold: cold, unrated: unrated,
+        ratingBasis: (hot || warm)
+          ? 'source classification'
+          : (parsed && !parsed.hasRatings ? 'no rating column in the source file' : null),
+        src: el('ts-up-src').value.trim() || (parsed ? parsed.filename : null),
+        note: el('ts-up-note').value.trim() || null
+      };
+      if (costV != null) {
+        fields.cost = costV;
+        fields.costItems = [['Booth space', costV]];
+        var cd = el('ts-up-costdocs').value === '' ? 0 : num('ts-up-costdocs');
+        // "Sum of invoices" only claims as much as the user actually reported
+        // having on file; without a document count it stays "partial".
+        fields.costBasis = cd ? 'invoices' : 'partial';
+        if (cd) fields.costDocs = cd;
+      }
+      if (oppsV != null) fields.opportunities = oppsV;
+      if (pipeV != null && !isNaN(pipeV)) fields.pipeline = pipeV;
+
+      var tags = el('ts-up-ctxtags').value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+      var ctxText = el('ts-up-ctxtext').value.trim();
+
+      var rec = {
+        savedAt: new Date().toISOString(),
+        show: meta,
+        year: year,
+        fields: fields,
+        context: ctxText ? { tags: tags, text: ctxText, source: el('ts-up-ctxsrc').value.trim() } : null,
+        published: false
+      };
+
+      // Persist, then fold into the live data and redraw.
+      var list = loadImports();
+      list = list.filter(function (r) { return !(r.show.id === rec.show.id && r.year === rec.year); });
+      list.push(rec);
+      var stored = saveImports(list);
+
+      try { applyImport(rec); } catch (err) { return fail('Could not apply that entry: ' + err.message); }
+
+      lastRec = rec;
+      refreshShowSelect();
       renderKPIs();
       renderFilters();
       renderAll();
-      alert('Successfully populated ' + targetShow.name + ' (' + yearVal + ') with ' + leadsVal + ' leads!');
+
+      el('ts-done-headline').textContent = meta.name + ' ' + year + ' · ' +
+        (leadsV == null ? statusLabelOf({ status: status }) : leadsV + ' qualified lead' + (leadsV === 1 ? '' : 's')) +
+        (costV != null ? ' · ' + fmtMoney(costV) : '');
+      el('ts-done-where').innerHTML = meta.isNew
+        ? 'This is a <strong>new tradeshow</strong>, so it needs a new show block plus its first year.'
+        : 'This adds a year to the existing <strong>' + meta.name + '</strong> block.';
+      el('ts-done-code').textContent = publishSnippet(rec);
+      if (!stored) {
+        el('ts-done-where').innerHTML += ' <span style="color:var(--serious)">Browser storage was unavailable, so this entry will be lost on refresh — commit it now.</span>';
+      }
+      showPendingBanner();
+      setStep(3);
     });
+
+    // ---- publish helpers
+    el('ts-done-copy').addEventListener('click', function () {
+      var text = el('ts-done-code').textContent;
+      var btn = el('ts-done-copy');
+      var ok = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy data block'; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, function () { fallbackCopy(text, ok); });
+      } else { fallbackCopy(text, ok); }
+    });
+
+    function fallbackCopy(text, ok) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); ok(); } catch (e) { alert('Copy failed — select the text manually.'); }
+      document.body.removeChild(ta);
+    }
+
+    el('ts-done-download').addEventListener('click', function () {
+      var btn = el('ts-done-download');
+      if (!lastRec) return;
+      btn.textContent = 'Building…';
+      fetch(window.location.pathname, { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(function (src) {
+          var out = spliceSource(src, lastRec);
+          if (!out) throw new Error('could not find the insertion point');
+          var blob = new Blob([out], { type: 'text/html' });
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'index.html';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+          btn.textContent = 'Downloaded';
+          // The file the user commits contains this entry, so stop nagging.
+          var list = loadImports().map(function (r) {
+            if (r.show.id === lastRec.show.id && r.year === lastRec.year) r.published = true;
+            return r;
+          });
+          saveImports(list);
+          var sh = null;
+          for (var i = 0; i < SHOWS.length; i++) { if (SHOWS[i].id === lastRec.show.id) sh = SHOWS[i]; }
+          if (sh) sh.data.forEach(function (d) { if (d.year === lastRec.year) d.unpublished = false; });
+          showPendingBanner();
+          renderAll();
+          setTimeout(function () { btn.textContent = 'Download updated index.html'; }, 2200);
+        })
+        .catch(function (err) {
+          btn.textContent = 'Download updated index.html';
+          alert('Could not build the file automatically (' + err.message + ').\n\n' +
+                'Use "Copy data block" and paste it into index.html instead. ' +
+                'Auto-download needs the page served over http(s) — it cannot read its own source from a file:// URL.');
+        });
+    });
+
+    refreshShowSelect();
+    syncTally();
   }
 
   function closestAttr(target, attr) {
@@ -2480,6 +3192,11 @@
       if (m) { showDetail(m[1]); } else { hideDetail(); }
     } catch (e) {}
   }
+
+  // Fold any browser-saved imports in before the first paint so an uploaded
+  // show is on the page immediately after a refresh, not just in the session
+  // it was added.
+  applyStoredImports();
 
   renderKPIs();
   renderFilters();
