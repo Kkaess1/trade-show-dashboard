@@ -385,12 +385,12 @@
       <div>
         <label id="ts-quality-label">Lead grade</label>
         <details class="ts-grade-dropdown" id="ts-quality-dropdown">
-          <summary class="ts-select ts-grade-summary" aria-labelledby="ts-quality-label ts-quality-summary"><span id="ts-quality-summary">Hot + Warm</span></summary>
+          <summary class="ts-select ts-grade-summary" aria-labelledby="ts-quality-label ts-quality-summary"><span id="ts-quality-summary">All leads</span></summary>
           <div class="ts-grade-menu">
             <div class="ts-grade-checklist" id="ts-quality-filter">
               <label><input type="checkbox" value="hot" checked> Hot</label>
               <label><input type="checkbox" value="warm" checked> Warm</label>
-              <label><input type="checkbox" value="cold"> Cold</label>
+              <label><input type="checkbox" value="cold" checked> Cold</label>
             </div>
           </div>
         </details>
@@ -467,18 +467,16 @@
 
     <div class="ts-footer">
       <h2 class="ts-section-title" style="margin-bottom:10px;">How these numbers were derived</h2>
-      <p><strong>One lead file per show, per year.</strong> Every show folder in the archive holds a master
-      lead list plus a copy for each sales rep containing only that rep's follow-up assignments. Only the
+      <p><strong>Earlier archive years use one lead file per show, per year.</strong> A show folder can hold a master
+      lead list plus copies for sales reps containing only their follow-up assignments. Only the
       <em>master</em> file is counted &mdash; per-rep copies, daily partial downloads, mailing-label extracts
       and archived drafts are all excluded. The exact file used is named under "Source" in each year's
       drill-down.</p>
-      <p><strong>From 2017 onward, the lead count is Hot + Warm only.</strong> Every workbook was reviewed
-      using its own schema. Staff-entered Hot/Warm fields are authoritative; legacy
-      <code>Application</code>/<code>Potential Application</code>, iCapture questions, and distributor
-      A/B grades are mapped to Hot/Warm. When no usable classification exists, the application notes are
-      reviewed individually: concrete active applications are Hot, plausible future applications are Warm,
-      and general interest, vendors, internal/test scans, blanks, and "no application" records are excluded.
-      Cold is the residual of valid source rows minus Hot and Warm. Earlier ungraded files remain unchanged.</p>
+      <p><strong>For 2020 through August 2026, lead counts come from the CRM source-of-truth workbook.</strong>
+      <code>Tradeshow leads by industry 2020-aug2026.xlsx</code> supplies every total and every Hot/Warm/Cold
+      grade shown in that period. The default view is Total Leads; the lead-grade filter uses the workbook's
+      <code>Rank Name</code> values. Rows without a rank remain included in Total Leads but not in an individual
+      grade. Earlier years retain the archive-derived counts already documented in each show folder.</p>
       <p><strong>Costs are what the archive documents.</strong> Where the show folder holds the company's own
       expense report (<em>"&hellip; Expense Breakdown / Estimated Expenses / Final Expenses"</em>) those itemised
       figures are used, preferring a final/actual report over an estimate &mdash; these cover most shows through
@@ -496,20 +494,16 @@
       invoice on file &mdash; and those years are left out of cost-per-lead so the comparison stays like-for-like.
       Cost coverage is thinnest for the European shows (Hannover, Analytica, Compamed), whose invoices were
       largely handled outside these folders.</p>
-      <p><strong>Where a show folder holds no lead export, the reference workbook is used instead.</strong>
-      <code>Tradeshow report data.xlsx</code> is the marketing team's own Hot + Warm summary for 2020&ndash;2025.
-      Eight show-years are counted from it because their folders hold a lead-retrieval order but no exported
-      lead list: MD&amp;M West, MD&amp;M Minneapolis, Hannover, Analytica, BIOMEDevice Silicon Valley and Compamed
-      for 2024, and A&amp;D Turin and FEINDEF for 2025. Those rows name the workbook under "Source" and give a
-      combined Hot + Warm figure with no Hot/Warm split, because that is all the workbook records. Wherever a
-      show folder <em>does</em> hold a lead file, that file is counted and the workbook is not used &mdash;
-      each such year's note states whether the workbook agrees.</p>
+      <p><strong>The workbook is the final authority for the 2020&ndash;August 2026 reporting window.</strong>
+      If an older show-folder export or prior summary disagrees, the CRM workbook value wins. Shows and years
+      with no row in the workbook remain visible for schedule and cost context, but do not contribute a lead
+      number. The portfolio totals for 2020&ndash;2026 reconcile to the workbook's Executive Summary.</p>
       <p><strong>Gaps are shown as gaps.</strong> Years with no leads carry a status &mdash; cancelled, declined,
       walked (attended without a booth), or no-data &mdash; and a note saying what the archive does and does not
       hold for that year. A cancelled show whose charges were refunded carries a documented cost of $0 with the
       refund correspondence cited, which is different from a blank. Nothing on this page is estimated or
-      interpolated: every lead count and every cost line traces back to a named file &mdash; the show folder's
-      own documents, or the reference workbook where it is the only record.</p>
+      interpolated: 2020&ndash;August 2026 lead counts trace to the CRM source-of-truth workbook, earlier lead
+      counts trace to the named show-folder file, and every cost line traces to an archived cost document.</p>
     </div>
 
     </div>
@@ -606,7 +600,7 @@
         <!-- ---------- lead grades ---------- -->
         <div class="ts-up-section" id="ts-up-leadsec">
           <h3>Lead grades</h3>
-          <p class="ts-up-hint">Read from the file where a rating column exists. Qualified leads = Hot + Warm; Cold is excluded from headline counts but kept for the grade filter.</p>
+          <p class="ts-up-hint">Read from the file where a rating column exists. Total leads include Hot, Warm, Cold and unrated rows; use the grade filter to isolate a segment.</p>
           <div class="ts-up-grid-3">
             <div class="ts-form-group">
               <label for="ts-up-hot">Hot</label>
@@ -629,7 +623,7 @@
               <input type="number" class="ts-input ts-up-tallyfield" id="ts-up-raw" min="0" />
             </div>
             <div class="ts-form-group">
-              <label for="ts-up-leads">Qualified leads</label>
+              <label for="ts-up-leads">Total leads</label>
               <input type="number" class="ts-input" id="ts-up-leads" min="0" />
             </div>
           </div>
@@ -1194,17 +1188,138 @@
     { id:'ehra-congress', name:'EHRA Congress', category:'Medical', region:'EMEA', data: [
       Y(2026,null,{status:'walked',note:'Walked by Delcourt.'})
     ]},
-    { id:'santexpo', name:'SantExpo', category:'Medical', region:'EMEA', data: [
-      Y(2026,null,{status:'walked',note:'Walked by Delcourt, James.'})
-    ]},
     { id:'emc-europe', name:'EMC Europe', category:'Electrical', region:'EMEA', data: [
       Y(2026,null,{status:'walked',note:'On 2026 Walk Master schedule.'})
     ]},
     { id:'farnborough', name:'Farnborough International Airshow', category:'Aerospace', region:'EMEA', data: [
-      Y(2026,null,{status:'walked',note:'Exhibit canceled; walked by Amato.'})
+      Y(2026,15,{raw:15,hot:5,warm:10,cold:0,unrated:0,status:'walked',ratingBasis:'Trip Report Lead List (Edge Campaign)',src:'O-1590-A Tradeshow Trip Report Template_Farnborough International Airshow 2026.pdf',note:'Exhibit canceled; walked by Davide Amato. 15 lead contacts captured across 10 target defense/aerospace companies.'})
     ]}
     // NEW-SHOW-ANCHOR — the upload dialog pastes a brand-new show block above this line.
   ];
+
+  // Final source of truth for lead counts from 2020 through August 2026.
+  // Columns: show id, display name, category, region, year, total, Hot, Warm, Cold, Unrated.
+  var CRM_LEAD_SOURCE = 'Tradeshow leads by industry 2020-aug2026.xlsx';
+  var CRM_LEAD_ROWS = [
+    ['aaos', 'AAOS', 'Medical', 'Americas', 2022, 15, 10, 5, 0, 0],
+    ['adm-sevilla', 'Aerospace & Defense Meetings Sevilla', 'Aerospace', 'EMEA', 2024, 5, 0, 3, 2, 0],
+    ['adm-turin', 'Aerospace & Defense Meetings Turin', 'Aerospace', 'EMEA', 2025, 16, 5, 11, 0, 0],
+    ['analytica', 'Analytica', 'Analytical', 'EMEA', 2021, 1, 1, 0, 0, 0],
+    ['analytica', 'Analytica', 'Analytical', 'EMEA', 2022, 33, 9, 19, 4, 1],
+    ['analytica', 'Analytica', 'Analytical', 'EMEA', 2024, 26, 2, 24, 0, 0],
+    ['automatica', 'Automatica', 'Industrial', 'EMEA', 2025, 41, 5, 34, 2, 0],
+    ['biomed-sj', 'BIOMEDevice San Jose / Silicon Valley', 'Medical', 'Americas', 2025, 9, 1, 8, 0, 0],
+    ['biomed-boston', 'BIOMEDevice Boston / Electronics New England', 'Medical', 'Americas', 2022, 7, 3, 4, 0, 0],
+    ['biomed-boston', 'BIOMEDevice Boston / Electronics New England', 'Medical', 'Americas', 2023, 10, 2, 8, 0, 0],
+    ['biomed-boston', 'BIOMEDevice Boston / Electronics New England', 'Medical', 'Americas', 2024, 14, 5, 9, 0, 0],
+    ['biomed-sj', 'BIOMEDevice San Jose / Silicon Valley', 'Medical', 'Americas', 2021, 20, 4, 15, 0, 1],
+    ['biomed-sj', 'BIOMEDevice San Jose / Silicon Valley', 'Medical', 'Americas', 2022, 22, 9, 12, 1, 0],
+    ['biomed-sj', 'BIOMEDevice San Jose / Silicon Valley', 'Medical', 'Americas', 2023, 11, 6, 5, 0, 0],
+    ['biomed-sj', 'BIOMEDevice San Jose / Silicon Valley', 'Medical', 'Americas', 2024, 11, 4, 7, 0, 0],
+    ['robotics-summit', 'Robotics Summit & Expo', 'Robotics', 'Americas', 2022, 10, 2, 8, 0, 0],
+    ['robotics-summit', 'Robotics Summit & Expo', 'Robotics', 'Americas', 2023, 17, 6, 11, 0, 0],
+    ['robotics-summit', 'Robotics Summit & Expo', 'Robotics', 'Americas', 2024, 23, 7, 16, 0, 0],
+    ['robotics-summit', 'Robotics Summit & Expo', 'Robotics', 'Americas', 2025, 21, 7, 14, 0, 0],
+    ['robotics-summit', 'Robotics Summit & Expo', 'Robotics', 'Americas', 2026, 26, 8, 18, 0, 0],
+    ['compamed', 'Compamed', 'Medical', 'EMEA', 2023, 44, 17, 25, 2, 0],
+    ['compamed', 'Compamed', 'Medical', 'EMEA', 2024, 30, 4, 26, 0, 0],
+    ['compamed', 'Compamed', 'Medical', 'EMEA', 2025, 13, 5, 8, 0, 0],
+    ['designcon', 'DesignCon', 'Semiconductor', 'Americas', 2020, 17, 7, 10, 0, 0],
+    ['designcon', 'DesignCon', 'Semiconductor', 'Americas', 2026, 44, 11, 33, 0, 0],
+    ['eurosatory', 'Eurosatory', 'Aerospace', 'EMEA', 2022, 68, 17, 40, 7, 4],
+    ['feindef', 'FEINDEF', 'Aerospace', 'EMEA', 2023, 9, 1, 1, 7, 0],
+    ['farnborough', 'Farnborough International Airshow', 'Aerospace', 'EMEA', 2020, 8, 0, 3, 5, 0],
+    ['farnborough', 'Farnborough International Airshow', 'Aerospace', 'EMEA', 2022, 18, 3, 13, 1, 1],
+    ['hannover', 'Hannover Messe', 'Industrial', 'EMEA', 2022, 33, 7, 24, 2, 0],
+    ['hannover', 'Hannover Messe', 'Industrial', 'EMEA', 2023, 38, 7, 26, 5, 0],
+    ['hannover', 'Hannover Messe', 'Industrial', 'EMEA', 2024, 33, 14, 17, 2, 0],
+    ['hannover', 'Hannover Messe', 'Industrial', 'EMEA', 2025, 15, 4, 11, 0, 0],
+    ['heli-expo', 'Heli-Expo', 'Aerospace', 'Americas', 2020, 14, 1, 13, 0, 0],
+    ['ieee', 'IEEE', 'Electrical', 'Americas', 2024, 21, 3, 17, 1, 0],
+    ['mdm-west', 'MD&M West', 'Medical', 'Americas', 2020, 8, 4, 4, 0, 0],
+    ['mdm-west', 'MD&M West', 'Medical', 'Americas', 2021, 13, 7, 6, 0, 0],
+    ['mdm-west', 'MD&M West', 'Medical', 'Americas', 2022, 24, 3, 21, 0, 0],
+    ['mdm-west', 'MD&M West', 'Medical', 'Americas', 2023, 10, 1, 9, 0, 0],
+    ['mdm-west', 'MD&M West', 'Medical', 'Americas', 2024, 12, 6, 6, 0, 0],
+    ['mdm-west', 'MD&M West', 'Medical', 'Americas', 2025, 9, 1, 8, 0, 0],
+    ['mdm-west', 'MD&M West', 'Medical', 'Americas', 2026, 25, 7, 18, 0, 0],
+    ['mdm-minn', 'MD&M Minneapolis', 'Medical', 'Americas', 2022, 7, 1, 6, 0, 0],
+    ['mdm-minn', 'MD&M Minneapolis', 'Medical', 'Americas', 2023, 10, 3, 7, 0, 0],
+    ['mdm-minn', 'MD&M Minneapolis', 'Medical', 'Americas', 2024, 12, 3, 9, 0, 0],
+    ['mdm-minn', 'MD&M Minneapolis', 'Medical', 'Americas', 2025, 13, 0, 13, 0, 0],
+    ['ons', 'ONS (Offshore Northern Seas)', 'Energy', 'EMEA', 2022, 1, 1, 0, 0, 0],
+    ['otc', 'OTC (Offshore Technology Conference)', 'Energy', 'Americas', 2022, 36, 2, 31, 0, 3],
+    ['otc', 'OTC (Offshore Technology Conference)', 'Energy', 'Americas', 2023, 43, 12, 31, 0, 0],
+    ['otc', 'OTC (Offshore Technology Conference)', 'Energy', 'Americas', 2024, 31, 7, 24, 0, 0],
+    ['otc', 'OTC (Offshore Technology Conference)', 'Energy', 'Americas', 2025, 13, 0, 13, 0, 0],
+    ['otc', 'OTC (Offshore Technology Conference)', 'Energy', 'Americas', 2026, 32, 8, 24, 0, 0],
+    ['other-direct-tradeshow', 'Other / Direct Tradeshow Inquiry', 'Other', 'Multi-region', 2020, 3, 0, 1, 1, 1],
+    ['other-direct-tradeshow', 'Other / Direct Tradeshow Inquiry', 'Other', 'Multi-region', 2021, 5, 2, 3, 0, 0],
+    ['other-direct-tradeshow', 'Other / Direct Tradeshow Inquiry', 'Other', 'Multi-region', 2022, 4, 2, 2, 0, 0],
+    ['other-direct-tradeshow', 'Other / Direct Tradeshow Inquiry', 'Other', 'Multi-region', 2023, 7, 2, 4, 0, 1],
+    ['other-direct-tradeshow', 'Other / Direct Tradeshow Inquiry', 'Other', 'Multi-region', 2024, 3, 2, 1, 0, 0],
+    ['other-direct-tradeshow', 'Other / Direct Tradeshow Inquiry', 'Other', 'Multi-region', 2025, 8, 3, 2, 0, 3],
+    ['other-direct-tradeshow', 'Other / Direct Tradeshow Inquiry', 'Other', 'Multi-region', 2026, 1, 0, 0, 0, 1],
+    ['pittcon', 'Pittcon', 'Analytical', 'Americas', 2020, 16, 1, 15, 0, 0],
+    ['slas', 'SLAS (formerly Lab Automation)', 'Analytical', 'Americas', 2026, 8, 5, 3, 0, 0],
+    ['space-tech-expo', 'Space Tech Expo', 'Aerospace', 'Americas', 2025, 2, 1, 1, 0, 0],
+    ['space-tech-expo', 'Space Tech Expo', 'Aerospace', 'Americas', 2026, 8, 3, 5, 0, 0],
+    ['virtual-engineering-week', 'Virtual Engineering Week', 'Industrial', 'Americas', 2020, 1, 1, 0, 0, 0],
+    ['virtual-engineering-week', 'Virtual Engineering Week', 'Industrial', 'Americas', 2021, 24, 0, 23, 1, 0]
+  ];
+
+  function applyCrmLeadSourceOfTruth() {
+    var byId = {};
+    SHOWS.forEach(function (show) {
+      byId[show.id] = show;
+      show.data.forEach(function (point) {
+        if (point.year < 2020 || point.year > 2026) return;
+        if (point.status === 'walked' && typeof point.leads === 'number') return;
+        var hadLead = typeof point.leads === 'number';
+        point.leads = null;
+        point.raw = null;
+        point.hot = 0;
+        point.warm = 0;
+        point.cold = 0;
+        point.unrated = 0;
+        point.qualifiedUnsplit = null;
+        point.ratingBasis = null;
+        point.src = null;
+        if (point.status === 'attended') point.status = 'no-data';
+        if (hadLead) point.note = 'No matching lead row in the CRM source-of-truth workbook; the prior archive-derived count is not used.';
+      });
+    });
+
+    CRM_LEAD_ROWS.forEach(function (row) {
+      var id = row[0];
+      var show = byId[id];
+      if (!show) {
+        show = { id:id, name:row[1], category:row[2], region:row[3], data:[] };
+        SHOWS.push(show);
+        byId[id] = show;
+      }
+      var year = row[4];
+      var point = show.data.find(function (candidate) { return candidate.year === year; });
+      if (!point) {
+        point = Y(year, row[5]);
+        show.data.push(point);
+      }
+      point.leads = row[5];
+      point.raw = row[5];
+      point.hot = row[6];
+      point.warm = row[7];
+      point.cold = row[8];
+      point.unrated = row[9];
+      point.qualifiedUnsplit = null;
+      point.ratingBasis = 'CRM Rank Name';
+      point.src = CRM_LEAD_SOURCE;
+      point.status = 'attended';
+      point.note = 'Lead total from Tradeshow Segmentation; grade mix from All Tradeshow Leads in the CRM source-of-truth workbook through August 2026.';
+      show.data.sort(function (a, b) { return a.year - b.year; });
+    });
+  }
+
+  applyCrmLeadSourceOfTruth();
 
   var SNAPSHOT_2014 = [
     {show:'Pittcon', region:'Americas', apps:10, costPerApp:2356, rating:'Successful', comment:'"Recommend attending 2015 Pittcon in New Orleans."'},
@@ -1309,7 +1424,8 @@
 
     'mtech-tokyo-2023': {tags:['Distributor booth','Location lesson'], text:'BSE exhibited through Moritex. The local TM called the event fruitful but recommended a larger booth to secure a better location next time.', source:'Nozomi wraps show - 07-03-23.msg'},
     'mtech-osaka-2022': {tags:['Distributor booth','Co-branding'], text:'Moritex operated the exhibit; BSE reviewed the wall design and recommended making the distributor relationship clearer in the co-branded display.', source:'Nozomi and Mark.msg'},
-    'compamed-2025': {tags:['Design sessions','Customer dinner','Enhanced booth'], text:'The booth added shelving to show more items. TMs held deep OEM design discussions, planned DesignLive sessions/workshops and used an Osypka Medical dinner for technical alignment.', source:'Compamed Preshow Info.docx; Compamed_2025_TradeShow_Report_FULL_O1590.docx'}
+    'compamed-2025': {tags:['Design sessions','Customer dinner','Enhanced booth'], text:'The booth added shelving to show more items. TMs held deep OEM design discussions, planned DesignLive sessions/workshops and used an Osypka Medical dinner for technical alignment.', source:'Compamed Preshow Info.docx; Compamed_2025_TradeShow_Report_FULL_O1590.docx'},
+    'farnborough-2026': {tags:['Walk Report','Edge Campaign','6th-Gen & AAM','B2B Meetings'], text:'Davide Amato walked FIA 2026 after BSE booth cancellation. Canvassed key defense/aerospace programs (GCAP 6th-gen fighters, CCAs, AAM/eVTOL) and captured 15 lead contacts across 10 target companies (Secondo Mona, Sitep Italia/Officina Stellare, Olsen Actuators, Civitanavi/Honeywell, ELT Group, Tekever, Umbra Group, Aerea, Heroux Devtek). Key topics: EMI/Shielding Faraday cages, electro-optics Gimbal seals (est. 400 pcs/yr, €70–100K), UAM4UAM qualification, and ballscrew nut sealing.', source:'O-1590-A Tradeshow Trip Report Template_Farnborough International Airshow 2026.pdf'}
     // NEW-CONTEXT-ANCHOR — the upload dialog pastes a new context entry above this line.
   };
 
@@ -1380,9 +1496,8 @@
   }
 
   // ---------- Lead-grade (hot/warm/cold) filter ----------
-  // From 2017 onward, `leads` is Hot + Warm and `raw` is the valid source-row
-  // count after removing worksheet summaries, templates, internal staff, and
-  // test scans. Cold is the residual. Older ungraded years remain unchanged.
+  // From 2020 through August 2026, `leads` is the CRM Total Leads value and
+  // Hot/Warm/Cold come from CRM Rank Name. Earlier ungraded years remain unchanged.
   var QUALITY_ORDER = ['hot', 'warm', 'cold'];
 
   function selectedGrades() {
@@ -1399,9 +1514,8 @@
     return { label: label, noun: label.toLowerCase() + ' leads' };
   }
 
-  function isDefaultQualified() { return state.grades.hot && state.grades.warm && !state.grades.cold; }
   function isAllGrades() { return selectedGrades().length === 3; }
-  function isGraded() { return !isDefaultQualified(); }
+  function isGraded() { return !isAllGrades(); }
 
   // Every show, carrying the selected grade but ignoring the category/region/
   // channel selectors — the archive-wide KPI tiles have always been scoped this
@@ -1424,7 +1538,7 @@
   // Lead count for the selected grade, or null when this point can't answer.
   function leadsOf(d) {
     if (typeof d.leads !== 'number') return null;
-    if (isDefaultQualified()) return d.leads;
+    if (isAllGrades()) return d.leads;
     if (!hasRating(d)) return selectedGrades().length === 3 ? d.leads : null;
     if (typeof d.qualifiedUnsplit === 'number') {
       var includesHot = !!state.grades.hot;
@@ -1491,8 +1605,9 @@
       scoped.forEach(function (s) {
         var pts = numericPoints(s);
         grandTotal += pts.reduce(function (sum, p) { return sum + p.leads; }, 0);
-        if (pts.length && pts[pts.length - 1].year >= CURRENT_YEAR - 1) {
-          mostRecentTotal += pts[pts.length - 1].leads;
+        var recentPts = pts.filter(function (p) { return p.year >= CURRENT_YEAR - 1 && p.year <= CURRENT_YEAR; });
+        if (recentPts.length) {
+          mostRecentTotal += recentPts.reduce(function (sum, p) { return sum + p.leads; }, 0);
           mostRecentShows++;
         }
       });
@@ -1524,7 +1639,7 @@
   // ---------- Filters ----------
   var state = {
     yearStart: 'All', yearEnd: 'All', category: 'All', region: 'All', channel: 'Direct', eventType: 'All',
-    grades: { hot: true, warm: true, cold: false },
+    grades: { hot: true, warm: true, cold: true },
     compareYears: [2025, 2026], comparisonOpen: false, compareMetric: 'leads'
   };
 
@@ -2345,7 +2460,7 @@
       seg(warm, 'var(--warning)', 'Warm') +
       seg(combined, 'var(--warning)', 'Hot/Warm combined') +
       seg(unrated, 'var(--baseline)', 'Unrated') +
-      seg(cold, 'var(--gridline)', 'Cold (excluded)') +
+      seg(cold, 'var(--gridline)', 'Cold') +
       '</div>';
   }
 
@@ -2378,9 +2493,9 @@
     var cpl = costPerLead(d);
     var booth = boothCost(d);
     var tiles = [
-      ['Qualified leads', d.leads == null ? '&mdash;' : fmt(d.leads),
-       d.cold ? (d.cold + ' cold excluded') : (d.leads == null ? statusLabelOf(d) : 'no cold-rated rows')],
-      ['Valid source rows', d.raw == null ? '&mdash;' : fmt(d.raw), d.raw != null ? 'after test/internal cleanup' : ''],
+      ['Total leads', d.leads == null ? '&mdash;' : fmt(d.leads),
+       d.leads == null ? statusLabelOf(d) : 'all CRM lead rows'],
+      ['Source rows', d.raw == null ? '&mdash;' : fmt(d.raw), d.raw != null ? 'used for the lead total' : ''],
       ['Booth space cost', booth == null ? '&mdash;' : fmtMoney(booth),
        booth == null
          ? (d.cost != null ? 'no booth-space line on file' : 'nothing on file')
@@ -2412,7 +2527,7 @@
         (d.warm ? '<li><span>Warm</span><span>' + d.warm + '</span></li>' : '') +
         (typeof d.qualifiedUnsplit === 'number' ? '<li><span>Hot/Warm combined</span><span>' + d.qualifiedUnsplit + '</span></li>' : '') +
         (d.unrated ? '<li><span>Unrated / blank</span><span>' + d.unrated + '</span></li>' : '') +
-        (d.cold ? '<li><span>Cold &mdash; excluded</span><span>&minus;' + d.cold + '</span></li>' : '') +
+        (d.cold ? '<li><span>Cold</span><span>' + d.cold + '</span></li>' : '') +
         '</ul>';
     } else if (d.raw != null) {
       out += '<p class="ts-yr-empty">The source file carries no Hot/Warm/Cold rating for this year, so all ' +
@@ -2784,8 +2899,8 @@
     function syncTally(e) {
       var hot = num('ts-up-hot'), warm = num('ts-up-warm'), cold = num('ts-up-cold'), unrated = num('ts-up-unrated');
       var raw = num('ts-up-raw');
-      // Editing a grade re-derives qualified leads; editing leads directly wins.
-      if (!e || e.target.id !== 'ts-up-leads') el('ts-up-leads').value = hot + warm;
+      // Editing a grade re-derives total leads; editing leads directly wins.
+      if (!e || e.target.id !== 'ts-up-leads') el('ts-up-leads').value = hot + warm + cold + unrated;
       var leads = num('ts-up-leads');
       var sum = hot + warm + cold + unrated;
       var t = el('ts-up-tally');
@@ -2811,7 +2926,7 @@
       el('ts-up-cold').value = p ? p.cold : 0;
       el('ts-up-unrated').value = p ? p.unrated : 0;
       el('ts-up-raw').value = p ? p.raw : '';
-      el('ts-up-leads').value = p ? p.hot + p.warm : '';
+      el('ts-up-leads').value = p && typeof p.leads === 'number' ? p.leads : '';
       el('ts-up-cost').value = '';
       el('ts-up-costdocs').value = '';
       el('ts-up-opps').value = '';
@@ -2983,7 +3098,7 @@
       var hot = num('ts-up-hot'), warm = num('ts-up-warm'), cold = num('ts-up-cold'), unrated = num('ts-up-unrated');
       var rawV = el('ts-up-raw').value === '' ? null : num('ts-up-raw');
       var leadsV = el('ts-up-leads').value === '' ? null : num('ts-up-leads');
-      if (status === 'attended' && leadsV == null) return fail('Enter a qualified lead count, or set the status to something other than Attended.');
+      if (status === 'attended' && leadsV == null) return fail('Enter a total lead count, or set the status to something other than Attended.');
       if (status !== 'attended' && status !== 'walked') { leadsV = null; }
 
       var costV = el('ts-up-cost').value === '' ? null : parseFloat(el('ts-up-cost').value);
@@ -3041,7 +3156,7 @@
       renderAll();
 
       el('ts-done-headline').textContent = meta.name + ' ' + year + ' · ' +
-        (leadsV == null ? statusLabelOf({ status: status }) : leadsV + ' qualified lead' + (leadsV === 1 ? '' : 's')) +
+        (leadsV == null ? statusLabelOf({ status: status }) : leadsV + ' lead' + (leadsV === 1 ? '' : 's')) +
         (costV != null ? ' · ' + fmtMoney(costV) : '');
       el('ts-done-where').innerHTML = meta.isNew
         ? 'This is a <strong>new tradeshow</strong>, so it needs a new show block plus its first year.'
